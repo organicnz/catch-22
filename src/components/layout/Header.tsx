@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ShoppingCart, Menu, X } from 'lucide-react';
+import { ShoppingCart, Menu, X, User } from 'lucide-react';
 import { useCartStore } from '@/lib/store/cart';
 import { useState, useEffect } from 'react';
 
@@ -30,6 +30,9 @@ export function Header() {
             <Link href="/products" className="text-slate-600 hover:text-slate-900 font-medium">
               Shop Gear
             </Link>
+            <Link href="/blog" className="text-slate-600 hover:text-slate-900 font-medium">
+              Blog
+            </Link>
             <Link href="/about" className="text-slate-600 hover:text-slate-900 font-medium">
               About
             </Link>
@@ -37,6 +40,9 @@ export function Header() {
 
           {/* Cart & Mobile Toggle */}
           <div className="flex items-center space-x-4">
+            <Link href="/account" className="p-2 text-slate-600 hover:text-slate-900 transition-colors">
+              <User size={24} />
+            </Link>
             <Link href="/cart" className="relative p-2 text-slate-600 hover:text-slate-900 transition-colors">
               <ShoppingCart size={24} />
               {isMounted && totalItems > 0 && (
@@ -68,11 +74,25 @@ export function Header() {
               Shop Gear
             </Link>
             <Link 
+              href="/blog" 
+              className="block px-3 py-2 rounded-md text-base font-medium text-slate-900 hover:bg-slate-50"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Blog
+            </Link>
+            <Link 
               href="/about" 
               className="block px-3 py-2 rounded-md text-base font-medium text-slate-900 hover:bg-slate-50"
               onClick={() => setIsMenuOpen(false)}
             >
               About
+            </Link>
+            <Link 
+              href="/contact" 
+              className="block px-3 py-2 rounded-md text-base font-medium text-slate-900 hover:bg-slate-50"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Contact
             </Link>
           </div>
         </div>
