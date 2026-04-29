@@ -32,5 +32,8 @@
     "tailwindcss": "^4",
     "typescript": "^5",
     "vercel": "^52.0.0"
-  }
+  },
+  "trustedDependencies": [
+    "unrs-resolver"
+  ]
 }
