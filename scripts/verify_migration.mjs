@@ -22,7 +22,7 @@ const tablesToVerify = [
   'products',
   'categories',
   'product_categories',
-  'customers',
+  'profiles',
   'orders',
   'order_items',
   'product_variations',
