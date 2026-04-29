@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase';
 import { notFound } from 'next/navigation';
+import { Metadata } from 'next';
 
 export const revalidate = 3600; // Cache for 1 hour
 
@@ -11,6 +12,35 @@ function sanitizeWPContent(html: string) {
   // Remove specific shortcodes like [wpforms...]
   clean = clean.replace(/\[wpforms[^\]]*\]/g, '<div class="p-4 bg-indigo-50 border border-indigo-100 rounded-lg my-4 text-indigo-700 font-medium">Please use our official <a href="/contact" class="underline">Contact Page</a> to reach out.</div>');
   return clean;
+}
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const slug = (await params).slug;
+  const supabase = createClient();
+  
+  const { data: content } = await supabase
+    .from('content')
+    .select('title, body')
+    .eq('slug', slug)
+    .eq('status', 'publish')
+    .single();
+
+  if (!content) {
+    return { title: 'Not Found' };
+  }
+
+  // Extract a brief description from the body
+  const rawText = content.body ? content.body.replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim() : '';
+  const description = rawText.length > 150 ? rawText.substring(0, 147) + '...' : rawText;
+
+  return {
+    title: `${content.title} | Catch-22`,
+    description: description,
+    openGraph: {
+      title: content.title,
+      description: description,
+    },
+  };
 }
 
 export default async function ContentPage({ params }: { params: { slug: string } }) {

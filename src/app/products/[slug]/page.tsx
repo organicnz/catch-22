@@ -3,8 +3,38 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { AddToCartButton } from '@/components/checkout/AddToCartButton';
+import { Metadata } from 'next';
 
 export const revalidate = 60;
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const slug = (await params).slug;
+  const supabase = createClient();
+  
+  const { data: product } = await supabase
+    .from('products')
+    .select('name, short_description, description, image_url')
+    .eq('slug', slug)
+    .single();
+
+  if (!product) {
+    return { title: 'Product Not Found' };
+  }
+
+  const rawDescription = product.short_description || product.description || '';
+  const cleanDescription = rawDescription.replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim();
+  const description = cleanDescription.length > 150 ? cleanDescription.substring(0, 147) + '...' : cleanDescription;
+
+  return {
+    title: `${product.name} | Catch-22 Gear`,
+    description: description,
+    openGraph: {
+      title: product.name,
+      description: description,
+      images: product.image_url ? [{ url: product.image_url }] : [],
+    },
+  };
+}
 
 export default async function ProductDetails({ params }: { params: { slug: string } }) {
   const supabase = createClient();
@@ -73,9 +103,11 @@ export default async function ProductDetails({ params }: { params: { slug: strin
           
           <div className="mt-10 px-4 sm:px-0 sm:mt-16 lg:mt-0">
             <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">{product.name}</h1>
-            <div className="mt-3">
-              <p className="text-3xl text-slate-900">${product.price.toFixed(2)}</p>
-            </div>
+            {(!product.product_variations || product.product_variations.length === 0) && (
+              <div className="mt-3">
+                <p className="text-3xl text-slate-900 font-bold">${product.price.toFixed(2)}</p>
+              </div>
+            )}
             
             <div className="mt-6">
               <div
@@ -85,7 +117,7 @@ export default async function ProductDetails({ params }: { params: { slug: strin
             </div>
             
             <div className="mt-10">
-              <AddToCartButton product={product} />
+              <AddToCartButton product={product} variations={product.product_variations || []} />
             </div>
           </div>
         </div>
