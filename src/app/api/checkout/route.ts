@@ -1,19 +1,14 @@
 import { NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 
+export const dynamic = 'force-dynamic'
+
 export async function POST(req: Request) {
   try {
     const { priceId } = await req.json()
 
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      payment_method_options: {
-        card: {
-          link: {
-            enabled: true,
-          },
-        },
-      },
+      payment_method_types: ['card', 'link'],
       line_items: [
         {
           price: priceId,
