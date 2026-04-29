@@ -49,7 +49,19 @@ export async function POST(req: Request) {
        // Return 500 so Stripe retries the webhook
        return NextResponse.json({ error: 'Database fulfillment failed' }, { status: 500 });
     }
+    
     console.log(`✅ Order fulfilled for session: ${session.id}`);
+
+    // Optional: Decrement inventory if managing strict stock quantities
+    // await supabase.rpc('decrement_stock', { product_ids: line_item_ids });
+
+    // Optional: Send Order Confirmation Email via Resend
+    // await resend.emails.send({
+    //   from: 'orders@catch-22.co.nz',
+    //   to: email,
+    //   subject: 'Your Catch-22 Order Confirmation',
+    //   html: '<p>Thank you for your order...</p>'
+    // });
   }
 
   return NextResponse.json({ received: true });
