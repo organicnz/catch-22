@@ -22,9 +22,9 @@ export default async function AccountPage() {
     redirect('/login');
   }
 
-  // Find the customer record that matches the auth email
+  // Find the profile record that matches the auth email
   const { data: customer } = await supabase
-    .from('customers')
+    .from('profiles')
     .select('id, first_name, last_name')
     .eq('email', user.email)
     .single();

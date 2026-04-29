@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     let customerId = null;
     
     if (email) {
-      const { data: customer } = await supabase.from('customers').select('id').eq('email', email).single();
+      const { data: customer } = await supabase.from('profiles').select('id').eq('email', email).single();
       customerId = customer?.id || null;
     }
 

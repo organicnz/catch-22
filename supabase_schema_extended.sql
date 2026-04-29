@@ -1,7 +1,7 @@
 -- catch-22-next/supabase_schema_extended.sql
 
--- Customers Table (to store historical WP users)
-CREATE TABLE IF NOT EXISTS customers (
+-- Profiles Table (to store historical WP users)
+CREATE TABLE IF NOT EXISTS profiles (
     id SERIAL PRIMARY KEY,
     wp_id INT UNIQUE,
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS customers (
 CREATE TABLE IF NOT EXISTS orders (
     id SERIAL PRIMARY KEY,
     wp_id INT UNIQUE,
-    customer_id INT REFERENCES customers(id) ON DELETE SET NULL,
+    customer_id INT REFERENCES profiles(id) ON DELETE SET NULL,
     status VARCHAR(50),
     currency VARCHAR(10),
     total_amount DECIMAL(10, 2),
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS order_items (
 );
 
 -- Security Rules
-ALTER TABLE customers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE order_items ENABLE ROW LEVEL SECURITY;
 

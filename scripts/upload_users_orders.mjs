@@ -32,13 +32,13 @@ async function uploadData() {
   const users = JSON.parse(fs.readFileSync(usersPath, 'utf8'));
   const orders = JSON.parse(fs.readFileSync(ordersPath, 'utf8'));
   
-  console.log(`Uploading ${users.length} users to 'customers' table...`);
+  console.log(`Uploading ${users.length} users to 'profiles' table...`);
   
   const wpToSupabaseUser = {};
   
   for (const user of users) {
     const { data, error } = await supabase
-      .from('customers')
+      .from('profiles')
       .upsert({
         wp_id: user.id,
         email: user.email || `missing_${user.id}@catch-22.co.nz`,
