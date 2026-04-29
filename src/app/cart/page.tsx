@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { Trash2, Plus, Minus, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
 
+import { StripeExpressCheckout } from '@/components/checkout/StripeExpressCheckout';
+
 export default function CartPage() {
   const { items, removeItem, updateQuantity, totalPrice } = useCartStore();
   const [isLoading, setIsLoading] = useState(false);
@@ -155,6 +157,10 @@ export default function CartPage() {
               {isLoading ? 'Processing...' : 'Proceed to Checkout'}
               {!isLoading && <ArrowRight className="ml-2" size={20} />}
             </button>
+          </div>
+
+          <div className="mt-4">
+            <StripeExpressCheckout />
           </div>
         </section>
       </div>
