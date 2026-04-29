@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
+import { AddToCartButton } from '@/components/checkout/AddToCartButton';
 
 export const revalidate = 60;
 

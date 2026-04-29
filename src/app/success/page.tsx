@@ -1,7 +1,18 @@
+'use client';
+
 import Link from 'next/link';
 import { CheckCircle } from 'lucide-react';
+import { useEffect } from 'react';
+import { useCartStore } from '@/lib/store/cart';
 
 export default function SuccessPage() {
+  const clearCart = useCartStore((state) => state.clearCart);
+
+  useEffect(() => {
+    // Clear the cart when the user successfully checks out
+    clearCart();
+  }, [clearCart]);
+
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
       <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-xl text-center border border-slate-100">

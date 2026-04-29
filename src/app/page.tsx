@@ -1,38 +1,88 @@
-import { ShoppingCart } from 'lucide-react'
+import { createClient } from '@/lib/supabase';
+import Image from 'next/image';
+import Link from 'next/link';
 
-export default function Home() {
+export const revalidate = 60;
+
+export default async function Home() {
+  const supabase = createClient();
+  
+  // Fetch 3 featured products
+  const { data: featuredProducts } = await supabase
+    .from('products')
+    .select('id, name, slug, price, image_url')
+    .eq('stock_status', 'instock')
+    .limit(3);
+
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50">
-      <header className="px-6 py-4 bg-white border-b border-slate-200">
-        <h1 className="text-xl font-bold text-slate-900 font-mono">CATCH-22</h1>
-      </header>
-      
-      <main className="flex-grow flex items-center justify-center p-6">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl shadow-slate-200/50 p-8 text-center border border-slate-100">
-          <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <ShoppingCart size={32} />
-          </div>
-          <h2 className="text-2xl font-extrabold text-slate-900 mb-2 tracking-tight">V2 MIGRATION</h2>
-          <p className="text-slate-500 mb-8 text-sm uppercase tracking-widest font-semibold">
-            Next.js + Supabase + Stripe Link
-          </p>
-          
-          <div className="p-4 bg-slate-50 rounded-xl mb-8 border border-slate-100">
-            <p className="text-xs text-slate-400 font-mono">STATUS: INITIALIZED</p>
-          </div>
-          
-          <button 
-            disabled
-            className="w-full py-4 px-6 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 disabled:opacity-50"
-          >
-            SYSTEMS READY
-          </button>
+    <div className="bg-white">
+      {/* Hero Section */}
+      <div className="relative bg-slate-900 h-[600px] flex items-center justify-center text-center">
+        <div className="absolute inset-0 overflow-hidden">
+          {/* Placeholder for a hero background if one exists, otherwise a gradient */}
+          <div className="absolute inset-0 bg-gradient-to-b from-indigo-900 to-slate-900 opacity-90" />
         </div>
-      </main>
+        <div className="relative z-10 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
+          <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl mb-6">
+            Equip Yourself for the Elements
+          </h1>
+          <p className="mt-4 text-xl text-slate-300 mb-10 max-w-2xl mx-auto">
+            Premium fishing gear, apparel, and accessories tested in the harshest environments. Built for those who demand performance.
+          </p>
+          <Link
+            href="/products"
+            className="inline-block bg-white border border-transparent rounded-md py-3 px-8 text-base font-medium text-slate-900 hover:bg-slate-50 transition-colors"
+          >
+            Shop the Collection
+          </Link>
+        </div>
+      </div>
 
-      <footer className="p-6 text-center text-slate-400 text-xs font-medium uppercase tracking-tighter">
-        &copy; 2026 CATCH-22.CO.NZ
-      </footer>
+      {/* Featured Products */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+        <div className="md:flex md:items-center md:justify-between mb-8">
+          <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Trending Gear</h2>
+          <Link href="/products" className="hidden text-sm font-medium text-indigo-600 hover:text-indigo-500 md:block">
+            Shop all products <span aria-hidden="true"> &rarr;</span>
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
+          {featuredProducts?.map((product) => (
+            <div key={product.id} className="group relative">
+              <div className="w-full min-h-80 bg-slate-200 aspect-w-1 aspect-h-1 rounded-md overflow-hidden group-hover:opacity-75 lg:h-80 lg:aspect-none relative">
+                {product.image_url ? (
+                  <Image
+                    src={product.image_url}
+                    alt={product.name}
+                    fill
+                    className="w-full h-full object-center object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-slate-400">No Image</div>
+                )}
+              </div>
+              <div className="mt-4 flex justify-between">
+                <div>
+                  <h3 className="text-sm text-slate-700 font-medium">
+                    <Link href={`/products/${product.slug}`}>
+                      <span aria-hidden="true" className="absolute inset-0" />
+                      {product.name}
+                    </Link>
+                  </h3>
+                </div>
+                <p className="text-sm font-semibold text-slate-900">${product.price.toFixed(2)}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-8 text-center md:hidden">
+          <Link href="/products" className="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+            Shop all products <span aria-hidden="true"> &rarr;</span>
+          </Link>
+        </div>
+      </div>
     </div>
-  )
+  );
 }
