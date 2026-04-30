@@ -39,18 +39,22 @@ export default function ContactPage() {
         </p>
 
         {status === 'success' && (
-          <div className="mb-8 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl font-bold text-sm uppercase tracking-wider text-center">
+          <div id="form-success-message" role="status" className="mb-8 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl font-bold text-sm uppercase tracking-wider text-center">
             ✅ Message sent successfully! We will be in touch soon.
           </div>
         )}
 
         {status === 'error' && (
-          <div className="mb-8 p-4 bg-rose-50 border border-rose-100 text-rose-700 rounded-2xl font-bold text-sm uppercase tracking-wider text-center">
+          <div id="form-error-message" role="alert" className="mb-8 p-4 bg-rose-50 border border-rose-100 text-rose-700 rounded-2xl font-bold text-sm uppercase tracking-wider text-center">
             ❌ {errorMessage}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-6"
+          aria-describedby={status === 'success' ? 'form-success-message' : status === 'error' ? 'form-error-message' : undefined}
+        >
           {/* Honeypot field for anti-spam */}
           <div className="hidden" aria-hidden="true">
             <label htmlFor="website">Leave this field empty</label>
@@ -96,7 +100,8 @@ export default function ContactPage() {
           <button
             type="submit"
             disabled={status === 'loading'}
-            className="w-full bg-secondary text-white font-black rounded-full py-5 hover:bg-primary transition-all uppercase tracking-[0.2em] text-sm shadow-xl shadow-secondary/10 disabled:opacity-50"
+            aria-busy={status === 'loading'}
+            className="w-full bg-secondary text-white font-black rounded-full py-5 hover:bg-primary transition-all uppercase tracking-[0.2em] text-sm shadow-xl shadow-secondary/10 disabled:opacity-50 focus:ring-2 focus:ring-primary focus:ring-offset-2"
           >
             {status === 'loading' ? 'Sending...' : 'Send Message'}
           </button>

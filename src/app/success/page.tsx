@@ -21,7 +21,7 @@ export default function SuccessPage() {
         </div>
         <h1 className="text-3xl font-black text-secondary uppercase tracking-tight mb-4">Order Confirmed!</h1>
         <p className="text-slate-600 mb-10 font-medium leading-relaxed">
-          Thank you for choosing Catch-22. We've received your order and are getting it ready for the elements.
+          Thank you for choosing Catch-22. We&apos;ve received your order and are getting it ready for the elements.
         </p>
         <Link 
           href="/products"

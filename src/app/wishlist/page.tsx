@@ -5,22 +5,26 @@ import Image from 'next/image';
 import { Trash2, ShoppingCart, Heart } from 'lucide-react';
 import { useWishlistStore } from '@/lib/store/wishlist';
 import { useCartStore } from '@/lib/store/cart';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export default function WishlistPage() {
   const { items, removeItem, clearWishlist } = useWishlistStore();
   const addItemToCart = useCartStore((state) => state.addItem);
+  const mountedRef = useRef(false);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      setIsMounted(true);
+    }
   }, []);
 
   if (!isMounted) {
     return <div className="min-h-screen bg-white" />;
   }
 
-  const handleMoveToCart = (item: any) => {
+  const handleMoveToCart = (item: { id: number; name: string; slug: string; price: number; image_url: string | null }) => {
     addItemToCart({
       id: item.id,
       name: item.name,

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
-import { createClient } from '@supabase/supabase-js';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,12 +13,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Cart is empty' }, { status: 400 });
     }
 
-    const supabase = createClient(
+    const cookieStore = await cookies();
+    const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll();
+          }
+        }
+      }
     );
 
-    let stripeDiscounts: any[] = [];
+    const { data: { user } } = await supabase.auth.getUser();
+
+    let stripeDiscounts: { coupon: string }[] = [];
     
     if (promoCode) {
       const { data: couponData } = await supabase
@@ -40,7 +51,7 @@ export async function POST(req: Request) {
       }
     }
 
-    const productIds = items.map((i: any) => i.id);
+    const productIds = items.map((i: { id: number }) => i.id);
 
     const { data: dbProducts, error } = await supabase
       .from('products')
@@ -51,7 +62,7 @@ export async function POST(req: Request) {
       throw new Error('Failed to validate cart items against the database');
     }
 
-    const line_items = items.map((item: any) => {
+    const line_items = items.map((item: { id: number; name: string; price: number; quantity: number }) => {
       const dbProduct = dbProducts.find((p) => p.id === item.id);
       
       // Fallback: If Stripe isn't fully synced yet, create a price inline dynamically (for testing only)
@@ -76,6 +87,11 @@ export async function POST(req: Request) {
       payment_method_types: ['card', 'link'],
       line_items: line_items,
       mode: 'payment',
+      customer_email: user?.email,
+      client_reference_id: user?.id,
+      metadata: {
+        userId: user?.id || 'guest',
+      },
       discounts: stripeDiscounts.length > 0 ? stripeDiscounts : undefined,
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/cart`,
@@ -89,7 +105,8 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ sessionId: session.id, url: session.url });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

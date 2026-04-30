@@ -23,6 +23,7 @@ export function Header() {
   const supabase = createClient();
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMounted(true);
     
     // Fetch categories

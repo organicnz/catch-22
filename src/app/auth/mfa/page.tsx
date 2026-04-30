@@ -14,25 +14,25 @@ export default function MfaChallengePage() {
   const supabase = createClient();
 
   useEffect(() => {
+    async function checkAal() {
+      const { data, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (error) {
+        router.push('/login');
+        return;
+      }
+
+      if (data.nextLevel === data.currentLevel) {
+        // Already at the required level
+        router.push('/account');
+      } else if (data.nextLevel === 'aal1') {
+        // No MFA setup, or already satisfied
+        router.push('/account');
+      }
+      setChecking(false);
+    }
     checkAal();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  async function checkAal() {
-    const { data, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-    if (error) {
-      router.push('/login');
-      return;
-    }
-
-    if (data.nextLevel === data.currentLevel) {
-      // Already at the required level
-      router.push('/account');
-    } else if (data.nextLevel === 'aal1') {
-      // No MFA setup, or already satisfied
-      router.push('/account');
-    }
-    setChecking(false);
-  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

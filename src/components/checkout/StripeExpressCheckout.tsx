@@ -6,7 +6,8 @@ import {
   Elements,
   ExpressCheckoutElement,
 } from '@stripe/react-stripe-js';
-import { useState, useEffect } from 'react';
+import type { StripeExpressCheckoutElementConfirmEvent } from '@stripe/stripe-js';
+import { useState } from 'react';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
 
@@ -21,7 +22,7 @@ export function StripeExpressCheckout() {
 
   if (amount === 0) return null;
 
-  const onConfirm = async (event: any) => {
+  const onConfirm = async (event: StripeExpressCheckoutElementConfirmEvent) => {
     if (!event) return;
     
     try {
@@ -46,11 +47,9 @@ export function StripeExpressCheckout() {
         window.location.href = data.url;
       } else {
         setErrorMessage(data.error || 'Something went wrong');
-        event.elements.getElement('expressCheckout').update({status: 'error'});
       }
-    } catch (error) {
+    } catch {
       setErrorMessage('Checkout failed');
-      event.elements.getElement('expressCheckout').update({status: 'error'});
     }
   };
 

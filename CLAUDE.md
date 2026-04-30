@@ -1,10 +1,10 @@
 # Catch-22: Developer Manifesto & Guide
 
 ## ⚡ Quick Start
-- `npm run dev`: Launch local development environment.
-- `npm run build`: Production bundle generation.
-- `npm run lint`: Code quality and syntax validation.
-- `npm run test`: Execute project test suite (if applicable).
+- `bun run dev`: Launch local development environment.
+- `bun run build`: Production bundle generation.
+- `bun run lint`: Code quality and syntax validation.
+- `bun run test`: Execute project test suite (if applicable).
 
 ---
 
@@ -28,7 +28,7 @@ All UI development must adhere to the core design tokens.
 
 ### 1. Component Architecture
 - **Location**: `src/components/`.
-- **Styling**: Tailwind CSS + Shadcn UI primitives.
+- **Styling**: Tailwind CSS 4 (Native CSS variables & @theme).
 - **Interactivity**: Use `framer-motion` for complex transitions; Tailwind for micro-animations.
 - **Example**:
   ```tsx

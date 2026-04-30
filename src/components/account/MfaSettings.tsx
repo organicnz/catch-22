@@ -3,10 +3,10 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase';
 import { QRCodeSVG } from 'qrcode.react';
-import { Shield, ShieldCheck, ShieldAlert, Loader2, X } from 'lucide-react';
+import { Shield, ShieldCheck, ShieldAlert, Loader2 } from 'lucide-react';
 
 export function MfaSettings() {
-  const [factors, setFactors] = useState<any[]>([]);
+  const [factors, setFactors] = useState<{ id: string; status: string; totp?: { qr_code: string } }[]>([]);
   const [loading, setLoading] = useState(true);
   const [enrolling, setEnrolling] = useState(false);
   const [qrCode, setQrCode] = useState('');

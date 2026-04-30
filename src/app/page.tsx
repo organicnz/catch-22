@@ -2,8 +2,30 @@ import { createClient } from '@/lib/supabase';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Suspense } from 'react';
+import { Metadata } from 'next';
+import { sanitizeText } from '@/lib/sanitize';
 
 export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: 'Catch-22 | Premium Fishing Gear New Zealand',
+  description: 'Premium fishing braid, lures, and apparel tested in the harshest New Zealand environments. Built to endure. Free NZ shipping available.',
+  openGraph: {
+    title: 'Catch-22 | Premium Fishing Gear New Zealand',
+    description: 'Premium fishing braid, lures, and apparel tested in the harshest New Zealand environments. Built to endure. Free NZ shipping available.',
+    url: 'https://catch-22.co.nz',
+    siteName: 'Catch-22',
+    locale: 'en_NZ',
+    type: 'website',
+    images: [{ url: '/hero.jpg', width: 1200, height: 630, alt: 'Catch-22 Premium Fishing Gear New Zealand' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Catch-22 | Premium Fishing Gear New Zealand',
+    description: 'Premium fishing braid, lures, and apparel tested in the harshest New Zealand environments. Built to endure. Free NZ shipping available.',
+    images: ['/hero.jpg'],
+  },
+};
 
 import { ProductCard } from '@/components/products/ProductCard';
 
@@ -49,7 +71,7 @@ async function DealOfTheDay() {
   const supabase = createClient();
   
   // Fetch one product on sale
-  const { data: dealProduct } = await supabase
+  const { data: dealProduct, error: dealError } = await supabase
     .from('products')
     .select('id, name, slug, price, regular_price, sale_price, image_url, description')
     .not('sale_price', 'is', null)
@@ -57,7 +79,14 @@ async function DealOfTheDay() {
     .limit(1)
     .single();
 
-  if (!dealProduct) return null;
+  if (dealError) {
+    console.error('[DealOfTheDay] Supabase error:', dealError.message);
+  }
+  if (!dealProduct) return (
+    <div className="bg-slate-900 py-24 text-center">
+      <p className="text-slate-500 font-black uppercase tracking-widest text-xs">No deal available today.</p>
+    </div>
+  );
 
   return (
     <div className="bg-slate-900 py-24 relative overflow-hidden">
@@ -104,6 +133,7 @@ async function DealOfTheDay() {
                    src={dealProduct.image_url}
                    alt={dealProduct.name}
                    fill
+                   loading="lazy"
                    className="object-contain relative z-10 drop-shadow-[0_35px_35px_rgba(0,0,0,0.5)]"
                  />
                )}
@@ -131,6 +161,11 @@ function TrustedByPros() {
       quote: "Been out catching 30kg kingfish on your 60lb braid 🤙",
       author: "Charles Cockery",
       role: "THUNDER Charter"
+    },
+    {
+      quote: "All on your braid - your braid latched onto mate 40.1kg. Legendary Sledger Rigs doing the work.",
+      author: "Ham & Ty",
+      role: "Fishing Adventures"
     }
   ];
 
@@ -145,7 +180,7 @@ function TrustedByPros() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
           {testimonials.map((t, i) => (
             <div key={i} className="relative group">
-              <div className="absolute -top-10 -left-6 text-[120px] font-black text-slate-100 select-none group-hover:text-primary/10 transition-colors">"</div>
+              <div className="absolute -top-10 -left-6 text-[120px] font-black text-slate-100 select-none group-hover:text-primary/10 transition-colors">&quot;</div>
               <div className="relative z-10">
                 <p className="text-xl font-bold text-secondary italic mb-8 leading-relaxed">
                   {t.quote}
@@ -167,7 +202,7 @@ async function LatestLogbookEntries() {
   const supabase = createClient();
   
   // Fetch latest 3 posts
-  const { data: posts } = await supabase
+  const { data: posts, error: postsError } = await supabase
     .from('content')
     .select('id, title, slug, created_at')
     .eq('status', 'publish')
@@ -175,35 +210,47 @@ async function LatestLogbookEntries() {
     .order('created_at', { ascending: false })
     .limit(3);
 
-  if (!posts || posts.length === 0) return null;
+  if (postsError) {
+    console.error('[LatestLogbookEntries] Supabase error:', postsError.message);
+  }
+  if (!posts || posts.length === 0) return (
+    <div className="text-center py-12">
+      <p className="text-slate-400 font-black uppercase tracking-widest text-xs">No logbook entries yet.</p>
+    </div>
+  );
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-      {posts.map((post) => (
-        <article key={post.id} className="group bg-white p-10 rounded-[3rem] border border-slate-100 hover:border-primary/40 shadow-sm hover:shadow-2xl transition-all duration-500 relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-            <div className="w-24 h-24 bg-primary rounded-full blur-2xl" />
-          </div>
-          <time dateTime={post.created_at} className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-6 block">
-            {new Date(post.created_at).toLocaleDateString('en-NZ', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric'
-            })}
-          </time>
-          <h3 className="text-xl font-black text-secondary uppercase leading-tight mb-8 group-hover:text-primary transition-colors line-clamp-2 min-h-[3.5rem]">
-            <Link href={`/${post.slug}`}>
-              {post.title}
+      {posts.map((post) => {
+        // Sanitize title using shared utility
+        const sanitizedTitle = sanitizeText(post.title);
+        
+        return (
+          <article key={post.id} className="group bg-white p-10 rounded-[3rem] border border-slate-100 hover:border-primary/40 shadow-sm hover:shadow-2xl transition-all duration-500 relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+              <div className="w-24 h-24 bg-primary rounded-full blur-2xl" />
+            </div>
+            <time dateTime={post.created_at} className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-6 block">
+              {new Date(post.created_at).toLocaleDateString('en-NZ', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+              })}
+            </time>
+            <h3 className="text-xl font-black text-secondary uppercase leading-tight mb-8 group-hover:text-primary transition-colors line-clamp-2 min-h-[3.5rem]">
+              <Link href={`/${post.slug}`}>
+                {sanitizedTitle}
+              </Link>
+            </h3>
+            <Link 
+              href={`/${post.slug}`}
+              className="text-[10px] font-black text-primary uppercase tracking-[0.25em] inline-flex items-center gap-3 group-hover:gap-5 transition-all"
+            >
+              Read Story <span className="text-lg">&rarr;</span>
             </Link>
-          </h3>
-          <Link 
-            href={`/${post.slug}`}
-            className="text-[10px] font-black text-primary uppercase tracking-[0.25em] inline-flex items-center gap-3 group-hover:gap-5 transition-all"
-          >
-            Read Story <span className="text-lg">&rarr;</span>
-          </Link>
-        </article>
-      ))}
+          </article>
+        );
+      })}
     </div>
   );
 }
@@ -211,11 +258,45 @@ async function LatestLogbookEntries() {
 export default async function Home() {
   return (
     <div className="bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@graph': [
+              {
+                '@type': 'Organization',
+                '@id': 'https://catch-22.co.nz/#organization',
+                name: 'Catch-22',
+                url: 'https://catch-22.co.nz',
+                logo: 'https://catch-22.co.nz/logo.svg',
+                contactPoint: {
+                  '@type': 'ContactPoint',
+                  telephone: '02102745622',
+                  contactType: 'customer service',
+                  areaServed: 'NZ',
+                  availableLanguage: 'English',
+                },
+                sameAs: [],
+              },
+              {
+                '@type': 'WebSite',
+                '@id': 'https://catch-22.co.nz/#website',
+                url: 'https://catch-22.co.nz',
+                name: 'Catch-22',
+                description: 'Premium fishing gear for New Zealand anglers',
+                publisher: { '@id': 'https://catch-22.co.nz/#organization' },
+                inLanguage: 'en-NZ',
+              },
+            ],
+          }),
+        }}
+      />
       {/* Hero Section */}
-      <div className="relative h-[650px] flex items-center overflow-hidden">
+      <section aria-label="Hero — Equip Yourself for the Elements" className="relative h-[650px] flex items-center overflow-hidden">
         <Image
           src="/hero.jpg"
-          alt="Fishing background"
+          alt="Angler fishing in New Zealand waters with Catch-22 gear"
           fill
           className="object-cover scale-105"
           priority
@@ -248,10 +329,10 @@ export default async function Home() {
         
         {/* Decorative elements */}
         <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-white to-transparent" />
-      </div>
+      </section>
 
       {/* Charity Banner */}
-      <div className="bg-secondary py-10 text-center text-white relative overflow-hidden">
+      <section aria-label="Charity — Sea Cleaners donation" className="bg-secondary py-10 text-center text-white relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
           <div className="absolute top-0 left-10 w-40 h-40 bg-primary rounded-full blur-[80px]" />
           <div className="absolute bottom-0 right-10 w-40 h-40 bg-primary rounded-full blur-[80px]" />
@@ -270,7 +351,7 @@ export default async function Home() {
             Learn more about our mission
           </Link>
         </div>
-      </div>
+      </section>
 
       <Suspense fallback={<div className="h-[600px] bg-slate-900 animate-pulse" />}>
         <DealOfTheDay />

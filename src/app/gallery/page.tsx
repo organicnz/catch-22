@@ -1,24 +1,42 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { Metadata } from 'next';
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
-  title: 'Catch-Snaps - Catch-22',
-  description: 'See the latest catches from the Catch-22 community. Send us your catch snaps today!',
+  title: 'Catch-Snaps | Catch-22 New Zealand',
+  description: 'Real catches, real gear. Browse the Catch-22 community gallery and submit your own fishing snaps to be featured.',
+  openGraph: {
+    title: 'Catch-Snaps | Catch-22 New Zealand',
+    description: 'Real catches, real gear. Browse the Catch-22 community gallery and submit your own fishing snaps to be featured.',
+    url: 'https://catch-22.co.nz/gallery',
+    siteName: 'Catch-22',
+    locale: 'en_NZ',
+    type: 'website',
+    images: [{ url: '/snap1.jpg', width: 1200, height: 630, alt: 'Catch-22 Community Fishing Gallery' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Catch-Snaps | Catch-22 New Zealand',
+    description: 'Real catches, real gear. Browse the Catch-22 community gallery and submit your own fishing snaps to be featured.',
+    images: ['/snap1.jpg'],
+  },
 };
 
 export default function GalleryPage() {
   // Placeholder images for the gallery
   const snaps = [
-    { src: '/snap1.jpg', alt: 'Big catch in NZ' },
-    { src: '/snap2.jpg', alt: 'Fishing at sunrise' },
-    { src: '/snap3.jpg', alt: 'Tested gear in action' },
-    { src: '/snap4.jpg', alt: 'Thunder Charter catch' },
-    { src: '/snap5.jpg', alt: 'Coastal fishing New Zealand' },
-    { src: '/snap6.jpg', alt: 'Premium braid in use' },
+    { src: '/snap1.jpg', alt: 'Angler holding a large kingfish caught using Catch-22 braid' },
+    { src: '/snap2.jpg', alt: 'Fishing at sunrise on a New Zealand boat with Catch-22 gear' },
+    { src: '/snap3.jpg', alt: 'Catch-22 fishing braid being tested in rough conditions' },
+    { src: '/snap4.jpg', alt: 'THUNDER Charter crew with a trophy kingfish catch' },
+    { src: '/snap5.jpg', alt: 'Coastal rock fishing in New Zealand with Catch-22 lures' },
+    { src: '/snap6.jpg', alt: 'Premium Catch-22 braid spooled on a fishing reel' },
   ];
 
   return (
-    <div className="bg-white py-16 px-4 sm:px-6 lg:px-8 min-h-screen">
+    <main className="bg-white py-16 px-4 sm:px-6 lg:px-8 min-h-screen">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col items-center text-center mb-16">
           <h1 className="text-4xl font-black text-secondary uppercase tracking-tight mb-4">Catch-22 Snaps</h1>
@@ -35,6 +53,7 @@ export default function GalleryPage() {
                 src={snap.src} 
                 alt={snap.alt} 
                 fill 
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                 className="object-cover group-hover:scale-110 transition-transform duration-[1.5s] ease-out"
                />
                <div className="absolute inset-0 bg-gradient-to-t from-secondary/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-8">
@@ -55,15 +74,16 @@ export default function GalleryPage() {
                 Tag us in your photos or send them directly to our team via the contact form. 
                 We love seeing our gear in the wild!
               </p>
-              <a 
+              <Link 
                href="/contact" 
+               aria-label="Submit your fishing snap to be featured on Catch-22"
                className="inline-block bg-secondary text-white font-black py-6 px-16 rounded-full transition-all uppercase tracking-[0.3em] text-xs hover:bg-primary shadow-2xl shadow-secondary/20 hover:scale-105"
               >
                 Submit Your Snap
-              </a>
+              </Link>
            </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

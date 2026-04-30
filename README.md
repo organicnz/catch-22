@@ -23,22 +23,21 @@ Catch-22 is not just gear; it's an experience. This digital storefront is engine
 
 ## 🚀 Technical Stack
 - **Frontend**: Next.js 16 (App Router), React 19, TypeScript
-- **Styling**: Tailwind CSS + Shadcn UI (Custom "Sensory" Design Tokens)
-- **Backend**: Supabase (PostgreSQL, Auth, Storage)
+- **Backend**: Supabase (Database, Auth, Storage via `@supabase/ssr`)
+- **Payments**: Stripe API (Express Checkout)
+- **Styling**: Tailwind CSS 4 (Custom "Sensory" Design Tokens)
 - **State**: Zustand (Cart & Wishlist persistence)
 - **Icons**: Lucide React
-- **Payments**: Stripe API
+- **Runtime**: Bun 1.x
 
 ## 📥 Getting Started
 
 ### 1. Prerequisites
-- Node.js 20+ or Bun
+- Bun 1.x
 - A Supabase project with the catch-22 schema applied
 
 ### 2. Installation
 ```bash
-npm install
-# or
 bun install
 ```
 
@@ -54,7 +53,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 ### 4. Development
 ```bash
-npm run dev
+bun run dev
 ```
 
 ## 📖 Documentation

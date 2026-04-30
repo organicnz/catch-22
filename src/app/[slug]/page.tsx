@@ -2,49 +2,9 @@ import { createClient } from '@/lib/supabase';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { sanitizeWPContent } from '@/lib/sanitize';
 
 export const revalidate = 3600; // Cache for 1 hour
-
-// Helper to sanitize old WordPress artifacts and remove hack-injected spam
-function sanitizeWPContent(html: string) {
-  if (!html) return '';
-  
-  let clean = html;
-  
-  // 1. Remove Gutenberg block comments
-  clean = clean.replace(/<!--\s*\/?wp:.*?-->/g, '');
-  
-  // 2. Remove specific shortcodes
-  clean = clean.replace(/\[wpforms[^\]]*\]/g, '<div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl my-8 text-secondary font-bold uppercase tracking-widest text-xs text-center">Please use our official <a href="/contact" class="text-primary underline">Contact Page</a> to reach out.</div>');
-  
-  // 3. Remove known spam keywords and their surrounding elements
-  const spamKeywords = [
-    'casino', 'slot', 'betting', 'gambling', 'poker', 'bingo', 'bonus', 'rtp',
-    'vavada', '1xbet', 'mostbet', 'pin-up', 'vulcan', 'mahjong', 'sweet bonanza',
-    'judi', 'genset', 'daftar', 'situs', 'mangsatoto', 'gacor', 'olympus', 'sbobet',
-    'spaceman', 'pragmatic', 'xanax', 'steroid', '1winrussia', 'kasyno',
-    'φρουτακια', 'лото клуб', 'betsala', 'jeetcity', 'wazamba', 'moonwin',
-    'f12bet', 'vavada.az', 'stake casino', 'jeet city', '1xbet uz',
-    'hellspincassino', 'candyspinz', 'wildsino', 'apuesta-360'
-  ];
-  
-  const spamRegex = new RegExp('<a [^>]*?href=["\'](https?:\\/\\/(?!(catch-22\\.co\\.nz|i0\\.wp\\.com|i1\\.wp\\.com|i2\\.wp\\.com|supabase\\.co))[^"\']+)["\'][^>]*?>.*?<\\/a>', 'gi');
-  clean = clean.replace(spamRegex, '');
-
-  // Remove any paragraph containing spam keywords
-  spamKeywords.forEach(keyword => {
-    const pSpamRegex = new RegExp(`<p>[^<]*${keyword}[^<]*</p>`, 'gi');
-    clean = clean.replace(pSpamRegex, '');
-  });
-
-  // 4. Remove blocks of suspicious links
-  clean = clean.replace(/(<a [^>]*?>.*?<\/a>\s*){3,}/gi, '');
-
-  // 5. Final cleanup
-  clean = clean.replace(/<p>\s*<\/p>/g, '');
-  
-  return clean;
-}
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const slug = (await params).slug;

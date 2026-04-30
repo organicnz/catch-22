@@ -1,0 +1,161 @@
+{
+  "mcpServers": {
+    "Cloudflare": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://mcp.pipedream.net/11112893-75b5-460c-99dc-021092760c4e/cloudflare_api_key"
+      ],
+      "disabled": true,
+      "autoApprove": [
+        "cloudflare_api_key-list-dns-records",
+        "cloudflare_api_key-create-dns-record",
+        "cloudflare_api_key-patch-dns-record"
+      ]
+    },
+    // "supabase-foodshare": {
+    //   "url": "https://mcp.supabase.com/mcp?project_ref=iazmjdjwnkilycbjwpzp&features=docs%2Caccount%2Cdatabase%2Cdebugging%2Cdevelopment%2Cfunctions%2Cbranching%2Cstorage",
+    //   "headers": {
+    //     "Authorization": "Bearer sbp_532e6c75a29d382da1a6cb20f83eda31973f1ee3"
+    //   },
+    //   "autoApprove": [
+    //     "list_tables",
+    //     "get_advisors",
+    //     "apply_migration",
+    //     "list_migrations",
+    //     "execute_sql",
+    //     "search_docs",
+    //     "get_project_url",
+    //     "list_edge_functions",
+    //     "deploy_edge_function",
+    //     "get_logs",
+    //     "get_edge_function",
+    //     "get_publishable_keys",
+    //     "list_extensions",
+    //     "list_extensions",
+    //     "generate_typescript_types",
+    //     "list_auth_users",
+    //     "list_buckets",
+    //     "list_files",
+    //     "upload_file",
+    //     "delete_file",
+    //     "list_all_objects",
+    //     "get_object",
+    //     "upload_object",
+    //     "delete_object",
+    //     "list_branches",
+    //     "create_branch",
+    //     "delete_branch",
+    //     "reset_branch",
+    //     "get_branch_status",
+    //     "get_branch_diff",
+    //     "apply_branch_diff",
+    //     "get_branch_info",
+    //     "execute_sql",
+    //     "deploy_edge_function",
+    //     "get_logs"
+    //   ],
+    //   "disabled": true
+    // },
+    // "supabase-hdskillfactory": {
+    //   "command": "npx",
+    //   "args": [
+    //     "-y",
+    //     "@supabase/mcp-server-supabase"
+    //   ],
+    //   "env": {
+    //     "SUPABASE_PROJECT_REF": "xejsnyavpjlranxloopn",
+    //     "SUPABASE_ACCESS_TOKEN": "sbp_v0_2a8a9394a7b1cacaa2fa4b083e00bf9f3a3d48f1"
+    //   },
+    //   "autoApprove": [
+    //     "list_tables",
+    //     "get_advisors",
+    //     "apply_migration",
+    //     "list_migrations",
+    //     "execute_sql",
+    //     "search_docs",
+    //     "get_project_url",
+    //     "list_edge_functions",
+    //     "deploy_edge_function",
+    //     "get_logs",
+    //     "get_edge_function",
+    //     "get_publishable_keys",
+    //     "list_extensions",
+    //     "list_extensions",
+    //     "generate_typescript_types",
+    //     "list_auth_users",
+    //     "list_buckets",
+    //     "list_files",
+    //     "upload_file",
+    //     "delete_file",
+    //     "list_all_objects",
+    //     "get_object",
+    //     "upload_object",
+    //     "delete_object",
+    //     "list_branches",
+    //     "create_branch",
+    //     "delete_branch",
+    //     "reset_branch",
+    //     "get_branch_status",
+    //     "get_branch_diff",
+    //     "apply_branch_diff",
+    //     "get_branch_info",
+    //     "execute_sql",
+    //     "deploy_edge_function",
+    //     "get_logs",
+    //     "list_projects"
+    //   ],
+    //   "disabled": false
+    // }
+    "supabase-catch22": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase"
+      ],
+      "env": {
+        "SUPABASE_PROJECT_REF": "wcoaqlglwxwceqktpckt",
+        "SUPABASE_ACCESS_TOKEN": "sbp_b90acc8575b9bc558666e7f539dbd2166f6fdbf2"
+      },
+      "autoApprove": [
+        "list_tables",
+        "get_advisors",
+        "apply_migration",
+        "list_migrations",
+        "execute_sql",
+        "search_docs",
+        "get_project_url",
+        "list_edge_functions",
+        "deploy_edge_function",
+        "get_logs",
+        "get_edge_function",
+        "get_publishable_keys",
+        "list_extensions",
+        "list_extensions",
+        "generate_typescript_types",
+        "list_auth_users",
+        "list_buckets",
+        "list_files",
+        "upload_file",
+        "delete_file",
+        "list_all_objects",
+        "get_object",
+        "upload_object",
+        "delete_object",
+        "list_branches",
+        "create_branch",
+        "delete_branch",
+        "reset_branch",
+        "get_branch_status",
+        "get_branch_diff",
+        "apply_branch_diff",
+        "get_branch_info",
+        "execute_sql",
+        "deploy_edge_function",
+        "get_logs",
+        "list_projects"
+      ],
+      "disabled": false
+    }
+  }
+}
