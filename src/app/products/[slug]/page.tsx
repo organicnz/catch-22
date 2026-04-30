@@ -56,8 +56,18 @@ export default async function ProductDetails({ params }: { params: { slug: strin
   }
 
   // Fetch related products from the same category
-  let relatedProducts: any[] = [];
-  const categoryIds = product.product_categories?.map((pc: any) => pc.category_id) || [];
+  interface RelatedProduct {
+    id: number;
+    name: string;
+    slug: string;
+    price: number;
+    image_url: string | null;
+    stock_status: string;
+    product_categories: { category_id: number }[];
+  }
+
+  let relatedProducts: RelatedProduct[] = [];
+  const categoryIds = (product.product_categories as { category_id: number }[])?.map((pc) => pc.category_id) || [];
 
   if (categoryIds.length > 0) {
     const { data: related } = await supabase
