@@ -53,10 +53,10 @@ export function AddToCartButton({ product, variations = [] }: AddToCartButtonPro
   const displayPrice = selectedVariation ? selectedVariation.price : product.price;
 
   return (
-    <div className="w-full space-y-4">
+    <div className="w-full space-y-6">
       {variations.length > 0 && (
         <div className="relative">
-          <label htmlFor="variation" className="block text-sm font-medium text-slate-700 mb-1">
+          <label htmlFor="variation" className="block text-xs font-black text-secondary uppercase tracking-widest mb-2">
             Select Option
           </label>
           <div className="relative">
@@ -67,7 +67,7 @@ export function AddToCartButton({ product, variations = [] }: AddToCartButtonPro
                 const v = variations.find(v => v.id === parseInt(e.target.value));
                 if (v) setSelectedVariation(v);
               }}
-              className="w-full appearance-none bg-slate-50 border border-slate-300 text-slate-900 py-3 px-4 pr-8 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent font-medium"
+              className="w-full appearance-none bg-slate-50 border border-slate-200 text-secondary py-4 px-5 pr-10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-bold text-sm uppercase tracking-wider"
             >
               {variations.map((v) => (
                 <option key={v.id} value={v.id}>
@@ -75,8 +75,8 @@ export function AddToCartButton({ product, variations = [] }: AddToCartButtonPro
                 </option>
               ))}
             </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
-              <ChevronDown size={16} />
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
+              <ChevronDown size={20} />
             </div>
           </div>
         </div>
@@ -84,24 +84,29 @@ export function AddToCartButton({ product, variations = [] }: AddToCartButtonPro
       
       {variations.length > 0 && (
          <div className="mt-4 mb-6">
-            <p className="text-3xl text-slate-900 font-bold">${displayPrice.toFixed(2)}</p>
+            <p className="text-4xl font-black text-primary">${displayPrice.toFixed(2)}</p>
          </div>
       )}
 
       <button
         onClick={handleAddToCart}
         disabled={isOutOfStock}
-        className={`w-full border border-transparent rounded-lg py-4 px-8 flex items-center justify-center text-lg font-bold text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all ${
+        className={`w-full border-none rounded-full py-5 px-10 flex items-center justify-center text-sm font-black text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all uppercase tracking-widest shadow-xl ${
           isOutOfStock 
-            ? 'bg-slate-400 cursor-not-allowed' 
+            ? 'bg-slate-300 cursor-not-allowed shadow-none' 
             : isAdded 
-              ? 'bg-emerald-500 hover:bg-emerald-600'
-              : 'bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-200'
+              ? 'bg-emerald-500 shadow-emerald-100 scale-95'
+              : 'bg-primary hover:bg-primary-dark shadow-primary/20 hover:scale-[1.02] active:scale-95'
         }`}
       >
-        <ShoppingCart className="mr-2" size={20} />
+        <ShoppingCart className="mr-3" size={20} strokeWidth={3} />
         {isOutOfStock ? 'Out of stock' : isAdded ? 'Added to Cart!' : 'Add to bag'}
       </button>
+      
+      <div className="flex items-center justify-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-tighter">
+         <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+         Secure checkout via Stripe
+      </div>
     </div>
   );
 }

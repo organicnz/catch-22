@@ -21,8 +21,8 @@ if (!supabaseUrl || !supabaseKey) {
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function uploadData() {
-  const usersPath = path.resolve(__dirname, '../../catch-22/wp-content/users_export.json');
-  const ordersPath = path.resolve(__dirname, '../../catch-22/wp-content/orders_export.json');
+  const usersPath = path.resolve(__dirname, '../../catch-22/migration_data/users_export.json');
+  const ordersPath = path.resolve(__dirname, '../../catch-22/migration_data/orders_export.json');
   
   if (!fs.existsSync(usersPath) || !fs.existsSync(ordersPath)) {
     console.error('Export JSON files not found.');

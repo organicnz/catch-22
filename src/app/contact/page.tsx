@@ -24,63 +24,76 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="bg-slate-50 py-16 px-4 sm:px-6 lg:px-8 min-h-[80vh]">
-      <div className="max-w-2xl mx-auto bg-white p-8 sm:p-12 rounded-2xl shadow-sm border border-slate-100">
-        <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Contact Us</h1>
-        <p className="text-slate-600 mb-8">
-          Have a question about our gear or an existing order? Send us a message and we'll get back to you.
+    <div className="bg-white py-16 px-4 sm:px-6 lg:px-8 min-h-[80vh]">
+      <div className="max-w-2xl mx-auto bg-slate-50 p-8 sm:p-12 rounded-3xl border border-slate-100 shadow-sm">
+        <div className="flex flex-col items-center text-center mb-10">
+          <h1 className="text-4xl font-black text-secondary uppercase tracking-tight mb-2">Contact Us</h1>
+          <div className="h-1.5 w-20 bg-primary"></div>
+        </div>
+        
+        <p className="text-slate-600 mb-10 text-center font-medium">
+          Have a question about our gear or an existing order? Send us a message and we'll get back to you as soon as possible.
         </p>
 
         {status === 'success' && (
-          <div className="mb-8 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-xl font-medium">
+          <div className="mb-8 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl font-bold text-sm uppercase tracking-wider text-center">
             ✅ Message sent successfully! We will be in touch soon.
           </div>
         )}
 
         {status === 'error' && (
-          <div className="mb-8 p-4 bg-rose-50 border border-rose-100 text-rose-700 rounded-xl font-medium">
+          <div className="mb-8 p-4 bg-rose-50 border border-rose-100 text-rose-700 rounded-2xl font-bold text-sm uppercase tracking-wider text-center">
             ❌ {errorMessage}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Honeypot field for anti-spam */}
+          <div className="hidden" aria-hidden="true">
+            <label htmlFor="website">Leave this field empty</label>
+            <input type="text" name="website" id="website" tabIndex={-1} autoComplete="off" />
+          </div>
+
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
+            <label htmlFor="name" className="block text-xs font-black text-secondary uppercase tracking-widest mb-2 ml-1">Full Name</label>
             <input
               type="text"
               name="name"
               id="name"
               required
-              className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none transition-all"
+              placeholder="Your name"
+              className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all font-bold text-secondary"
             />
           </div>
           
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
+            <label htmlFor="email" className="block text-xs font-black text-secondary uppercase tracking-widest mb-2 ml-1">Email Address</label>
             <input
               type="email"
               name="email"
               id="email"
               required
-              className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none transition-all"
+              placeholder="your@email.com"
+              className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all font-bold text-secondary"
             />
           </div>
 
           <div>
-            <label htmlFor="message" className="block text-sm font-medium text-slate-700 mb-1">Message</label>
+            <label htmlFor="message" className="block text-xs font-black text-secondary uppercase tracking-widest mb-2 ml-1">Message</label>
             <textarea
               name="message"
               id="message"
-              rows={4}
+              rows={5}
               required
-              className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none transition-all"
+              placeholder="How can we help you?"
+              className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all font-bold text-secondary resize-none"
             ></textarea>
           </div>
 
           <button
             type="submit"
             disabled={status === 'loading'}
-            className="w-full bg-slate-900 text-white font-bold rounded-xl py-4 hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 disabled:opacity-50"
+            className="w-full bg-secondary text-white font-black rounded-full py-5 hover:bg-primary transition-all uppercase tracking-[0.2em] text-sm shadow-xl shadow-secondary/10 disabled:opacity-50"
           >
             {status === 'loading' ? 'Sending...' : 'Send Message'}
           </button>

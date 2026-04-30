@@ -19,7 +19,7 @@ if (!stripeKey || stripeKey.includes('placeholder') || stripeKey === 'sk_test_..
   process.exit(1);
 }
 
-const stripe = new Stripe(stripeKey, { apiVersion: '2025-02-24.acacia' as any, typescript: true });
+const stripe = new Stripe(stripeKey, { apiVersion: '2025-02-24.acacia', typescript: true });
 
 async function syncStripe() {
   console.log('🚀 Starting Stripe Synchronization...');

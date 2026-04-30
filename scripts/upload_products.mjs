@@ -21,7 +21,7 @@ if (!supabaseUrl || !supabaseKey) {
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function uploadProducts() {
-  const exportPath = path.resolve(__dirname, '../../catch-22/wp-content/products_export.json');
+  const exportPath = path.resolve(__dirname, '../../catch-22/migration_data/products_export.json');
   if (!fs.existsSync(exportPath)) {
     console.error(`Cannot find the export file at ${exportPath}`);
     process.exit(1);

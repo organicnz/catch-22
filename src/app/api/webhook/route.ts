@@ -46,14 +46,30 @@ export async function POST(req: Request) {
     
     if (orderError) {
        console.error('❌ Error inserting fulfilled order:', orderError.message);
-       // Return 500 so Stripe retries the webhook
        return NextResponse.json({ error: 'Database fulfillment failed' }, { status: 500 });
     }
     
     console.log(`✅ Order fulfilled for session: ${session.id}`);
 
-    // Optional: Decrement inventory if managing strict stock quantities
-    // await supabase.rpc('decrement_stock', { product_ids: line_item_ids });
+    // Decrement inventory for each item purchased
+    const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+    
+    if (lineItems.data.length > 0) {
+      for (const item of lineItems.data) {
+        // Find the product by its Stripe Price ID
+        const { data: product } = await supabase
+          .from('products')
+          .select('id')
+          .eq('stripe_price_id', item.price?.id)
+          .single();
+
+        if (product) {
+          // Call the RPC to reduce stock (or set out of stock if tracking quantities)
+          await supabase.rpc('decrement_stock', { p_id: product.id, decrement_by: item.quantity || 1 });
+          console.log(`✅ Decremented stock for product ${product.id}`);
+        }
+      }
+    }
 
     // Optional: Send Order Confirmation Email via Resend
     // await resend.emails.send({
