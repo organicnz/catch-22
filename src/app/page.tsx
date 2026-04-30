@@ -1,9 +1,12 @@
-import { createClient } from '@/lib/supabase';
+import { createClient, getStorageUrl } from '@/lib/supabase';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Suspense } from 'react';
 import { Metadata } from 'next';
 import { sanitizeText } from '@/lib/sanitize';
+import { ProductCard } from '@/components/products/ProductCard';
+import { CharitySection } from '@/components/home/CharitySection';
+import { TestimonialSection } from '@/components/home/TestimonialSection';
 
 export const revalidate = 60;
 
@@ -27,20 +30,18 @@ export const metadata: Metadata = {
   },
 };
 
-import { ProductCard } from '@/components/products/ProductCard';
-
 async function BestSellers() {
   const supabase = createClient();
   
-  // Fetch 4 featured products (Best Sellers)
+  // Fetch featured products (Best Sellers)
   const { data: featuredProducts } = await supabase
     .from('products')
     .select('id, name, slug, price, regular_price, sale_price, image_url')
     .eq('stock_status', 'instock')
-    .limit(4);
+    .limit(8);
 
   return (
-    <div className="grid grid-cols-1 gap-y-12 gap-x-8 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-y-16 gap-x-8 sm:grid-cols-2 lg:grid-cols-4">
       {featuredProducts?.map((product) => (
         <ProductCard key={product.id} product={product} />
       ))}
@@ -79,122 +80,83 @@ async function DealOfTheDay() {
     .limit(1)
     .single();
 
-  if (dealError) {
-    console.error('[DealOfTheDay] Supabase error:', dealError.message);
-  }
-  if (!dealProduct) return (
-    <div className="bg-slate-900 py-24 text-center">
-      <p className="text-slate-500 font-black uppercase tracking-widest text-xs">No deal available today.</p>
-    </div>
-  );
+  if (dealError || !dealProduct) return null;
 
   return (
-    <div className="bg-slate-900 py-24 relative overflow-hidden">
-      {/* Background patterns */}
-      <div className="absolute inset-0 opacity-10 pointer-events-none">
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#D1FF00_1px,transparent_1px)] [background-size:40px_40px]" />
+    <section aria-label="Special Offer — Deal of the Day" className="bg-secondary py-24 relative overflow-hidden">
+      {/* Visual background flair */}
+      <div className="absolute inset-0 opacity-5 pointer-events-none">
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-primary/20 -skew-x-12 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary to-transparent" />
       </div>
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="flex flex-col lg:flex-row items-center gap-16">
+        <div className="flex flex-col lg:flex-row items-center gap-20">
           <div className="lg:w-1/2">
-            <span className="text-primary font-black uppercase tracking-[0.4em] text-xs mb-6 block">Limited Time Offer</span>
-            <h2 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter mb-8 leading-[0.9]">
+            <div className="inline-flex items-center gap-3 px-4 py-2 bg-primary/10 border border-primary/20 rounded-full mb-8">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+              </span>
+              <span className="text-primary font-black uppercase tracking-[0.3em] text-[10px]">Limited Supply</span>
+            </div>
+            
+            <h2 className="text-5xl md:text-8xl font-black text-white uppercase tracking-tighter mb-10 leading-[0.85]">
               Deal of <br /> <span className="text-primary">The Day</span>
             </h2>
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-[2.5rem] mb-12">
-              <h3 className="text-2xl font-black text-white uppercase mb-4">{dealProduct.name}</h3>
-              <p className="text-slate-400 font-medium mb-8 line-clamp-3">
-                {dealProduct.description?.replace(/<[^>]*>/g, '') || 'Premium fishing gear at an unbeatable price.'}
+            
+            <div className="bg-white/5 backdrop-blur-2xl border border-white/10 p-10 rounded-[3rem] shadow-2xl relative">
+              <h3 className="text-3xl font-black text-white uppercase mb-6 tracking-tight">{dealProduct.name}</h3>
+              <p className="text-slate-400 font-medium mb-10 leading-relaxed line-clamp-3">
+                {dealProduct.description?.replace(/<[^>]*>/g, '') || 'Professional-grade fishing equipment engineered for performance.'}
               </p>
-              <div className="flex items-end gap-6 mb-8">
+              
+              <div className="flex items-center gap-8 mb-12">
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Was</span>
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">RRP</span>
                   <span className="text-2xl text-slate-500 line-through font-bold">${dealProduct.regular_price?.toFixed(2)}</span>
                 </div>
+                <div className="w-px h-12 bg-white/10"></div>
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-black text-primary uppercase tracking-widest mb-1">Now Only</span>
-                  <span className="text-5xl font-black text-primary leading-none">${dealProduct.price.toFixed(2)}</span>
+                  <span className="text-[10px] font-black text-primary uppercase tracking-widest mb-1">Crew Price</span>
+                  <span className="text-5xl font-black text-primary leading-none tracking-tighter">${dealProduct.price.toFixed(2)}</span>
                 </div>
               </div>
+
               <Link 
                 href={`/products/${dealProduct.slug}`}
-                className="inline-block bg-primary hover:bg-primary-dark text-white font-black py-5 px-12 rounded-full transition-all uppercase tracking-[0.2em] text-xs shadow-xl shadow-primary/20 w-full text-center"
+                className="group relative inline-flex items-center justify-center bg-primary hover:bg-white text-secondary font-black py-6 px-12 rounded-2xl transition-all duration-500 uppercase tracking-[0.2em] text-xs w-full overflow-hidden"
               >
-                Claim This Deal
+                <span className="relative z-10">Secure This Deal</span>
+                <div className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
               </Link>
             </div>
           </div>
-          <div className="lg:w-1/2 relative">
-            <div className="relative aspect-square w-full max-w-[500px] mx-auto">
-               <div className="absolute inset-0 bg-primary rounded-full blur-[100px] opacity-20 animate-pulse" />
+          
+          <div className="lg:w-1/2 relative group">
+            <div className="relative aspect-square w-full max-w-[600px] mx-auto">
+               <div className="absolute inset-0 bg-primary/20 rounded-full blur-[120px] group-hover:bg-primary/30 transition-all duration-700" />
                {dealProduct.image_url && (
                  <Image 
-                   src={dealProduct.image_url}
+                   src={getStorageUrl(dealProduct.image_url)}
                    alt={dealProduct.name}
                    fill
                    loading="lazy"
-                   className="object-contain relative z-10 drop-shadow-[0_35px_35px_rgba(0,0,0,0.5)]"
+                   className="object-contain relative z-10 drop-shadow-[0_50px_50px_rgba(0,0,0,0.6)] group-hover:scale-110 group-hover:-rotate-3 transition-all duration-700"
                  />
                )}
+            </div>
+            {/* Urgency Badge */}
+            <div className="absolute top-10 right-10 bg-red-600 text-white w-24 h-24 rounded-full flex flex-col items-center justify-center shadow-2xl rotate-12 group-hover:rotate-0 transition-all">
+               <span className="text-[10px] font-black uppercase tracking-tighter">Save</span>
+               <span className="text-2xl font-black tracking-tighter">
+                 {Math.round(100 - (dealProduct.price / (dealProduct.regular_price || dealProduct.price) * 100))}%
+               </span>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-function TrustedByPros() {
-  const testimonials = [
-    {
-      quote: "There you go mate 40.1kg. We got 4 yesterday - your braid doing the business.",
-      author: "Charles Cockery",
-      role: "THUNDER Charter"
-    },
-    {
-      quote: "We landed a couple of 30+kg kingies on the new line.",
-      author: "Charles Cockery",
-      role: "THUNDER Charter"
-    },
-    {
-      quote: "Been out catching 30kg kingfish on your 60lb braid 🤙",
-      author: "Charles Cockery",
-      role: "THUNDER Charter"
-    },
-    {
-      quote: "All on your braid - your braid latched onto mate 40.1kg. Legendary Sledger Rigs doing the work.",
-      author: "Ham & Ty",
-      role: "Fishing Adventures"
-    }
-  ];
-
-  return (
-    <div className="bg-white py-32 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="text-center mb-24">
-          <h2 className="text-4xl font-black tracking-tighter text-secondary uppercase">Trusted By The Pros</h2>
-          <div className="h-2 w-24 bg-primary mt-4 mx-auto rounded-full"></div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-          {testimonials.map((t, i) => (
-            <div key={i} className="relative group">
-              <div className="absolute -top-10 -left-6 text-[120px] font-black text-slate-100 select-none group-hover:text-primary/10 transition-colors">&quot;</div>
-              <div className="relative z-10">
-                <p className="text-xl font-bold text-secondary italic mb-8 leading-relaxed">
-                  {t.quote}
-                </p>
-                <div>
-                  <p className="font-black text-secondary uppercase tracking-widest text-xs">{t.author}</p>
-                  <p className="text-primary font-black uppercase tracking-widest text-[10px] mt-1">{t.role}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
+    </section>
   );
 }
 
@@ -210,10 +172,7 @@ async function LatestLogbookEntries() {
     .order('created_at', { ascending: false })
     .limit(3);
 
-  if (postsError) {
-    console.error('[LatestLogbookEntries] Supabase error:', postsError.message);
-  }
-  if (!posts || posts.length === 0) return (
+  if (postsError || !posts || posts.length === 0) return (
     <div className="text-center py-12">
       <p className="text-slate-400 font-black uppercase tracking-widest text-xs">No logbook entries yet.</p>
     </div>
@@ -222,9 +181,7 @@ async function LatestLogbookEntries() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
       {posts.map((post) => {
-        // Sanitize title using shared utility
         const sanitizedTitle = sanitizeText(post.title);
-        
         return (
           <article key={post.id} className="group bg-white p-10 rounded-[3rem] border border-slate-100 hover:border-primary/40 shadow-sm hover:shadow-2xl transition-all duration-500 relative overflow-hidden">
             <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
@@ -232,9 +189,7 @@ async function LatestLogbookEntries() {
             </div>
             <time dateTime={post.created_at} className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-6 block">
               {new Date(post.created_at).toLocaleDateString('en-NZ', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric'
+                month: 'short', day: 'numeric', year: 'numeric'
               })}
             </time>
             <h3 className="text-xl font-black text-secondary uppercase leading-tight mb-8 group-hover:text-primary transition-colors line-clamp-2 min-h-[3.5rem]">
@@ -258,6 +213,7 @@ async function LatestLogbookEntries() {
 export default async function Home() {
   return (
     <div className="bg-white">
+      {/* Schema.org Organization Data */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -277,7 +233,6 @@ export default async function Home() {
                   areaServed: 'NZ',
                   availableLanguage: 'English',
                 },
-                sameAs: [],
               },
               {
                 '@type': 'WebSite',
@@ -292,34 +247,37 @@ export default async function Home() {
           }),
         }}
       />
-      {/* Hero Section */}
-      <section aria-label="Hero — Equip Yourself for the Elements" className="relative h-[650px] flex items-center overflow-hidden">
+
+      {/* Hero Section: High Sensory Luxury */}
+      <section aria-label="Hero — Equip Yourself for the Elements" className="relative h-[85vh] min-h-[700px] flex items-center overflow-hidden bg-secondary">
         <Image
-          src="/thunder-charter.jpg"
-          alt="THUNDER Charter boat on Bay of Plenty waters with Catch-22 gear"
+          src={getStorageUrl('hero.jpg')}
+          alt="Premium fishing gear in the New Zealand elements"
           fill
-          className="object-cover scale-105"
+          className="object-cover opacity-60 scale-105 group-hover:scale-100 transition-transform duration-[2000ms]"
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-secondary/80 to-secondary/20" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-secondary/40 to-secondary" />
+        
         <div className="relative z-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-          <div className="max-w-2xl">
-            <h1 className="text-5xl font-black tracking-tight text-white sm:text-6xl lg:text-7xl mb-8 uppercase leading-[0.9]">
-              Equip <br/> Yourself <br/> <span className="text-primary">for the Elements</span>
+          <div className="max-w-4xl">
+            <span className="text-primary font-black uppercase tracking-[0.5em] text-xs mb-8 block animate-fade-in">Established NZ 2020</span>
+            <h1 className="text-6xl md:text-8xl lg:text-[10rem] font-black tracking-tight text-white uppercase leading-[0.8] mb-12">
+              Built to <br /> <span className="text-primary">Endure.</span>
             </h1>
-            <p className="mt-4 text-lg text-slate-200 font-medium mb-12 max-w-lg leading-relaxed">
-              Premium fishing gear, apparel, and accessories tested in the harshest New Zealand environments. Built to endure.
+            <p className="mt-4 text-xl md:text-2xl text-slate-300 font-medium mb-16 max-w-2xl leading-relaxed">
+              Premium fishing gear, apparel, and accessories tested in the harshest New Zealand environments.
             </p>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-8 items-center">
               <Link
                 href="/products"
-                className="inline-block bg-primary hover:bg-primary-dark text-white font-black py-5 px-12 rounded-full transition-all uppercase tracking-[0.2em] text-xs shadow-xl shadow-primary/20 hover:scale-105 active:scale-95"
+                className="group relative inline-flex items-center justify-center bg-primary text-secondary font-black py-6 px-16 rounded-full transition-all duration-500 uppercase tracking-[0.3em] text-xs shadow-2xl shadow-primary/20 hover:scale-105"
               >
-                Shop All Gear
+                Explore Collection
               </Link>
               <Link
                 href="/about-us"
-                className="inline-block bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-black py-5 px-12 rounded-full transition-all uppercase tracking-[0.2em] text-xs border border-white/30"
+                className="text-xs font-black uppercase tracking-[0.4em] text-white border-b border-white/20 hover:border-primary hover:text-primary transition-all pb-2"
               >
                 Our Story
               </Link>
@@ -327,66 +285,52 @@ export default async function Home() {
           </div>
         </div>
         
-        {/* Decorative elements */}
-        <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-white to-transparent" />
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 text-white/40">
+           <span className="text-[8px] font-black uppercase tracking-[0.5em] vertical-rl">Scroll</span>
+           <div className="w-px h-12 bg-gradient-to-b from-primary to-transparent" />
+        </div>
       </section>
 
-      {/* Charity Banner */}
-      <section aria-label="Charity — Sea Cleaners donation" className="bg-secondary py-10 text-center text-white relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-          <div className="absolute top-0 left-10 w-40 h-40 bg-primary rounded-full blur-[80px]" />
-          <div className="absolute bottom-0 right-10 w-40 h-40 bg-primary rounded-full blur-[80px]" />
-        </div>
-        <div className="max-w-7xl mx-auto px-4 relative z-10 flex flex-col md:flex-row items-center justify-center gap-6">
-          <div className="flex items-center gap-4">
-             <div className="w-14 h-14 bg-primary rounded-full flex items-center justify-center text-secondary font-black text-xl shadow-lg">2.5%</div>
-             <div className="text-left">
-                <h2 className="text-xl md:text-2xl font-black uppercase tracking-wider leading-tight">
-                  of all profits donated
-                </h2>
-                <p className="text-xs font-black text-primary uppercase tracking-[0.2em]">NZ Sea Cleaners Charity Trust</p>
-             </div>
+      {/* Featured Products: Best Sellers Grid */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
+        <div className="flex flex-col md:flex-row items-end justify-between mb-24 gap-8">
+          <div className="max-w-xl text-left">
+            <span className="text-primary font-black uppercase tracking-[0.4em] text-[10px] mb-4 block">Store Selection</span>
+            <h2 className="text-5xl md:text-7xl font-black text-secondary uppercase tracking-tighter leading-[0.9]">
+              Best <br /> <span className="text-slate-300">Sellers</span>
+            </h2>
           </div>
-          <Link href="/about-us" className="text-[10px] font-black uppercase tracking-widest border-b border-white/30 hover:border-primary hover:text-primary transition-all">
-            Learn more about our mission
+          <Link href="/products" className="group text-xs font-black uppercase tracking-[0.3em] text-secondary flex items-center gap-4 hover:gap-6 transition-all">
+             View All Gear <span className="text-xl group-hover:text-primary transition-colors">&rarr;</span>
           </Link>
-        </div>
-      </section>
-
-      <Suspense fallback={<div className="h-[600px] bg-slate-900 animate-pulse" />}>
-        <DealOfTheDay />
-      </Suspense>
-
-      <TrustedByPros />
-
-      {/* Featured Products */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32">
-        <div className="flex flex-col items-center mb-20">
-          <h2 className="text-4xl font-black tracking-tighter text-secondary uppercase">Best Sellers</h2>
-          <div className="h-2 w-24 bg-primary mt-4 rounded-full"></div>
         </div>
 
         <Suspense fallback={<BestSellersLoading />}>
           <BestSellers />
         </Suspense>
+      </section>
 
-        <div className="mt-24 text-center">
-          <Link 
-            href="/products" 
-            className="inline-block border-2 border-secondary/10 text-secondary hover:bg-secondary hover:text-white font-black py-5 px-12 rounded-full transition-all uppercase tracking-[0.2em] text-xs shadow-sm hover:shadow-xl"
-          >
-            View All Products
-          </Link>
-        </div>
-      </div>
+      {/* Deal of the Day: High Visibility */}
+      <Suspense fallback={<div className="h-[600px] bg-secondary animate-pulse" />}>
+        <DealOfTheDay />
+      </Suspense>
 
-      {/* Latest from the Logbook */}
-      <div className="bg-slate-50 border-y border-slate-100 py-32">
+      {/* Testimonials: Trusted By Pros */}
+      <TestimonialSection />
+
+      {/* Charity: NZ Sea Cleaners */}
+      <CharitySection />
+
+      {/* Logbook: Storytelling Preview */}
+      <section className="bg-slate-50 border-y border-slate-100 py-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col items-center mb-20 text-center">
-            <h2 className="text-4xl font-black tracking-tighter text-secondary uppercase">The Logbook</h2>
-            <div className="h-2 w-24 bg-primary mt-4 rounded-full"></div>
-            <p className="mt-6 text-slate-500 font-medium max-w-2xl leading-relaxed text-lg">
+          <div className="flex flex-col items-center mb-24 text-center">
+            <span className="text-primary font-black uppercase tracking-[0.4em] text-[10px] mb-6">Field Reports</span>
+            <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-secondary uppercase leading-[0.9]">
+              The <br /> <span className="text-slate-400">Logbook</span>
+            </h2>
+            <p className="mt-8 text-slate-500 font-medium max-w-2xl leading-relaxed text-lg">
               Stay updated with our latest adventures, gear reviews, and fishing tips from the Catch-22 crew.
             </p>
           </div>
@@ -395,42 +339,53 @@ export default async function Home() {
             <LatestLogbookEntries />
           </Suspense>
 
-          <div className="mt-20 text-center">
+          <div className="mt-24 text-center">
             <Link 
               href="/blog" 
-              className="text-[10px] font-black text-primary uppercase tracking-[0.3em] hover:text-secondary transition-all flex items-center justify-center gap-4"
+              className="group text-xs font-black text-primary uppercase tracking-[0.3em] hover:text-secondary transition-all flex items-center justify-center gap-4"
             >
-              Explore more stories <span className="text-xl">&rarr;</span>
+              Explore more stories <span className="text-2xl group-hover:translate-x-2 transition-transform duration-500">&rarr;</span>
             </Link>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Thank you section */}
-      <div className="bg-white py-32 text-center overflow-hidden relative">
-         <div className="max-w-4xl mx-auto px-4 relative z-10">
-           <h3 className="text-4xl md:text-5xl font-black text-secondary uppercase mb-8 tracking-tighter">Thank you for <br/> joining the crew</h3>
-           <p className="text-slate-500 text-lg font-medium leading-relaxed max-w-xl mx-auto mb-12">
-             We appreciate your support in our mission to provide high-quality gear while giving back to the oceans we love.
+      {/* Final CTA: Crew Join */}
+      <section className="bg-white py-40 text-center overflow-hidden relative">
+         <div className="max-w-5xl mx-auto px-4 relative z-10">
+           <h3 className="text-5xl md:text-8xl font-black text-secondary uppercase mb-12 tracking-tighter leading-[0.85]">
+             Gear up and <br /> <span className="text-primary drop-shadow-sm">Join the Crew</span>
+           </h3>
+           <p className="text-slate-500 text-xl font-medium leading-relaxed max-w-2xl mx-auto mb-16">
+             Join thousands of NZ anglers who trust Catch-22 for their most demanding expeditions. High-performance gear, zero compromises.
            </p>
-           <div className="flex justify-center gap-8">
+           
+           <div className="flex flex-wrap justify-center gap-12 md:gap-24 mb-20">
               <div className="flex flex-col items-center">
-                 <div className="text-2xl font-black text-secondary">4.9/5</div>
-                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Customer Rating</div>
+                 <div className="text-4xl font-black text-secondary">4.9/5</div>
+                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">Verified Anglers</div>
               </div>
-              <div className="w-px h-12 bg-slate-100"></div>
+              <div className="w-px h-16 bg-slate-100 hidden md:block"></div>
               <div className="flex flex-col items-center">
-                 <div className="text-2xl font-black text-secondary">Fast</div>
-                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">NZ Wide Delivery</div>
+                 <div className="text-4xl font-black text-secondary tracking-tighter">FAST</div>
+                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">NZ Wide Delivery</div>
+              </div>
+              <div className="w-px h-16 bg-slate-100 hidden md:block"></div>
+              <div className="flex flex-col items-center">
+                 <div className="text-4xl font-black text-secondary tracking-tighter">PRO</div>
+                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">Tested In Elements</div>
               </div>
            </div>
+
+           <Link href="/products" className="bg-secondary text-white font-black py-6 px-16 rounded-2xl transition-all duration-500 uppercase tracking-[0.4em] text-xs hover:bg-primary hover:text-secondary shadow-2xl">
+              Shop The Fleet
+           </Link>
          </div>
          
-         {/* Background accent */}
-         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full opacity-5 pointer-events-none">
-            <div className="w-[800px] h-[800px] bg-primary rounded-full blur-[150px] mx-auto" />
+         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full opacity-[0.03] pointer-events-none">
+            <div className="w-[1000px] h-[1000px] bg-primary rounded-full blur-[180px] mx-auto" />
          </div>
-      </div>
+      </section>
     </div>
   );
 }

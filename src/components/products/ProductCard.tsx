@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { WishlistButton } from './WishlistButton';
+import { getStorageUrl } from '@/lib/supabase';
 
 interface ProductCardProps {
   product: {
@@ -32,7 +33,7 @@ export function ProductCard({ product }: ProductCardProps) {
       <Link href={`/products/${product.slug}`} className="relative h-72 overflow-hidden bg-slate-50 block">
         {product.image_url ? (
           <Image
-            src={product.image_url}
+            src={getStorageUrl(product.image_url)}
             alt={product.name}
             fill
             className="w-full h-full object-center object-cover group-hover:scale-110 transition-transform duration-700 ease-out"

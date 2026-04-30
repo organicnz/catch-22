@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Metadata } from 'next';
+import { getStorageUrl } from '@/lib/supabase';
 
 export const revalidate = 60;
 
@@ -27,12 +28,12 @@ export const metadata: Metadata = {
 export default function GalleryPage() {
   // Placeholder images for the gallery
   const snaps = [
-    { src: '/snap1.jpg', alt: 'Angler holding a large kingfish caught using Catch-22 braid' },
-    { src: '/snap2.jpg', alt: 'Fishing at sunrise on a New Zealand boat with Catch-22 gear' },
-    { src: '/snap3.jpg', alt: 'Catch-22 fishing braid being tested in rough conditions' },
-    { src: '/snap4.jpg', alt: 'THUNDER Charter crew with a trophy kingfish catch' },
-    { src: '/snap5.jpg', alt: 'Coastal rock fishing in New Zealand with Catch-22 lures' },
-    { src: '/snap6.jpg', alt: 'Premium Catch-22 braid spooled on a fishing reel' },
+    { src: getStorageUrl('snap1.jpg'), alt: 'Angler holding a large kingfish caught using Catch-22 braid' },
+    { src: getStorageUrl('snap2.jpg'), alt: 'Fishing at sunrise on a New Zealand boat with Catch-22 gear' },
+    { src: getStorageUrl('snap3.jpg'), alt: 'Catch-22 fishing braid being tested in rough conditions' },
+    { src: getStorageUrl('snap4.jpg'), alt: 'THUNDER Charter crew with a trophy kingfish catch' },
+    { src: getStorageUrl('snap5.jpg'), alt: 'Coastal rock fishing in New Zealand with Catch-22 lures' },
+    { src: getStorageUrl('snap6.jpg'), alt: 'Premium Catch-22 braid spooled on a fishing reel' },
   ];
 
   return (

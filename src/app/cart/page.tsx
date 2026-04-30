@@ -1,6 +1,7 @@
 'use client';
 
 import { useCartStore } from '@/lib/store/cart';
+import { getStorageUrl } from '@/lib/supabase';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Trash2, Plus, Minus, ArrowRight } from 'lucide-react';
@@ -18,7 +19,9 @@ export default function CartPage() {
     try {
       const response = await fetch('/api/checkout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           items: items.map((item) => ({ id: item.id, quantity: item.quantity, name: item.name, price: item.price })),
           promoCode: promoCode.trim()
@@ -30,7 +33,7 @@ export default function CartPage() {
       } else {
         alert(data.error || 'Something went wrong');
       }
-    } catch (error) {
+    } catch {
       alert('Checkout failed');
     } finally {
       setIsLoading(false);
@@ -68,7 +71,7 @@ export default function CartPage() {
                   <div className="flex-shrink-0">
                     <div className="w-24 h-24 sm:w-40 sm:h-40 bg-slate-50 rounded-2xl border border-slate-100 object-center object-cover relative overflow-hidden shadow-sm transition-shadow group-hover:shadow-md">
                       {item.image_url ? (
-                        <Image src={item.image_url} alt={item.name} fill className="object-cover" />
+                        <Image src={getStorageUrl(item.image_url)} alt={item.name} fill className="object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-slate-400 font-black uppercase tracking-widest text-[10px]">No Image</div>
                       )}

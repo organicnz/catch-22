@@ -17,11 +17,47 @@
   --color-secondary: var(--secondary);
   --color-accent: var(--accent);
   --font-sans: var(--font-inter);
+  --font-outfit: var(--font-outfit);
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
+@layer base {
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-outfit), sans-serif;
+  }
+}
+
+@layer utilities {
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes scale-up {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.8s ease-out forwards;
+  }
+
+  .animate-scale-up {
+    animation: scale-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .tracking-ultra {
+    letter-spacing: 0.5em;
+  }
+
+  .transition-sensory {
+    transition: all 500ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
 }
 
 .bg-primary {

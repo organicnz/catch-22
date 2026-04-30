@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Metadata } from 'next';
+import { getStorageUrl } from '@/lib/supabase';
 
 export const revalidate = 60;
 
@@ -30,35 +31,35 @@ export default function PartnersPage() {
       name: 'Ham & Ty\'s Fishing Adventures',
       description: 'Follow Ham & Ty for some off the hook entertainment. Check out their shop for custom mugs, hats, and the legendary Sledger Rigs.',
       link: 'https://www.hamandtys.com/',
-      image: '/partner-ham-ty.jpg',
+      image: getStorageUrl('partner-ham-ty.jpg'),
       imageAlt: 'Ham and Ty fishing with Catch-22 gear'
     },
     {
       name: 'Northland Fishing and Mental Wellness Support Group',
       description: 'A dedicated initiative combining the healing power of fishing and the outdoors with community support for mental wellness. A safe place to share and heal.',
       link: 'https://givealittle.co.nz/cause/northland-fishing-and-mental-wellness-support-group',
-      image: '/snap1.jpg', // Using a generic snap as placeholder if no partner logo exists
+      image: getStorageUrl('snap1.jpg'), // Using a generic snap as placeholder if no partner logo exists
       imageAlt: 'Northland Fishing and Mental Wellness Support Group community'
     },
     {
       name: 'NZ ANGLER',
       description: 'Our mates down at NZ ANGLER provide solid acidwrap rods and pro-series reels for the serious fisho.',
       link: 'https://nzangler.co.nz/',
-      image: '/snap2.jpg', // Using a generic snap as placeholder
+      image: getStorageUrl('snap2.jpg'), // Using a generic snap as placeholder
       imageAlt: 'NZ Angler fishing rods and reels'
     },
     {
       name: 'THUNDER Charter',
       description: 'Run by Charles at Bay of Plenty Boat Hire. A premier charter experience testing Catch-22 gear in the toughest conditions.',
       link: 'https://www.bayofplentyboathire.co.nz',
-      image: '/partner-thunder.jpg',
+      image: getStorageUrl('partner-thunder.jpg'),
       imageAlt: 'THUNDER Charter boat on Bay of Plenty waters'
     },
     {
       name: 'Sea Cleaners',
       description: 'Dedicated to preserving our New Zealand coastlines. We are proud to support their mission by donating 2.5% of all profits.',
       link: 'https://seacleaners.org.nz/',
-      image: '/partner-seacleaners.jpg',
+      image: getStorageUrl('partner-seacleaners.jpg'),
       imageAlt: 'Sea Cleaners volunteers cleaning New Zealand coastline'
     }
   ];
