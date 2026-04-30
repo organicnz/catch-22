@@ -56,6 +56,11 @@ ALTER TABLE content ENABLE ROW LEVEL SECURITY;
 ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
 
 -- Public read access policies
+DROP POLICY IF EXISTS "Public product variations are viewable by everyone." ON product_variations;
 CREATE POLICY "Public product variations are viewable by everyone." ON product_variations FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public content is viewable by everyone." ON content;
 CREATE POLICY "Public content is viewable by everyone." ON content FOR SELECT USING (status = 'publish');
+
+DROP POLICY IF EXISTS "Public reviews are viewable by everyone." ON reviews;
 CREATE POLICY "Public reviews are viewable by everyone." ON reviews FOR SELECT USING (true);

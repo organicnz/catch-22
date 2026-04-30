@@ -14,7 +14,7 @@ const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function uploadFinal() {
-  const readJSON = (filename) => JSON.parse(fs.readFileSync(path.resolve(__dirname, `../../catch-22/wp-content/${filename}`), 'utf8'));
+  const readJSON = (filename) => JSON.parse(fs.readFileSync(path.resolve(__dirname, `../../catch-22/migration_data/${filename}`), 'utf8'));
 
   const variations = readJSON('variations_export.json');
   const coupons = readJSON('coupons_export.json');

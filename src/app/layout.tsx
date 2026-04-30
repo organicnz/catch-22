@@ -1,22 +1,26 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: "--font-inter",
 });
 
 export const metadata: Metadata = {
-  title: "Catch-22",
-  description: "Premium fishing gear and apparel.",
+  title: "Catch-22 | Built for the Elements",
+  description: "Premium fishing gear and apparel. Tested in the harshest environments, designed for durability and performance. 2.5% of all profits donated to NZ Sea Cleaners.",
+  keywords: ["fishing gear", "fishing apparel", "NZ fishing", "braid", "lures", "sea cleaners"],
+  openGraph: {
+    title: "Catch-22 | Built for the Elements",
+    description: "Premium fishing gear and apparel. Tested in the harshest environments.",
+    url: "https://catch-22.co.nz",
+    siteName: "Catch-22",
+    locale: "en_NZ",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -27,9 +31,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${inter.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-slate-50 text-slate-900">
+      <body className="min-h-full flex flex-col bg-white text-secondary font-sans">
         <Header />
         <main className="flex-grow flex flex-col">{children}</main>
         <Footer />

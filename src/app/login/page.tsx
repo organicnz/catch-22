@@ -34,36 +34,50 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-[80vh] bg-slate-50 flex items-center justify-center px-4">
-      <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-xl text-center border border-slate-100">
-        <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Welcome Back</h1>
-        <p className="text-slate-600 mb-8 font-medium">
-          Sign in via magic link to view your Catch-22 order history.
+    <div className="min-h-[80vh] bg-white flex items-center justify-center px-4 py-16">
+      <div className="max-w-md w-full bg-slate-50 p-10 rounded-3xl shadow-sm text-center border border-slate-100">
+        <div className="flex flex-col items-center mb-8">
+          <h1 className="text-3xl font-black text-secondary uppercase tracking-tight mb-2">Welcome Back</h1>
+          <div className="h-1.5 w-16 bg-primary"></div>
+        </div>
+        
+        <p className="text-slate-600 mb-10 font-medium leading-relaxed">
+          Sign in via magic link to view your Catch-22 order history and account details.
         </p>
 
-        <form onSubmit={handleLogin} className="space-y-4">
-          <input
-            type="email"
-            placeholder="Your email address"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600 outline-none transition-all"
-          />
+        <form onSubmit={handleLogin} className="space-y-6">
+          <div className="text-left">
+            <label htmlFor="email" className="block text-[10px] font-black text-secondary uppercase tracking-widest mb-2 ml-1">Email Address</label>
+            <input
+              type="email"
+              id="email"
+              placeholder="YOUR@EMAIL.COM"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all font-bold text-secondary uppercase tracking-wider text-xs"
+            />
+          </div>
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-slate-900 text-white font-bold rounded-xl py-3 hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 disabled:opacity-50"
+            className="w-full bg-secondary text-white font-black rounded-full py-5 hover:bg-primary transition-all uppercase tracking-[0.2em] text-sm shadow-xl shadow-secondary/10 disabled:opacity-50"
           >
             {loading ? 'Sending...' : 'Send Magic Link'}
           </button>
         </form>
 
         {message && (
-          <div className="mt-6 p-4 bg-slate-50 rounded-xl border border-slate-100 text-sm font-medium">
+          <div className="mt-8 p-4 bg-white rounded-2xl border border-slate-100 text-xs font-black uppercase tracking-widest text-secondary shadow-sm">
             {message}
           </div>
         )}
+        
+        <div className="mt-10 pt-8 border-t border-slate-100">
+           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">
+             New to Catch-22? Your account will be created automatically upon your first order.
+           </p>
+        </div>
       </div>
     </div>
   );

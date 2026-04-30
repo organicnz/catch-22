@@ -83,9 +83,9 @@ export async function POST(req: Request) {
       shipping_address_collection: {
         allowed_countries: ['NZ', 'AU'],
       },
-      // shipping_options: [
-      //   { shipping_rate: 'shr_123456789' } // Add your Stripe Shipping Rate ID here
-      // ]
+      shipping_options: [
+        // { shipping_rate: 'shr_123456789' } // Add your Stripe Shipping Rate ID here
+      ]
     });
 
     return NextResponse.json({ sessionId: session.id, url: session.url });

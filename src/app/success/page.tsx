@@ -14,19 +14,24 @@ export default function SuccessPage() {
   }, [clearCart]);
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
-      <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-xl text-center border border-slate-100">
-        <CheckCircle className="w-16 h-16 text-emerald-500 mx-auto mb-6" />
-        <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Payment Successful!</h1>
-        <p className="text-slate-600 mb-8 font-medium">
-          Thank you for your order. We are preparing it for shipment right now.
+    <div className="min-h-[80vh] bg-white flex items-center justify-center px-4 py-20">
+      <div className="max-w-md w-full bg-slate-50 p-10 rounded-3xl shadow-sm text-center border border-slate-100">
+        <div className="bg-emerald-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
+           <CheckCircle className="w-12 h-12 text-emerald-600" strokeWidth={3} />
+        </div>
+        <h1 className="text-3xl font-black text-secondary uppercase tracking-tight mb-4">Order Confirmed!</h1>
+        <p className="text-slate-600 mb-10 font-medium leading-relaxed">
+          Thank you for choosing Catch-22. We've received your order and are getting it ready for the elements.
         </p>
         <Link 
           href="/products"
-          className="w-full inline-block py-4 px-6 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200"
+          className="w-full inline-block py-5 px-8 bg-primary hover:bg-primary-dark text-white font-black rounded-full transition-all uppercase tracking-[0.2em] text-sm shadow-xl shadow-primary/20"
         >
           Continue Shopping
         </Link>
+        <p className="mt-8 text-[10px] text-slate-400 font-black uppercase tracking-widest">
+           2.5% of your purchase is donated to NZ Sea Cleaners
+        </p>
       </div>
     </div>
   );

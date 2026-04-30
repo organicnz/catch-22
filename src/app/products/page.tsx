@@ -1,8 +1,39 @@
 import { createClient } from '@/lib/supabase';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Metadata } from 'next';
 
 export const revalidate = 60; // Revalidate every 60 seconds
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined }
+}): Promise<Metadata> {
+  const resolvedParams = await searchParams;
+  const categorySlug = typeof resolvedParams.category === 'string' ? resolvedParams.category : null;
+  
+  if (categorySlug) {
+    const supabase = createClient();
+    const { data: category } = await supabase
+      .from('categories')
+      .select('name')
+      .eq('slug', categorySlug)
+      .single();
+      
+    if (category) {
+      return {
+        title: `${category.name} | Catch-22 Gear`,
+        description: `Premium ${category.name.toLowerCase()} and fishing equipment from Catch-22. Built for the elements.`,
+      };
+    }
+  }
+
+  return {
+    title: 'All Gear | Catch-22',
+    description: 'Browse our full collection of premium fishing braid, lures, and apparel. High performance gear for harsh environments.',
+  };
+}
 
 export default async function ProductsPage({
   searchParams,
@@ -27,6 +58,7 @@ export default async function ProductsPage({
     .select(`
       id, name, slug, price, image_url, stock_status,
       product_categories!inner (
+        category_id,
         categories!inner (slug)
       )
     `)
@@ -45,81 +77,104 @@ export default async function ProductsPage({
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="flex flex-col md:flex-row gap-8">
-        
-        {/* Sidebar / Categories */}
-        <div className="w-full md:w-64 flex-shrink-0">
-          <h2 className="text-lg font-bold text-slate-900 mb-4">Categories</h2>
-          <ul className="space-y-2">
-            <li>
-              <Link 
-                href="/products" 
-                className={`block px-3 py-2 rounded-md text-sm font-medium transition-colors ${!categorySlug ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
-              >
-                All Gear
-              </Link>
-            </li>
-            {categories?.map((category) => (
-              <li key={category.id}>
+    <div className="bg-white min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="flex flex-col md:flex-row gap-12">
+          
+          {/* Sidebar / Categories */}
+          <div className="w-full md:w-64 flex-shrink-0">
+            <h2 className="text-xl font-black text-secondary uppercase tracking-widest mb-6 border-b-2 border-primary pb-2 inline-block">Categories</h2>
+            <ul className="space-y-1">
+              <li>
                 <Link 
-                  href={`/products?category=${category.slug}`}
-                  className={`block px-3 py-2 rounded-md text-sm font-medium transition-colors ${categorySlug === category.slug ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}
+                  href="/products" 
+                  className={`block px-4 py-3 rounded-lg text-sm font-bold uppercase tracking-wider transition-all ${!categorySlug ? 'bg-primary text-white shadow-md' : 'text-secondary hover:bg-slate-50 hover:text-primary'}`}
                 >
-                  {category.name}
+                  All Gear
                 </Link>
               </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Product Grid */}
-        <div className="flex-1">
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 mb-8">
-            {categorySlug ? categories?.find(c => c.slug === categorySlug)?.name || 'Gear' : 'All Catch-22 Gear'}
-          </h1>
-          
-          {products?.length === 0 ? (
-            <div className="text-center py-12 bg-slate-50 rounded-xl border border-slate-100">
-              <p className="text-slate-500">No products found in this category.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
-              {products?.map((product) => (
-                <div key={product.id} className="group relative">
-                  <div className="w-full min-h-80 bg-slate-200 aspect-w-1 aspect-h-1 rounded-md overflow-hidden group-hover:opacity-75 lg:h-80 lg:aspect-none relative">
-                    {product.image_url ? (
-                      <Image
-                        src={product.image_url}
-                        alt={product.name}
-                        fill
-                        className="w-full h-full object-center object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-slate-400">
-                        No Image
-                      </div>
-                    )}
-                  </div>
-                  <div className="mt-4 flex justify-between">
-                    <div>
-                      <h3 className="text-sm text-slate-700 font-medium">
-                        <Link href={`/products/${product.slug}`}>
-                          <span aria-hidden="true" className="absolute inset-0" />
-                          {product.name}
-                        </Link>
-                      </h3>
-                    </div>
-                    <p className="text-sm font-semibold text-slate-900">
-                      ${product.price.toFixed(2)}
-                    </p>
-                  </div>
-                </div>
+              {categories?.map((category) => (
+                <li key={category.id}>
+                  <Link 
+                    href={`/products?category=${category.slug}`}
+                    className={`block px-4 py-3 rounded-lg text-sm font-bold uppercase tracking-wider transition-all ${categorySlug === category.slug ? 'bg-primary text-white shadow-md' : 'text-secondary hover:bg-slate-50 hover:text-primary'}`}
+                  >
+                    {category.name}
+                  </Link>
+                </li>
               ))}
-            </div>
-          )}
-        </div>
+            </ul>
 
+            <div className="mt-12 bg-slate-50 p-6 rounded-2xl border border-slate-100 hidden md:block">
+              <h3 className="text-sm font-black text-secondary uppercase tracking-widest mb-4">Need Help?</h3>
+              <p className="text-xs text-slate-500 leading-relaxed mb-4 font-medium">
+                Can't find what you're looking for? Contact our gear experts for advice.
+              </p>
+              <Link href="/contact" className="text-xs font-black text-primary uppercase hover:underline">
+                Contact Us &rarr;
+              </Link>
+            </div>
+          </div>
+
+          {/* Product Grid */}
+          <div className="flex-1">
+            <div className="flex flex-col mb-10">
+              <h1 className="text-4xl font-black tracking-tight text-secondary uppercase">
+                {categorySlug ? categories?.find(c => c.slug === categorySlug)?.name || 'Gear' : 'All Catch-22 Gear'}
+              </h1>
+              <div className="h-1.5 w-24 bg-primary mt-3"></div>
+            </div>
+            
+            {products?.length === 0 ? (
+              <div className="text-center py-24 bg-slate-50 rounded-3xl border border-dashed border-slate-200">
+                <p className="text-slate-500 font-bold uppercase tracking-widest">No gear found in this category.</p>
+                <Link href="/products" className="inline-block mt-4 text-primary font-black uppercase text-sm hover:underline">
+                  View all products
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-y-10 gap-x-8 sm:grid-cols-2 lg:grid-cols-3">
+                {products?.map((product) => (
+                  <div key={product.id} className="group flex flex-col h-full border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300">
+                    <Link href={`/products/${product.slug}`} className="relative h-72 overflow-hidden bg-slate-100 block">
+                      {product.image_url ? (
+                        <Image
+                          src={product.image_url}
+                          alt={product.name}
+                          fill
+                          className="w-full h-full object-center object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-slate-400 font-bold uppercase tracking-widest text-xs">
+                          No Image
+                        </div>
+                      )}
+                    </Link>
+                    <div className="p-6 flex-grow flex flex-col justify-between">
+                      <div>
+                        <h3 className="text-md font-black text-secondary uppercase mb-2 line-clamp-2 min-h-[3rem] leading-tight group-hover:text-primary transition-colors">
+                          <Link href={`/products/${product.slug}`}>
+                            {product.name}
+                          </Link>
+                        </h3>
+                      </div>
+                      <div className="flex items-center justify-between mt-6">
+                         <p className="text-xl font-black text-primary">${product.price.toFixed(2)}</p>
+                         <Link 
+                          href={`/products/${product.slug}`}
+                          className="bg-secondary text-white text-xs font-black px-6 py-2.5 rounded-full hover:bg-primary transition-colors uppercase tracking-widest"
+                         >
+                           View Gear
+                         </Link>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+        </div>
       </div>
     </div>
   );

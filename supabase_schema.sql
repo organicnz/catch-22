@@ -42,6 +42,11 @@ ALTER TABLE products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE product_categories ENABLE ROW LEVEL SECURITY;
 
 -- Allow public read access to products and categories
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone." ON categories;
 CREATE POLICY "Public profiles are viewable by everyone." ON categories FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public products are viewable by everyone." ON products;
 CREATE POLICY "Public products are viewable by everyone." ON products FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public product categories are viewable by everyone." ON product_categories;
 CREATE POLICY "Public product categories are viewable by everyone." ON product_categories FOR SELECT USING (true);

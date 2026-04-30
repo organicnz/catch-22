@@ -4,17 +4,32 @@ import { createClient } from '@/lib/supabase';
 import { revalidatePath } from 'next/cache';
 
 export async function submitContact(formData: FormData) {
+  // 1. Honeypot check (bots often fill all fields)
+  const honeypot = formData.get('website') as string;
+  if (honeypot) {
+    // Silently reject by pretending it worked
+    return { success: true };
+  }
+
   const name = formData.get('name') as string;
   const email = formData.get('email') as string;
   const message = formData.get('message') as string;
 
+  // 2. Basic validation
   if (!name || !email || !message) {
     return { error: 'All fields are required.' };
   }
 
-  // We must use the Service Role key to insert if RLS restricts anon inserts, 
-  // or we can just use the standard client if we enable anon inserts on the table.
-  // For safety and anti-spam, backend insertion is preferred.
+  if (name.length < 2) return { error: 'Name is too short.' };
+  if (message.length < 10) return { error: 'Message is too short.' };
+  if (!email.includes('@')) return { error: 'Invalid email address.' };
+
+  // 3. Spam keyword check for content
+  const spamKeywords = ['casino', 'slot', 'judi', 'togel', 'crypto', 'loan'];
+  if (spamKeywords.some(kw => message.toLowerCase().includes(kw))) {
+    return { error: 'Message flagged as potential spam. Please revise.' };
+  }
+
   const supabase = createClient();
   
   const { error } = await supabase.from('contact_submissions').insert({
