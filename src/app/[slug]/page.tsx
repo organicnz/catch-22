@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
+import Link from 'next/link';
 
 export const revalidate = 3600; // Cache for 1 hour
 

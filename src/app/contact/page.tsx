@@ -32,7 +32,7 @@ export default function ContactPage() {
         </div>
         
         <p className="text-slate-600 mb-10 text-center font-medium">
-          Have a question about our gear or an existing order? Send us a message and we'll get back to you as soon as possible.
+          Have a question about our gear or an existing order? Send us a message and we&apos;ll get back to you as soon as possible.
         </p>
 
         {status === 'success' && (
