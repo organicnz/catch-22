@@ -2,6 +2,7 @@
  * Shared sanitization utilities for WordPress-migrated and user-generated content.
  * All functions are fail-safe: they never throw and return '' on error.
  */
+import { getStorageUrl } from './supabase';
 
 export const SPAM_KEYWORDS = [
   'casino', 'slot', 'betting', 'gambling', 'poker', 'bingo', 'bonus', 'rtp',
@@ -114,6 +115,16 @@ export function sanitizeWPContent(html: string): string {
 
     // 8. Remove empty paragraphs
     clean = clean.replace(/<p>\s*<\/p>/g, '');
+    
+    // 9. Transform embedded images to use Supabase Storage URLs
+    // This finds <img src="..."> and ensures the src uses the storage utility
+    clean = clean.replace(/<img[^>]+src=["']([^"']+)["'][^>]*>/gi, (match, src) => {
+      if (!src) return match;
+      // If it's already a full URL to a different domain, leave it
+      // If it's a relative path or an old Catch-22 path, transform it
+      const storageUrl = getStorageUrl(src);
+      return match.replace(src, storageUrl);
+    });
 
     return clean;
   } catch (err) {

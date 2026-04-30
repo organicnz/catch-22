@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase';
+import { createClient, getStorageUrl } from '@/lib/supabase';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -106,7 +106,7 @@ export default async function ProductDetails({ params }: { params: { slug: strin
             <div className="aspect-square rounded-3xl overflow-hidden bg-slate-50 relative border border-slate-100 shadow-inner">
               {product.image_url ? (
                 <Image
-                  src={product.image_url}
+                  src={getStorageUrl(product.image_url)}
                   alt={product.name}
                   fill
                   className="object-contain"
@@ -124,7 +124,7 @@ export default async function ProductDetails({ params }: { params: { slug: strin
               <div className="mt-4 grid grid-cols-4 gap-4">
                  {product.gallery_urls.slice(0, 4).map((url: string, index: number) => (
                     <div key={index} className="aspect-square relative rounded-xl overflow-hidden bg-slate-50 border border-slate-100">
-                      <Image src={url} alt={`${product.name} gallery ${index}`} fill className="object-cover" />
+                      <Image src={getStorageUrl(url)} alt={`${product.name} gallery ${index}`} fill className="object-cover" />
                     </div>
                  ))}
               </div>

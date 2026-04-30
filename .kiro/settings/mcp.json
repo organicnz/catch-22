@@ -115,7 +115,7 @@
       ],
       "env": {
         "SUPABASE_PROJECT_REF": "wcoaqlglwxwceqktpckt",
-        "SUPABASE_ACCESS_TOKEN": "sbp_b90acc8575b9bc558666e7f539dbd2166f6fdbf2"
+        "SUPABASE_ACCESS_TOKEN": "sbp_v0_912b3e0ba813b4493570b6e3126abfd5dd8f91ab"
       },
       "autoApprove": [
         "list_tables",
@@ -153,7 +153,8 @@
         "execute_sql",
         "deploy_edge_function",
         "get_logs",
-        "list_projects"
+        "list_projects",
+        "get_project"
       ],
       "disabled": false
     }

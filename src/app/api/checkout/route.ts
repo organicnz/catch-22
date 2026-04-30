@@ -1,112 +1,78 @@
 import { NextResponse } from 'next/server';
-import { stripe } from '@/lib/stripe';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import Stripe from 'stripe';
+import { createClient } from '@/lib/supabase';
 
-export const dynamic = 'force-dynamic';
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2025-01-27-acacia' as any,
+});
 
 export async function POST(req: Request) {
   try {
     const { items, promoCode } = await req.json();
 
-    if (!items || items.length === 0) {
-      return NextResponse.json({ error: 'Cart is empty' }, { status: 400 });
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return NextResponse.json({ error: 'No items in cart' }, { status: 400 });
     }
 
-    const cookieStore = await cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll();
-          }
-        }
-      }
-    );
+    const supabase = createClient();
 
-    const { data: { user } } = await supabase.auth.getUser();
-
-    let stripeDiscounts: { coupon: string }[] = [];
-    
-    if (promoCode) {
-      const { data: couponData } = await supabase
-        .from('coupons')
-        .select('*')
-        .eq('code', promoCode.toUpperCase())
-        .single();
-
-      if (couponData) {
-        // Create a temporary coupon in Stripe for this session
-        const isPercent = couponData.discount_type === 'percent';
-        const stripeCoupon = await stripe.coupons.create({
-          ...(isPercent ? { percent_off: couponData.amount } : { amount_off: Math.round(couponData.amount * 100), currency: 'nzd' }),
-          duration: 'once',
-          name: couponData.code,
-        });
-        stripeDiscounts = [{ coupon: stripeCoupon.id }];
-      } else {
-        return NextResponse.json({ error: 'Invalid promo code' }, { status: 400 });
-      }
-    }
-
-    const productIds = items.map((i: { id: number }) => i.id);
-
-    const { data: dbProducts, error } = await supabase
+    // Fetch product details from Supabase to ensure price integrity
+    const productIds = items.map(item => item.id);
+    const { data: dbProducts, error: dbError } = await supabase
       .from('products')
-      .select('id, stripe_price_id, price')
+      .select('id, name, price, slug')
       .in('id', productIds);
 
-    if (error || !dbProducts) {
-      throw new Error('Failed to validate cart items against the database');
+    if (dbError || !dbProducts) {
+      console.error('Database error:', dbError);
+      return NextResponse.json({ error: 'Failed to verify products' }, { status: 500 });
     }
 
-    const line_items = items.map((item: { id: number; name: string; price: number; quantity: number }) => {
-      const dbProduct = dbProducts.find((p) => p.id === item.id);
-      
-      // Fallback: If Stripe isn't fully synced yet, create a price inline dynamically (for testing only)
-      if (!dbProduct?.stripe_price_id) {
-        return {
-          price_data: {
-            currency: 'nzd',
-            product_data: { name: item.name },
-            unit_amount: Math.round(item.price * 100),
-          },
-          quantity: item.quantity,
-        };
+    // Map database products for easy lookup
+    const productMap = new Map(dbProducts.map(p => [p.id, p]));
+
+    // Build line items for Stripe
+    const lineItems = items.map(item => {
+      const dbProduct = productMap.get(item.id);
+      if (!dbProduct) {
+        throw new Error(`Product not found: ${item.name}`);
       }
 
       return {
-        price: dbProduct.stripe_price_id,
+        price_data: {
+          currency: 'nzd',
+          product_data: {
+            name: dbProduct.name,
+            metadata: {
+              slug: dbProduct.slug,
+            },
+          },
+          unit_amount: Math.round(dbProduct.price * 100), // Convert to cents
+        },
         quantity: item.quantity,
       };
     });
 
+    // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card', 'link'],
-      line_items: line_items,
+      payment_method_types: ['card'],
+      line_items: lineItems,
       mode: 'payment',
-      customer_email: user?.email,
-      client_reference_id: user?.id,
-      metadata: {
-        userId: user?.id || 'guest',
-      },
-      discounts: stripeDiscounts.length > 0 ? stripeDiscounts : undefined,
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/cart`,
-      billing_address_collection: 'required',
+      success_url: `${req.headers.get('origin')}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${req.headers.get('origin')}/cart`,
       shipping_address_collection: {
         allowed_countries: ['NZ', 'AU'],
       },
-      shipping_options: [
-        // { shipping_rate: 'shr_123456789' } // Add your Stripe Shipping Rate ID here
-      ]
+      // Allow promo codes if needed
+      allow_promotion_codes: true,
+      metadata: {
+        promoCode: promoCode || '',
+      },
     });
 
-    return NextResponse.json({ sessionId: session.id, url: session.url });
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json({ url: session.url });
+  } catch (error: any) {
+    console.error('Checkout error:', error);
+    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
   }
 }

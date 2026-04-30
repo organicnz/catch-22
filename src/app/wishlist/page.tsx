@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Trash2, ShoppingCart, Heart } from 'lucide-react';
 import { useWishlistStore } from '@/lib/store/wishlist';
+import { getStorageUrl } from '@/lib/supabase';
 import { useCartStore } from '@/lib/store/cart';
 import { useState, useEffect, useRef } from 'react';
 
@@ -72,7 +73,7 @@ export default function WishlistPage() {
                   <Link href={`/products/${item.slug}`} className="relative h-64 block overflow-hidden bg-slate-50">
                     {item.image_url ? (
                       <Image 
-                        src={item.image_url} 
+                        src={getStorageUrl(item.image_url)} 
                         alt={item.name} 
                         fill 
                         className="object-cover group-hover:scale-105 transition-transform duration-500"

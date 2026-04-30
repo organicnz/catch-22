@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Metadata } from 'next';
+import { getStorageUrl } from '@/lib/supabase';
 
 export const metadata: Metadata = {
   title: 'About Us - Catch-22',
@@ -13,7 +14,7 @@ export default function AboutPage() {
       {/* Hero Section */}
       <div className="relative h-[400px] flex items-center overflow-hidden">
         <Image
-          src="/about-hero.jpg"
+          src={getStorageUrl('about-hero.jpg')}
           alt="Fishing in New Zealand"
           fill
           className="object-cover"
@@ -41,7 +42,7 @@ export default function AboutPage() {
             </div>
             <div className="flex-1 w-full h-80 relative rounded-3xl overflow-hidden shadow-2xl border border-slate-100">
                <Image 
-                src="/team.jpg" 
+                src={getStorageUrl('team.jpg')} 
                 alt="Catch-22 Team" 
                 fill 
                 className="object-cover"
@@ -64,7 +65,7 @@ export default function AboutPage() {
           <section className="flex flex-col-reverse md:flex-row gap-12 items-center">
             <div className="flex-1 w-full h-80 relative rounded-3xl overflow-hidden shadow-2xl border border-slate-100">
                <Image 
-                src="/thunder-charter.jpg" 
+                src={getStorageUrl('thunder-charter.jpg')} 
                 alt="Thunder Charter" 
                 fill 
                 className="object-cover"

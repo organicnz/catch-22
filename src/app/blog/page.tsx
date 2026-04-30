@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase';
 import Link from 'next/link';
+import { SPAM_KEYWORDS } from '@/lib/sanitize';
 
 export const revalidate = 3600; // Cache for 1 hour
 
@@ -32,17 +33,9 @@ export default async function BlogPage({
     return <div className="p-8 text-center text-red-500 font-bold uppercase tracking-widest">Failed to load logbook.</div>;
   }
 
-  // Filter out spam posts (hacked content) - reusing logic from previous step
-  const spamKeywords = [
-    'casino', 'slot', 'betting', 'gambling', 'poker', 'bingo', 'bonus', 'rtp',
-    'vavada', '1xbet', 'mostbet', 'pin-up', 'vulcan', 'mahjong', 'sweet bonanza',
-    'judi', 'genset', 'daftar', 'situs', 'mangsatoto', 'gacor', 'olympus', 'sbobet',
-    'spaceman', 'pragmatic', 'xanax', 'steroid', '1winrussia', 'kasyno'
-  ];
-  
   const filteredPosts = posts?.filter(post => {
     const titleLower = post.title.toLowerCase();
-    const isSpam = spamKeywords.some(keyword => titleLower.includes(keyword));
+    const isSpam = SPAM_KEYWORDS.some(keyword => titleLower.includes(keyword));
     const hasNonLatin = /[^\u0000-\u007F\u00A0-\u00FF]/.test(post.title) && !titleLower.includes('catch-22');
     return !isSpam && !hasNonLatin;
   }) || [];

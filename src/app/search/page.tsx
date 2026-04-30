@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase';
+import { createClient, getStorageUrl } from '@/lib/supabase';
 import Image from 'next/image';
 import Link from 'next/link';
 import { WishlistButton } from '@/components/products/WishlistButton';
@@ -68,7 +68,7 @@ export default async function SearchPage({
                   <Link href={`/products/${product.slug}`} className="relative h-64 overflow-hidden bg-slate-100 block">
                     {product.image_url ? (
                       <Image
-                        src={product.image_url}
+                        src={getStorageUrl(product.image_url)}
                         alt={product.name}
                         fill
                         className="w-full h-full object-center object-cover group-hover:scale-105 transition-transform duration-300"

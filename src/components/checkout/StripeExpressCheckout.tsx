@@ -26,10 +26,12 @@ export function StripeExpressCheckout() {
     if (!event) return;
     
     try {
-      // Create a Checkout Session on the server
+      // Create a Checkout Session via Local API Route
       const response = await fetch('/api/checkout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           items: items.map((item) => ({ 
             id: item.id, 
