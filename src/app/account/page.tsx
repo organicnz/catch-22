@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { MfaSettings } from '@/components/account/MfaSettings'
 
 export default async function AccountPage() {
   const cookieStore = await cookies();
@@ -20,6 +21,12 @@ export default async function AccountPage() {
 
   if (!user) {
     redirect('/login');
+  }
+
+  // Check MFA status
+  const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (aalData && aalData.nextLevel !== aalData.currentLevel && aalData.nextLevel === 'aal2') {
+    redirect('/auth/mfa');
   }
 
   // Find the profile record that matches the auth email
@@ -107,6 +114,11 @@ export default async function AccountPage() {
             ))}
           </div>
         )}
+
+        {/* 2FA Settings Section */}
+        <div className="max-w-xl">
+           <MfaSettings />
+        </div>
       </div>
     </div>
   );

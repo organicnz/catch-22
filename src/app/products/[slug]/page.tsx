@@ -3,7 +3,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { AddToCartButton } from '@/components/checkout/AddToCartButton';
+import { WishlistButton } from '@/components/products/WishlistButton';
 import { Metadata } from 'next';
+import { ProductCard } from '@/components/products/ProductCard';
 
 export const revalidate = 60;
 
@@ -150,8 +152,9 @@ export default async function ProductDetails({ params }: { params: { slug: strin
               />
             </div>
             
-            <div className="mt-10 pt-10 border-t border-slate-100">
+            <div className="mt-10 pt-10 border-t border-slate-100 flex flex-col gap-4">
               <AddToCartButton product={product} variations={product.product_variations || []} />
+              <WishlistButton product={product} showText={true} />
             </div>
 
             <div className="mt-8 grid grid-cols-2 gap-4">
@@ -169,45 +172,14 @@ export default async function ProductDetails({ params }: { params: { slug: strin
 
         {/* Related Products Section */}
         {relatedProducts.length > 0 && (
-          <div className="mt-24 pb-16 border-t border-slate-100 pt-16">
-            <div className="flex flex-col items-center mb-12">
-              <h2 className="text-3xl font-black tracking-tight text-secondary uppercase">You might also like</h2>
-              <div className="h-1 w-20 bg-primary mt-2"></div>
+          <div className="mt-32 pb-16 border-t border-slate-100 pt-24">
+            <div className="flex flex-col items-center mb-16">
+              <h2 className="text-4xl font-black tracking-tighter text-secondary uppercase">You might also like</h2>
+              <div className="h-2 w-24 bg-primary mt-4 rounded-full"></div>
             </div>
-            <div className="grid grid-cols-1 gap-y-10 gap-x-8 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-y-12 gap-x-8 sm:grid-cols-2 lg:grid-cols-4">
               {relatedProducts.map((relatedProduct) => (
-                <div key={relatedProduct.id} className="group flex flex-col h-full border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all">
-                  <Link href={`/products/${relatedProduct.slug}`} className="relative h-64 overflow-hidden bg-slate-100 block">
-                    {relatedProduct.image_url ? (
-                      <Image
-                        src={relatedProduct.image_url}
-                        alt={relatedProduct.name}
-                        fill
-                        className="w-full h-full object-center object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-slate-400 font-bold uppercase tracking-widest text-[10px]">No Image</div>
-                    )}
-                  </Link>
-                  <div className="p-4 flex-grow flex flex-col justify-between">
-                    <div>
-                      <h3 className="text-sm font-bold text-secondary uppercase mb-1 line-clamp-2 min-h-[2.5rem]">
-                        <Link href={`/products/${relatedProduct.slug}`}>
-                          {relatedProduct.name}
-                        </Link>
-                      </h3>
-                    </div>
-                    <div className="flex items-center justify-between mt-4">
-                       <p className="text-lg font-black text-primary">${relatedProduct.price.toFixed(2)}</p>
-                       <Link 
-                        href={`/products/${relatedProduct.slug}`}
-                        className="bg-secondary text-white text-[10px] font-bold px-4 py-2 rounded-full hover:bg-primary transition-colors uppercase tracking-widest"
-                       >
-                         View
-                       </Link>
-                    </div>
-                  </div>
-                </div>
+                <ProductCard key={relatedProduct.id} product={relatedProduct} />
               ))}
             </div>
           </div>

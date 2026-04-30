@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Metadata } from 'next';
+import { WishlistButton } from '@/components/products/WishlistButton';
 
 export const revalidate = 60; // Revalidate every 60 seconds
 
@@ -34,6 +35,8 @@ export async function generateMetadata({
     description: 'Browse our full collection of premium fishing braid, lures, and apparel. High performance gear for harsh environments.',
   };
 }
+
+import { ProductCard } from '@/components/products/ProductCard';
 
 export default async function ProductsPage({
   searchParams,
@@ -133,42 +136,9 @@ export default async function ProductsPage({
                 </Link>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-y-10 gap-x-8 sm:grid-cols-2 lg:grid-cols-3">
-                {products?.map((product) => (
-                  <div key={product.id} className="group flex flex-col h-full border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300">
-                    <Link href={`/products/${product.slug}`} className="relative h-72 overflow-hidden bg-slate-100 block">
-                      {product.image_url ? (
-                        <Image
-                          src={product.image_url}
-                          alt={product.name}
-                          fill
-                          className="w-full h-full object-center object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-slate-400 font-bold uppercase tracking-widest text-xs">
-                          No Image
-                        </div>
-                      )}
-                    </Link>
-                    <div className="p-6 flex-grow flex flex-col justify-between">
-                      <div>
-                        <h3 className="text-md font-black text-secondary uppercase mb-2 line-clamp-2 min-h-[3rem] leading-tight group-hover:text-primary transition-colors">
-                          <Link href={`/products/${product.slug}`}>
-                            {product.name}
-                          </Link>
-                        </h3>
-                      </div>
-                      <div className="flex items-center justify-between mt-6">
-                         <p className="text-xl font-black text-primary">${product.price.toFixed(2)}</p>
-                         <Link 
-                          href={`/products/${product.slug}`}
-                          className="bg-secondary text-white text-xs font-black px-6 py-2.5 rounded-full hover:bg-primary transition-colors uppercase tracking-widest"
-                         >
-                           View Gear
-                         </Link>
-                      </div>
-                    </div>
-                  </div>
+              <div className="grid grid-cols-1 gap-y-12 gap-x-8 sm:grid-cols-2 lg:grid-cols-3">
+                {products?.map((product: any) => (
+                  <ProductCard key={product.id} product={product} />
                 ))}
               </div>
             )}

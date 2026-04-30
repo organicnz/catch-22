@@ -35,7 +35,10 @@ export function Footer() {
             <h3 className="text-primary text-sm font-black uppercase tracking-widest mb-6">Information</h3>
             <ul className="space-y-4 text-sm font-bold">
               <li><Link href="/about-us" className="hover:text-primary transition-colors uppercase tracking-wider">About Us</Link></li>
-              <li><Link href="/blog" className="hover:text-primary transition-colors uppercase tracking-wider">Catch Blog</Link></li>
+              <li><Link href="/blog" className="hover:text-primary transition-colors uppercase tracking-wider">Logbook</Link></li>
+              <li><Link href="/faqs" className="hover:text-primary transition-colors uppercase tracking-wider">FAQs</Link></li>
+              <li><Link href="/gallery" className="hover:text-primary transition-colors uppercase tracking-wider">Catch Snaps</Link></li>
+              <li><Link href="/partners" className="hover:text-primary transition-colors uppercase tracking-wider">Our Partners</Link></li>
               <li><Link href="/contact" className="hover:text-primary transition-colors uppercase tracking-wider">Contact Us</Link></li>
             </ul>
           </div>
@@ -44,7 +47,7 @@ export function Footer() {
             <h3 className="text-primary text-sm font-black uppercase tracking-widest mb-6">Legal</h3>
             <ul className="space-y-4 text-sm font-bold">
               <li><Link href="/terms-and-conditions" className="hover:text-primary transition-colors uppercase tracking-wider">Terms of Service</Link></li>
-              <li><Link href="/privacy-policy-2" className="hover:text-primary transition-colors uppercase tracking-wider">Privacy Policy</Link></li>
+              <li><Link href="/privacy-policy" className="hover:text-primary transition-colors uppercase tracking-wider">Privacy Policy</Link></li>
               <li><Link href="/shipping-returns" className="hover:text-primary transition-colors uppercase tracking-wider">Shipping & Returns</Link></li>
             </ul>
           </div>

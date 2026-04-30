@@ -31,8 +31,11 @@ export default function ContactPage() {
           <div className="h-1.5 w-20 bg-primary"></div>
         </div>
         
-        <p className="text-slate-600 mb-10 text-center font-medium">
+        <p className="text-slate-600 mb-4 text-center font-medium">
           Have a question about our gear or an existing order? Send us a message and we&apos;ll get back to you as soon as possible.
+        </p>
+        <p className="text-primary mb-10 text-center font-black uppercase tracking-widest text-[10px] bg-primary/5 py-3 rounded-full">
+          Note: Our store is currently TEMPORARILY ONLINE ONLY
         </p>
 
         {status === 'success' && (
@@ -98,6 +101,29 @@ export default function ContactPage() {
             {status === 'loading' ? 'Sending...' : 'Send Message'}
           </button>
         </form>
+
+        <div className="mt-16 pt-10 border-t border-slate-200 grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div>
+            <h3 className="text-sm font-black text-secondary uppercase tracking-widest mb-4">Contact Info</h3>
+            <div className="space-y-3">
+              <p className="text-slate-600 font-bold flex items-center gap-3">
+                <span className="text-primary text-lg">✉</span> 
+                <a href="mailto:Catch-22NZ@hotmail.com" className="hover:text-primary transition-colors">Catch-22NZ@hotmail.com</a>
+              </p>
+              <p className="text-slate-600 font-bold flex items-center gap-3">
+                <span className="text-primary text-lg">📞</span> 
+                <a href="tel:02102745622" className="hover:text-primary transition-colors">02102745622</a>
+              </p>
+            </div>
+          </div>
+          <div>
+            <h3 className="text-sm font-black text-secondary uppercase tracking-widest mb-4">Business Hours</h3>
+            <div className="space-y-1 text-slate-600 font-medium text-sm uppercase tracking-wider">
+              <p><span className="font-black text-secondary">Mon – Fri:</span> 9am – 4pm</p>
+              <p><span className="font-black text-secondary">Sat – Sun:</span> 11am – 3pm</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
