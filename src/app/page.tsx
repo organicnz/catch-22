@@ -17,13 +17,13 @@ export const metadata: Metadata = {
     siteName: 'Catch-22',
     locale: 'en_NZ',
     type: 'website',
-    images: [{ url: '/hero.jpg', width: 1200, height: 630, alt: 'Catch-22 Premium Fishing Gear New Zealand' }],
+    images: [{ url: '/thunder-charter.jpg', width: 1200, height: 630, alt: 'Catch-22 Premium Fishing Gear New Zealand' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Catch-22 | Premium Fishing Gear New Zealand',
     description: 'Premium fishing braid, lures, and apparel tested in the harshest New Zealand environments. Built to endure. Free NZ shipping available.',
-    images: ['/hero.jpg'],
+    images: ['/thunder-charter.jpg'],
   },
 };
 
@@ -295,8 +295,8 @@ export default async function Home() {
       {/* Hero Section */}
       <section aria-label="Hero — Equip Yourself for the Elements" className="relative h-[650px] flex items-center overflow-hidden">
         <Image
-          src="/hero.jpg"
-          alt="Angler fishing in New Zealand waters with Catch-22 gear"
+          src="/thunder-charter.jpg"
+          alt="THUNDER Charter boat on Bay of Plenty waters with Catch-22 gear"
           fill
           className="object-cover scale-105"
           priority

@@ -65,11 +65,11 @@ export function Header() {
           <div className="flex-shrink-0 flex items-center mr-4">
             <Link href="/" className="flex items-center">
               <Image 
-                src="/logo.svg" 
+                src="/logo.png" 
                 alt="CATCH-22" 
-                width={180} 
-                height={60} 
-                className="h-12 w-auto"
+                width={220} 
+                height={138} 
+                className="h-14 w-auto"
                 priority
               />
             </Link>

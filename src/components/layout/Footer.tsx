@@ -9,10 +9,10 @@ export function Footer() {
           <div className="col-span-1 md:col-span-1">
             <Link href="/" className="inline-block">
               <Image 
-                src="/logo.svg" 
+                src="/logo.png" 
                 alt="CATCH-22" 
-                width={150} 
-                height={50} 
+                width={180} 
+                height={113} 
                 className="h-10 w-auto brightness-0 invert" 
               />
             </Link>
