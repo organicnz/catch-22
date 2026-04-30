@@ -1,8 +1,6 @@
 import { createClient } from '@/lib/supabase';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Metadata } from 'next';
-import { WishlistButton } from '@/components/products/WishlistButton';
 
 export const revalidate = 60; // Revalidate every 60 seconds
 
@@ -13,7 +11,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const resolvedParams = await searchParams;
   const categorySlug = typeof resolvedParams.category === 'string' ? resolvedParams.category : null;
-  
+
   if (categorySlug) {
     const supabase = createClient();
     const { data: category } = await supabase
@@ -21,18 +19,52 @@ export async function generateMetadata({
       .select('name')
       .eq('slug', categorySlug)
       .single();
-      
+
     if (category) {
+      const title = `${category.name} | Catch-22 New Zealand`;
+      const description = `Shop premium ${category.name.toLowerCase()} from Catch-22. High-performance fishing gear built for New Zealand conditions.`;
       return {
-        title: `${category.name} | Catch-22 Gear`,
-        description: `Premium ${category.name.toLowerCase()} and fishing equipment from Catch-22. Built for the elements.`,
+        title,
+        description,
+        openGraph: {
+          title,
+          description,
+          url: `https://catch-22.co.nz/products?category=${categorySlug}`,
+          siteName: 'Catch-22',
+          locale: 'en_NZ',
+          type: 'website',
+          images: [{ url: '/hero.jpg', width: 1200, height: 630, alt: `Catch-22 ${category.name}` }],
+        },
+        twitter: {
+          card: 'summary_large_image',
+          title,
+          description,
+          images: ['/hero.jpg'],
+        },
       };
     }
   }
 
+  const title = 'All Gear | Catch-22 New Zealand';
+  const description = 'Browse our full collection of premium fishing braid, lures, and apparel. High-performance gear built for New Zealand conditions.';
   return {
-    title: 'All Gear | Catch-22',
-    description: 'Browse our full collection of premium fishing braid, lures, and apparel. High performance gear for harsh environments.',
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: 'https://catch-22.co.nz/products',
+      siteName: 'Catch-22',
+      locale: 'en_NZ',
+      type: 'website',
+      images: [{ url: '/hero.jpg', width: 1200, height: 630, alt: 'Catch-22 Premium Fishing Gear' }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: ['/hero.jpg'],
+    },
   };
 }
 
@@ -50,10 +82,15 @@ export default async function ProductsPage({
   const categorySlug = typeof resolvedSearchParams.category === 'string' ? resolvedSearchParams.category : null;
 
   // Fetch Categories for the Sidebar
-  const { data: categories } = await supabase
+  const { data: categories, error: categoriesError } = await supabase
     .from('categories')
     .select('*')
     .order('name');
+
+  if (categoriesError) {
+    console.error('[ProductsPage] Categories query failed:', categoriesError.message);
+    // Continue rendering — categories sidebar will be empty but page won't crash
+  }
 
   // Fetch Products (with optional category filtering)
   let query = supabase
@@ -111,7 +148,7 @@ export default async function ProductsPage({
             <div className="mt-12 bg-slate-50 p-6 rounded-2xl border border-slate-100 hidden md:block">
               <h3 className="text-sm font-black text-secondary uppercase tracking-widest mb-4">Need Help?</h3>
               <p className="text-xs text-slate-500 leading-relaxed mb-4 font-medium">
-                Can't find what you're looking for? Contact our gear experts for advice.
+                Can&apos;t find what you&apos;re looking for? Contact our gear experts for advice.
               </p>
               <Link href="/contact" className="text-xs font-black text-primary uppercase hover:underline">
                 Contact Us &rarr;
@@ -137,7 +174,7 @@ export default async function ProductsPage({
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-y-12 gap-x-8 sm:grid-cols-2 lg:grid-cols-3">
-                {products?.map((product: any) => (
+                {products?.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>

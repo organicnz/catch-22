@@ -6,6 +6,7 @@ import { AddToCartButton } from '@/components/checkout/AddToCartButton';
 import { WishlistButton } from '@/components/products/WishlistButton';
 import { Metadata } from 'next';
 import { ProductCard } from '@/components/products/ProductCard';
+import { sanitizeWPContent } from '@/lib/sanitize';
 
 export const revalidate = 60;
 
@@ -108,11 +109,13 @@ export default async function ProductDetails({ params }: { params: { slug: strin
                   src={product.image_url}
                   alt={product.name}
                   fill
-                  className="w-full h-full object-center object-cover"
+                  className="object-contain"
                   priority
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-slate-400 font-bold uppercase tracking-widest text-xs">No Image</div>
+                <div className="bg-slate-100 flex items-center justify-center h-full rounded-3xl">
+                  <span className="text-slate-300 font-black uppercase text-xs tracking-widest">No Image</span>
+                </div>
               )}
             </div>
             
@@ -138,17 +141,21 @@ export default async function ProductDetails({ params }: { params: { slug: strin
                  </ol>
                </nav>
                <h1 className="text-4xl font-black tracking-tight text-secondary uppercase leading-tight mb-4">{product.name}</h1>
-               <div className="flex items-center gap-4">
-                  <p className="text-3xl font-black text-primary">${product.price.toFixed(2)}</p>
-                  <span className="bg-slate-100 text-slate-500 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter">In Stock</span>
-               </div>
+                <div className="flex items-center gap-4">
+                   <p className="text-3xl font-black text-primary">${product.price.toFixed(2)}</p>
+                   {product.stock_status === 'instock' ? (
+                     <span className="bg-emerald-50 text-emerald-600 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter border border-emerald-100">In Stock</span>
+                   ) : (
+                     <span className="bg-rose-50 text-rose-600 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter border border-rose-100">Out of Stock</span>
+                   )}
+                </div>
             </div>
             
             <div className="prose prose-slate max-w-none">
               <h3 className="text-sm font-black text-secondary uppercase tracking-widest mb-4 border-b border-slate-100 pb-2">Description</h3>
               <div
                 className="text-base text-slate-600 leading-relaxed space-y-4"
-                dangerouslySetInnerHTML={{ __html: product.description || product.short_description || '' }}
+                dangerouslySetInnerHTML={{ __html: sanitizeWPContent(product.description || product.short_description || '') }}
               />
             </div>
             

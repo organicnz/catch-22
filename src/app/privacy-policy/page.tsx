@@ -15,7 +15,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-xl font-black text-secondary uppercase tracking-wider mb-4">What data we collect</h2>
             <p>
-              When visitors leave comments or place orders, we collect the data provided in the forms, and also the visitor's IP address and browser user agent string to help spam detection.
+              When visitors leave comments or place orders, we collect the data provided in the forms, and also the visitor&apos;s IP address and browser user agent string to help spam detection.
             </p>
           </section>
 

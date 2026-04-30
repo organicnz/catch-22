@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -92,12 +93,12 @@ export default function AboutPage() {
           <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight mb-8">
             Ready to get equipped?
           </h2>
-          <a 
+          <Link 
             href="/products" 
             className="inline-block bg-primary hover:bg-primary-dark text-white font-black py-5 px-12 rounded-full transition-all uppercase tracking-[0.2em] text-sm shadow-xl shadow-primary/20"
           >
             Explore our Shop
-          </a>
+          </Link>
         </div>
       </div>
     </div>

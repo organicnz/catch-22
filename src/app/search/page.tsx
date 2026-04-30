@@ -14,8 +14,8 @@ export default async function SearchPage({
   const resolvedParams = await searchParams;
   const q = typeof resolvedParams.q === 'string' ? resolvedParams.q : '';
 
-  let products: any[] = [];
-  let posts: any[] = [];
+  let products: { id: number; name: string; slug: string; price: number; image_url: string | null; stock_status: string }[] = [];
+  let posts: { id: number; title: string; slug: string; type: string; created_at: string }[] = [];
   
   if (q) {
     // 1. Search Products
@@ -54,7 +54,7 @@ export default async function SearchPage({
           </h1>
           <div className="h-1.5 w-24 bg-primary mt-3"></div>
           <p className="mt-4 text-slate-500 font-bold uppercase tracking-widest text-xs">
-            Results for <span className="text-primary">"{q}"</span>
+            Results for <span className="text-primary">&ldquo;{q}&rdquo;</span>
           </p>
         </div>
 

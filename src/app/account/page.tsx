@@ -36,7 +36,7 @@ export default async function AccountPage() {
     .eq('email', user.email)
     .single();
 
-  let orders: any[] = [];
+  let orders: { id: number; created_at: string; status: string; total_amount: number; order_items: { product_name: string; quantity: number; total: number }[] }[] = [];
   if (customer) {
     const { data } = await supabase
       .from('orders')
@@ -96,7 +96,7 @@ export default async function AccountPage() {
                 </div>
                 <div className="px-8 py-6">
                   <ul className="divide-y divide-slate-50">
-                    {order.order_items.map((item: any, idx: number) => (
+                    {order.order_items.map((item: { product_name: string; quantity: number; total: number }, idx: number) => (
                       <li key={idx} className="py-4 flex justify-between items-center group">
                         <div className="flex items-center gap-4">
                           <div className="w-1.5 h-1.5 bg-primary rounded-full group-hover:scale-150 transition-transform"></div>

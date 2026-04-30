@@ -13,9 +13,10 @@ export async function POST(req: Request) {
 
   try {
     event = stripe.webhooks.constructEvent(body, signature!, webhookSecret);
-  } catch (err: any) {
-    console.error(`⚠️ Webhook signature verification failed: ${err.message}`);
-    return NextResponse.json({ error: `Webhook Error: ${err.message}` }, { status: 400 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    console.error(`⚠️ Webhook signature verification failed: ${message}`);
+    return NextResponse.json({ error: `Webhook Error: ${message}` }, { status: 400 });
   }
 
   if (event.type === 'checkout.session.completed') {
@@ -25,12 +26,17 @@ export async function POST(req: Request) {
     // (Requires STRIPE_SERVICE_ROLE_KEY or Anon key depending on RLS)
     const supabase = createClient();
     
-    // Use the email provided during checkout to find or create the customer
-    const email = session.customer_details?.email;
-    let customerId = null;
+    // Use the metadata provided during checkout to link the order to the Supabase user
+    let customerId = session.metadata?.userId && session.metadata.userId !== 'guest' 
+      ? session.metadata.userId 
+      : null;
     
-    if (email) {
-      const { data: customer } = await supabase.from('profiles').select('id').eq('email', email).single();
+    if (!customerId && session.customer_details?.email) {
+      const { data: customer } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', session.customer_details.email)
+        .single();
       customerId = customer?.id || null;
     }
 
@@ -41,7 +47,7 @@ export async function POST(req: Request) {
        currency: session.currency?.toUpperCase() || 'NZD',
        payment_method: 'stripe_link',
        billing_address: session.customer_details?.address || {},
-       shipping_address: (session as any).shipping_details?.address || {}
+       shipping_address: (session as Stripe.Checkout.Session & { shipping_details?: { address?: Record<string, unknown> } }).shipping_details?.address || {}
     });
     
     if (orderError) {

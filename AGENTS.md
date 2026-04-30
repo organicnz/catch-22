@@ -18,12 +18,22 @@ Transform the legacy WordPress/Elementor ecosystem (catch-22.co.nz) into a moder
 - **Edge Functions**: Specialized logic for data synchronization, complex server-side operations, and secure Stripe webhook handling.
 
 ### 3. "Sensory Luxury" Design System
-- **Design Tokens**: Defined in `tailwind.config.ts` and `src/app/globals.css`.
+- **Design Tokens**: Defined directly in `src/app/globals.css` using Tailwind 4 `@theme` (no legacy config file).
 - **Core Componentry**: Reusable, high-fidelity components like `ProductCard`, `WishlistButton`, and `Header`.
 - **Aesthetic Principles**:
   - **High-Contrast**: Primary Lime (#D1FF00) against Deep Secondary (#0F172A).
   - **Fluidity**: 500ms-700ms ease-out transitions for interactive elements.
   - **Clarity**: Heavy use of tracking (letter-spacing) and black-weight typography for a premium feel.
+
+---
+
+## 🛠 Working Stack (Simplified)
+- **Runtime**: Bun (Package management & scripts)
+- **Frontend**: Next.js 16 (App Router + React 19)
+- **Backend**: Supabase (Database, Auth, Storage via REST client)
+- **Payments**: Stripe (Express Checkout & Webhooks)
+- **Styling**: Tailwind CSS 4 (Native CSS variables)
+- **State**: Zustand (Persistent cart & wishlist)
 
 ---
 
