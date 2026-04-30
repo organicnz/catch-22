@@ -18,7 +18,12 @@ async function cleanupSpam() {
   const spamKeywords = [
     'casino', 'slot', 'betting', 'gambling', 'poker', 'bingo', 'bonus', 'rtp',
     'vavada', '1xbet', 'mostbet', 'pin-up', 'vulcan', 'mahjong', 'sweet bonanza',
-    'judi', 'genset', 'daftar', 'situs', 'ug1881', 'prediksi'
+    'judi', 'genset', 'daftar', 'situs', 'ug1881', 'prediksi',
+    'funeral', 'golf carts', 'physicians', 'negroni', 'kebab', 'shawarma', 'gyros',
+    'barbershop', 'dentistry', 'dental', 'salon', 'fondasi', 'karakter', 'pendidikan',
+    'otentik', 'shabu shabu', 'mall', 'culinary', 'anime', 'dorama', 'football',
+    'maglie', 'calcio', 'fotballdrakter', 'vector', 'illustrations', 'test title',
+    'elementor #', 'sample page', 'landingpage', 'compare'
   ];
 
   let totalDeleted = 0;

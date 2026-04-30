@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCart, Menu, X, User, Search, LogOut, ChevronDown } from 'lucide-react';
+import { ShoppingCart, Menu, X, User, Search, LogOut, ChevronDown, Heart } from 'lucide-react';
 import { useCartStore } from '@/lib/store/cart';
+import { useWishlistStore } from '@/lib/store/wishlist';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase';
@@ -17,6 +18,7 @@ export function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const totalItems = useCartStore((state) => state.totalItems());
+  const wishlistItems = useWishlistStore((state) => state.items.length);
   const router = useRouter();
   const supabase = createClient();
 
@@ -103,13 +105,22 @@ export function Header() {
                 </div>
               </div>
               <Link href="/blog" className="text-secondary hover:text-primary font-bold uppercase tracking-wider text-sm transition-colors py-8">
-                Blog
+                Logbook
               </Link>
               <Link href="/about-us" className="text-secondary hover:text-primary font-bold uppercase tracking-wider text-sm transition-colors py-8">
                 About
               </Link>
               <Link href="/contact" className="text-secondary hover:text-primary font-bold uppercase tracking-wider text-sm transition-colors py-8">
                 Contact
+              </Link>
+              <Link href="/faqs" className="text-secondary hover:text-primary font-bold uppercase tracking-wider text-sm transition-colors py-8">
+                FAQs
+              </Link>
+              <Link href="/gallery" className="text-secondary hover:text-primary font-bold uppercase tracking-wider text-sm transition-colors py-8">
+                Snaps
+              </Link>
+              <Link href="/partners" className="text-secondary hover:text-primary font-bold uppercase tracking-wider text-sm transition-colors py-8">
+                Partners
               </Link>
             </nav>
 
@@ -135,6 +146,14 @@ export function Header() {
                 <LogOut size={20} />
               </button>
             )}
+            <Link href="/wishlist" className="relative p-2 text-secondary hover:text-primary transition-colors" title="Wishlist">
+              <Heart size={24} />
+              {isMounted && wishlistItems > 0 && (
+                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-[10px] font-black leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-primary rounded-full shadow-md">
+                  {wishlistItems}
+                </span>
+              )}
+            </Link>
             <Link href="/cart" className="relative p-2 text-secondary hover:text-primary transition-colors" title="Cart">
               <ShoppingCart size={24} />
               {isMounted && totalItems > 0 && (
@@ -205,7 +224,7 @@ export function Header() {
                 className="block text-base font-black uppercase tracking-widest text-secondary hover:text-primary py-2"
                 onClick={() => setIsMenuOpen(false)}
               >
-                The Logbook
+                Logbook
               </Link>
               <Link 
                 href="/about-us" 
@@ -221,9 +240,37 @@ export function Header() {
               >
                 Contact
               </Link>
+              <Link 
+                href="/faqs" 
+                className="block text-base font-black uppercase tracking-widest text-secondary hover:text-primary py-2"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                FAQs
+              </Link>
+              <Link 
+                href="/gallery" 
+                className="block text-base font-black uppercase tracking-widest text-secondary hover:text-primary py-2"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Snaps
+              </Link>
+              <Link 
+                href="/partners" 
+                className="block text-base font-black uppercase tracking-widest text-secondary hover:text-primary py-2"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Partners
+              </Link>
             </div>
 
             <div className="mt-12 pt-8 border-t border-slate-100 flex items-center justify-between">
+                <Link 
+                href="/wishlist" 
+                className="flex items-center gap-3 text-xs font-black uppercase tracking-widest text-secondary"
+                onClick={() => setIsMenuOpen(false)}
+               >
+                 <Heart size={18} /> Wishlist ({wishlistItems})
+               </Link>
                <Link 
                 href={user ? "/account" : "/login"} 
                 className="flex items-center gap-3 text-xs font-black uppercase tracking-widest text-secondary"

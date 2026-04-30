@@ -36,7 +36,8 @@ export default async function BlogPage({
   const spamKeywords = [
     'casino', 'slot', 'betting', 'gambling', 'poker', 'bingo', 'bonus', 'rtp',
     'vavada', '1xbet', 'mostbet', 'pin-up', 'vulcan', 'mahjong', 'sweet bonanza',
-    'judi', 'genset', 'daftar', 'situs'
+    'judi', 'genset', 'daftar', 'situs', 'mangsatoto', 'gacor', 'olympus', 'sbobet',
+    'spaceman', 'pragmatic', 'xanax', 'steroid', '1winrussia', 'kasyno'
   ];
   
   const filteredPosts = posts?.filter(post => {

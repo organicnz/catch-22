@@ -18,11 +18,27 @@ function sanitizeWPContent(html: string) {
   clean = clean.replace(/\[wpforms[^\]]*\]/g, '<div class="p-4 bg-slate-50 border border-slate-100 rounded-2xl my-8 text-secondary font-bold uppercase tracking-widest text-xs text-center">Please use our official <a href="/contact" class="text-primary underline">Contact Page</a> to reach out.</div>');
   
   // 3. Remove known spam keywords and their surrounding elements
+  const spamKeywords = [
+    'casino', 'slot', 'betting', 'gambling', 'poker', 'bingo', 'bonus', 'rtp',
+    'vavada', '1xbet', 'mostbet', 'pin-up', 'vulcan', 'mahjong', 'sweet bonanza',
+    'judi', 'genset', 'daftar', 'situs', 'mangsatoto', 'gacor', 'olympus', 'sbobet',
+    'spaceman', 'pragmatic', 'xanax', 'steroid', '1winrussia', 'kasyno',
+    'φρουτακια', 'лото клуб', 'betsala', 'jeetcity', 'wazamba', 'moonwin',
+    'f12bet', 'vavada.az', 'stake casino', 'jeet city', '1xbet uz',
+    'hellspincassino', 'candyspinz', 'wildsino', 'apuesta-360'
+  ];
+  
   const spamRegex = new RegExp('<a [^>]*?href=["\'](https?:\\/\\/(?!(catch-22\\.co\\.nz|i0\\.wp\\.com|i1\\.wp\\.com|i2\\.wp\\.com|supabase\\.co))[^"\']+)["\'][^>]*?>.*?<\\/a>', 'gi');
   clean = clean.replace(spamRegex, '');
 
+  // Remove any paragraph containing spam keywords
+  spamKeywords.forEach(keyword => {
+    const pSpamRegex = new RegExp(`<p>[^<]*${keyword}[^<]*</p>`, 'gi');
+    clean = clean.replace(pSpamRegex, '');
+  });
+
   // 4. Remove blocks of suspicious links
-  clean = clean.replace(/(<a [^>]*?>.*?<\/a>\s*){5,}/gi, '');
+  clean = clean.replace(/(<a [^>]*?>.*?<\/a>\s*){3,}/gi, '');
 
   // 5. Final cleanup
   clean = clean.replace(/<p>\s*<\/p>/g, '');
@@ -45,7 +61,8 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     return { title: 'Not Found' };
   }
 
-  const rawText = content.body ? content.body.replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim() : '';
+  const cleanBody = sanitizeWPContent(content.body || '');
+  const rawText = cleanBody.replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim();
   const description = rawText.length > 150 ? rawText.substring(0, 147) + '...' : rawText;
 
   return {

@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase';
 import Image from 'next/image';
 import Link from 'next/link';
+import { WishlistButton } from '@/components/products/WishlistButton';
 
 export const revalidate = 60;
 
@@ -76,6 +77,9 @@ export default async function SearchPage({
                       <div className="w-full h-full flex items-center justify-center text-slate-400 font-black uppercase tracking-widest text-[10px]">No Image</div>
                     )}
                   </Link>
+                  <div className="absolute top-3 right-3 z-10 scale-90 origin-top-right">
+                    <WishlistButton product={product} />
+                  </div>
                   <div className="p-4 flex-grow flex flex-col justify-between">
                     <div>
                       <h3 className="text-sm font-bold text-secondary uppercase mb-1 line-clamp-2 min-h-[2.5rem]">
