@@ -1,4 +1,5 @@
-import { createClient, getStorageUrl } from '@/lib/supabase';
+import { getStorageUrl } from '@/lib/supabase';
+import { createServerClient } from '@/lib/supabase-server';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -13,7 +14,7 @@ export const revalidate = 60;
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const slug = (await params).slug;
-  const supabase = createClient();
+  const supabase = await createServerClient();
   
   const { data: product } = await supabase
     .from('products')
@@ -41,7 +42,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 }
 
 export default async function ProductDetails({ params }: { params: { slug: string } }) {
-  const supabase = createClient();
+  const supabase = await createServerClient();
   const slug = (await params).slug;
   
   const { data: product, error } = await supabase

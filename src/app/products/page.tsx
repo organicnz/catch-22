@@ -1,7 +1,8 @@
-import { createClient } from '@/lib/supabase';
+import { createServerClient } from '@/lib/supabase-server';
 import Link from 'next/link';
 import { Metadata } from 'next';
 
+export const dynamic = 'force-dynamic';
 export const revalidate = 60; // Revalidate every 60 seconds
 
 export async function generateMetadata({
@@ -13,7 +14,7 @@ export async function generateMetadata({
   const categorySlug = typeof resolvedParams.category === 'string' ? resolvedParams.category : null;
 
   if (categorySlug) {
-    const supabase = createClient();
+    const supabase = await createServerClient();
     const { data: category } = await supabase
       .from('categories')
       .select('name')
@@ -73,7 +74,7 @@ export default async function ProductsPage({
 }: {
   searchParams: { [key: string]: string | string[] | undefined }
 }) {
-  const supabase = createClient();
+  const supabase = await createServerClient();
   
   // Await searchParams in Next 15+
   const resolvedSearchParams = await searchParams;

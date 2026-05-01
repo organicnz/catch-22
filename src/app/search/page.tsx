@@ -1,4 +1,7 @@
-import { createClient, getStorageUrl } from '@/lib/supabase';
+import { getStorageUrl } from '@/lib/supabase';
+import { createServerClient } from '@/lib/supabase-server';
+
+export const dynamic = 'force-dynamic';
 import Image from 'next/image';
 import Link from 'next/link';
 import { WishlistButton } from '@/components/products/WishlistButton';
@@ -10,7 +13,7 @@ export default async function SearchPage({
 }: {
   searchParams: { [key: string]: string | string[] | undefined }
 }) {
-  const supabase = createClient();
+  const supabase = await createServerClient();
   const resolvedParams = await searchParams;
   const q = typeof resolvedParams.q === 'string' ? resolvedParams.q : '';
 

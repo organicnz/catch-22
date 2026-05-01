@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { createClient } from '@/lib/supabase';
+import { createServerClient } from '@/lib/supabase-server';
 
 export async function POST(req: Request) {
   try {
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'No items in cart' }, { status: 400 });
     }
 
-    const supabase = createClient();
+    const supabase = await createServerClient();
 
     // Fetch product details from Supabase to ensure price integrity
     const productIds = items.map(item => item.id);
