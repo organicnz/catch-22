@@ -1,5 +1,4 @@
-import { createServerClient } from '@/lib/supabase'
-import { cookies } from 'next/headers'
+import { createServerClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import { MfaSettings } from '@/components/account/MfaSettings'
 import { UserSettings } from '@/components/account/UserSettings'

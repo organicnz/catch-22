@@ -1,4 +1,4 @@
-import { createServerClient } from '@supabase/ssr'
+import { createServerClient } from '@/lib/supabase-server'
 import { cookies } from 'next/headers'
 import { unstable_cache } from 'next/cache'
 
@@ -22,17 +22,7 @@ export async function getUserSettings(email: string): Promise<UserSettings> {
   const cookieStore = await cookies();
   const cachedSettings = await unstable_cache(
     async (userEmail: string) => {
-      const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-          cookies: {
-            getAll() {
-              return cookieStore.getAll()
-            },
-          },
-        }
-      );
+      const supabase = await createServerClient();
 
       try {
         const { data, error } = await supabase
