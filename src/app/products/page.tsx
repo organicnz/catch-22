@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase';
+import { createClient, getStorageUrl } from '@/lib/supabase';
 import Link from 'next/link';
 import { Metadata } from 'next';
 
@@ -32,14 +32,13 @@ export async function generateMetadata({
           url: `https://catch-22.co.nz/products?category=${categorySlug}`,
           siteName: 'Catch-22',
           locale: 'en_NZ',
-          type: 'website',
-          images: [{ url: '/hero.jpg', width: 1200, height: 630, alt: `Catch-22 ${category.name}` }],
+          images: [{ url: getStorageUrl('hero.jpg'), width: 1200, height: 630, alt: `Catch-22 ${category.name}` }],
         },
         twitter: {
           card: 'summary_large_image',
           title,
           description,
-          images: ['/hero.jpg'],
+          images: [getStorageUrl('hero.jpg')],
         },
       };
     }
@@ -56,14 +55,13 @@ export async function generateMetadata({
       url: 'https://catch-22.co.nz/products',
       siteName: 'Catch-22',
       locale: 'en_NZ',
-      type: 'website',
-      images: [{ url: '/hero.jpg', width: 1200, height: 630, alt: 'Catch-22 Premium Fishing Gear' }],
+      images: [{ url: getStorageUrl('hero.jpg'), width: 1200, height: 630, alt: 'Catch-22 Premium Fishing Gear' }],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: ['/hero.jpg'],
+      images: [getStorageUrl('hero.jpg')],
     },
   };
 }

@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { getStorageUrl } from '@/lib/supabase';
 
 const TESTIMONIALS = [
   {
@@ -71,7 +72,7 @@ export function TestimonialSection() {
            <div className="flex flex-wrap justify-center items-center gap-12 md:gap-24 opacity-30 grayscale hover:opacity-60 transition-all duration-500">
               {/* Using local partner images identified earlier */}
               <div className="relative h-12 w-32">
-                <Image src="/logo.svg" alt="Catch-22" fill className="object-contain" />
+                <Image src={getStorageUrl("logo.svg")} alt="Catch-22" fill className="object-contain" />
               </div>
               <p className="font-black text-secondary uppercase tracking-[0.5em] text-xs">Tested @ Bay of Plenty</p>
               <p className="font-black text-secondary uppercase tracking-[0.5em] text-xs">Custom Lures</p>

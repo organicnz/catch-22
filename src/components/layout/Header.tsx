@@ -7,7 +7,7 @@ import { useCartStore } from '@/lib/store/cart';
 import { useWishlistStore } from '@/lib/store/wishlist';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase';
+import { createClient, getStorageUrl } from '@/lib/supabase';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 
 export function Header() {
@@ -65,7 +65,7 @@ export function Header() {
           <div className="flex-shrink-0 flex items-center mr-4">
             <Link href="/" className="flex items-center">
               <Image 
-                src="/logo.png" 
+                src={getStorageUrl('logo.png')} 
                 alt="CATCH-22" 
                 width={220} 
                 height={138} 
@@ -105,9 +105,6 @@ export function Header() {
                   ))}
                 </div>
               </div>
-              <Link href="/blog" className="text-secondary hover:text-primary font-bold uppercase tracking-wider text-sm transition-colors py-8">
-                Logbook
-              </Link>
               <Link href="/about-us" className="text-secondary hover:text-primary font-bold uppercase tracking-wider text-sm transition-colors py-8">
                 About
               </Link>
@@ -220,13 +217,6 @@ export function Header() {
                 )}
               </div>
               
-              <Link 
-                href="/blog" 
-                className="block text-base font-black uppercase tracking-widest text-secondary hover:text-primary py-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Logbook
-              </Link>
               <Link 
                 href="/about-us" 
                 className="block text-base font-black uppercase tracking-widest text-secondary hover:text-primary py-2"

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import { getStorageUrl } from '@/lib/supabase';
 
 export function Footer() {
   return (
@@ -9,7 +10,7 @@ export function Footer() {
           <div className="col-span-1 md:col-span-1">
             <Link href="/" className="inline-block">
               <Image 
-                src="/logo.png" 
+                src={getStorageUrl('logo.png')} 
                 alt="CATCH-22" 
                 width={180} 
                 height={113} 
@@ -35,7 +36,6 @@ export function Footer() {
             <h3 className="text-primary text-sm font-black uppercase tracking-widest mb-6">Information</h3>
             <ul className="space-y-4 text-sm font-bold">
               <li><Link href="/about-us" className="hover:text-primary transition-colors uppercase tracking-wider">About Us</Link></li>
-              <li><Link href="/blog" className="hover:text-primary transition-colors uppercase tracking-wider">Logbook</Link></li>
               <li><Link href="/faqs" className="hover:text-primary transition-colors uppercase tracking-wider">FAQs</Link></li>
               <li><Link href="/gallery" className="hover:text-primary transition-colors uppercase tracking-wider">Catch Snaps</Link></li>
               <li><Link href="/partners" className="hover:text-primary transition-colors uppercase tracking-wider">Our Partners</Link></li>

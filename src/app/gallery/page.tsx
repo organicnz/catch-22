@@ -15,13 +15,13 @@ export const metadata: Metadata = {
     siteName: 'Catch-22',
     locale: 'en_NZ',
     type: 'website',
-    images: [{ url: '/snap1.jpg', width: 1200, height: 630, alt: 'Catch-22 Community Fishing Gallery' }],
+    images: [{ url: getStorageUrl('snap1.jpg'), width: 1200, height: 630, alt: 'Catch-22 Community Fishing Gallery' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Catch-Snaps | Catch-22 New Zealand',
     description: 'Real catches, real gear. Browse the Catch-22 community gallery and submit your own fishing snaps to be featured.',
-    images: ['/snap1.jpg'],
+    images: [getStorageUrl('snap1.jpg')],
   },
 };
 

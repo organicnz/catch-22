@@ -83,8 +83,8 @@ export default async function ContentPage({ params }: { params: { slug: string }
         
         {content.type === 'post' && (
           <div className="mt-20 pt-10 border-t border-slate-100 flex justify-between items-center">
-             <Link href="/blog" className="text-sm font-black text-secondary uppercase tracking-widest hover:text-primary transition-colors flex items-center gap-2">
-                <span>&larr;</span> Back to Logbook
+             <Link href="/" className="text-sm font-black text-secondary uppercase tracking-widest hover:text-primary transition-colors flex items-center gap-2">
+                <span>&larr;</span> Back to Home
              </Link>
              <div className="flex gap-4">
                 {/* Social share placeholders */}
