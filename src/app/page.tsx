@@ -7,6 +7,7 @@ import { sanitizeText } from '@/lib/sanitize';
 import { ProductCard } from '@/components/products/ProductCard';
 import { CharitySection } from '@/components/home/CharitySection';
 import { TestimonialSection } from '@/components/home/TestimonialSection';
+import { ProductSlider } from '@/components/products/ProductSlider';
 
 export const revalidate = 60;
 
@@ -41,19 +42,15 @@ async function BestSellers() {
     .limit(8);
 
   return (
-    <div className="grid grid-cols-1 gap-y-16 gap-x-8 sm:grid-cols-2 lg:grid-cols-4">
-      {featuredProducts?.map((product) => (
-        <ProductCard key={product.id} product={product} />
-      ))}
-    </div>
+    <ProductSlider products={featuredProducts || []} />
   );
 }
 
 function BestSellersLoading() {
   return (
-    <div className="grid grid-cols-1 gap-y-12 gap-x-8 sm:grid-cols-2 lg:grid-cols-4 animate-pulse">
+    <div className="flex gap-8 overflow-hidden pb-12 pt-4">
       {[1, 2, 3, 4].map((i) => (
-        <div key={i} className="flex flex-col h-full bg-slate-50 rounded-[2rem] border border-slate-100 overflow-hidden">
+        <div key={i} className="min-w-[85%] sm:min-w-[45%] lg:min-w-[23%] flex flex-col h-full bg-slate-50 rounded-[2rem] border border-slate-100 overflow-hidden animate-pulse">
            <div className="h-72 bg-slate-100"></div>
            <div className="p-8 space-y-6">
               <div className="h-4 bg-slate-100 rounded w-3/4"></div>
