@@ -1,90 +1,171 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
-import { Metadata } from 'next';
+import { useState } from 'react';
+import { Camera, Maximize2, X, ChevronRight, Share2, MapPin } from 'lucide-react';
 import { getStorageUrl } from '@/lib/supabase';
+import { Metadata } from 'next';
 
-export const revalidate = 60;
-
-export const metadata: Metadata = {
-  title: 'Catch-Snaps | Catch-22 New Zealand',
-  description: 'Real catches, real gear. Browse the Catch-22 community gallery and submit your own fishing snaps to be featured.',
-  openGraph: {
-    title: 'Catch-Snaps | Catch-22 New Zealand',
-    description: 'Real catches, real gear. Browse the Catch-22 community gallery and submit your own fishing snaps to be featured.',
-    url: 'https://catch-22.co.nz/gallery',
-    siteName: 'Catch-22',
-    locale: 'en_NZ',
-    type: 'website',
-    images: [{ url: getStorageUrl('snap1.jpg'), width: 1200, height: 630, alt: 'Catch-22 Community Fishing Gallery' }],
+// Temporary static data - will eventually come from Supabase DB
+const snaps = [
+  { 
+    id: 1, 
+    url: 'site/snap1.jpg', 
+    caption: 'Sunrise at Three Kings', 
+    location: 'Far North',
+    author: '@capt_finn'
   },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Catch-Snaps | Catch-22 New Zealand',
-    description: 'Real catches, real gear. Browse the Catch-22 community gallery and submit your own fishing snaps to be featured.',
-    images: [getStorageUrl('snap1.jpg')],
+  { 
+    id: 2, 
+    url: 'site/snap2.jpg', 
+    caption: '20kg Kingie on 30lb Braid', 
+    location: 'White Island',
+    author: '@kiwi_angler'
   },
-};
+  { 
+    id: 3, 
+    url: 'site/snap3.jpg', 
+    caption: 'Product testing in the BoP', 
+    location: 'Tauranga',
+    author: '@catch22_nz'
+  },
+  { 
+    id: 4, 
+    url: 'site/snap4.jpg', 
+    caption: 'Catch of a Lifetime', 
+    location: 'Bay of Islands',
+    author: '@saltwater_therapy'
+  },
+  { 
+    id: 5, 
+    url: 'site/snap5.jpg', 
+    caption: 'The rugged coast', 
+    location: 'East Cape',
+    author: '@ocean_wanderer'
+  },
+  { 
+    id: 6, 
+    url: 'site/snap6.jpg', 
+    caption: 'New Gear Drop', 
+    location: 'HQ',
+    author: '@catch22_team'
+  },
+];
 
 export default function GalleryPage() {
-  // Placeholder images for the gallery
-  const snaps = [
-    { src: getStorageUrl('snap1.jpg'), alt: 'Angler holding a large kingfish caught using Catch-22 braid' },
-    { src: getStorageUrl('snap2.jpg'), alt: 'Fishing at sunrise on a New Zealand boat with Catch-22 gear' },
-    { src: getStorageUrl('snap3.jpg'), alt: 'Catch-22 fishing braid being tested in rough conditions' },
-    { src: getStorageUrl('snap4.jpg'), alt: 'THUNDER Charter crew with a trophy kingfish catch' },
-    { src: getStorageUrl('snap5.jpg'), alt: 'Coastal rock fishing in New Zealand with Catch-22 lures' },
-    { src: getStorageUrl('snap6.jpg'), alt: 'Premium Catch-22 braid spooled on a fishing reel' },
-  ];
+  const [selectedImage, setSelectedImage] = useState<typeof snaps[0] | null>(null);
 
   return (
-    <main className="bg-white py-16 px-4 sm:px-6 lg:px-8 min-h-screen">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col items-center text-center mb-16">
-          <h1 className="text-4xl font-black text-secondary uppercase tracking-tight mb-4">Catch-22 Snaps</h1>
-          <div className="h-2 w-24 bg-primary"></div>
-          <p className="mt-6 text-slate-500 font-medium text-lg max-w-2xl leading-relaxed">
-            Real gear, real catches. Send us your Catch-22 snaps today to be featured on our logbook and social media.
+    <main className="min-h-screen pt-32 pb-20 bg-secondary">
+      <div className="container mx-auto px-4">
+        {/* Header Section */}
+        <div className="max-w-4xl mb-24">
+          <div className="inline-flex items-center gap-3 px-4 py-2 bg-primary/10 border border-primary/20 rounded-full mb-8">
+            <Camera className="w-3 h-3 text-primary" />
+            <span className="text-primary font-black uppercase tracking-[0.3em] text-[10px]">Community Feed</span>
+          </div>
+          <h1 className="text-6xl md:text-9xl font-black text-white uppercase tracking-tighter leading-[0.8] mb-10">
+            Catch <br /> <span className="text-primary italic">Snaps</span>
+          </h1>
+          <p className="text-slate-400 text-lg md:text-2xl font-medium max-w-2xl leading-relaxed tracking-wide">
+            Tag <span className="text-primary font-black italic">#CATCH22</span> to be featured. 
+            A visual collection of moments from the rugged New Zealand coastline.
           </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 sm:gap-12">
-          {snaps.map((snap, idx) => (
-            <div key={idx} className="aspect-[4/5] relative group rounded-[2.5rem] overflow-hidden shadow-sm border border-slate-100 hover:shadow-2xl hover:-translate-y-2 transition-all duration-700 ease-out">
-               <Image 
-                src={snap.src} 
-                alt={snap.alt} 
-                fill 
-                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                className="object-cover group-hover:scale-110 transition-transform duration-[1.5s] ease-out"
-               />
-               <div className="absolute inset-0 bg-gradient-to-t from-secondary/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-8">
-                  <p className="text-white font-black uppercase tracking-[0.3em] text-[10px] transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 delay-100">
-                    {snap.alt}
-                  </p>
-                  <div className="h-1 w-12 bg-primary mt-3 rounded-full transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 delay-200 origin-left" />
-               </div>
+        {/* Masonry-style Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+          {snaps.map((snap) => (
+            <div 
+              key={snap.id}
+              className="group relative aspect-[4/5] bg-white/5 rounded-[3rem] overflow-hidden cursor-pointer shadow-2xl hover:shadow-primary/10 transition-all duration-700 hover:-translate-y-2 border border-white/5"
+              onClick={() => setSelectedImage(snap)}
+            >
+              <Image
+                src={getStorageUrl(snap.url)}
+                alt={snap.caption}
+                fill
+                className="object-cover transition-transform duration-1000 group-hover:scale-110 opacity-80 group-hover:opacity-100"
+              />
+              
+              {/* Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-secondary/90 via-secondary/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col justify-end p-10">
+                <div className="flex items-center gap-2 mb-4">
+                   <MapPin className="w-4 h-4 text-primary" />
+                   <span className="text-primary font-black uppercase tracking-widest text-[10px]">{snap.location}</span>
+                </div>
+                <h3 className="text-2xl font-black text-white uppercase tracking-tight mb-2 italic">{snap.caption}</h3>
+                <p className="text-white/60 text-sm font-bold">{snap.author}</p>
+                
+                <div className="mt-8 pt-8 border-t border-white/10 flex items-center justify-between">
+                   <button className="flex items-center gap-2 text-white hover:text-primary transition-colors">
+                      <Maximize2 className="w-5 h-5" />
+                      <span className="text-[10px] font-black uppercase tracking-widest">Enlarge</span>
+                   </button>
+                   <Share2 className="w-5 h-5 text-white/40" />
+                </div>
+              </div>
             </div>
           ))}
         </div>
-
-        <div className="mt-32 text-center bg-slate-50/50 backdrop-blur-sm p-16 rounded-[4rem] border border-slate-100 relative overflow-hidden">
-           <div className="absolute top-0 right-0 w-64 h-64 bg-primary opacity-5 rounded-full blur-[100px] pointer-events-none" />
-           <div className="relative z-10">
-              <h3 className="text-3xl font-black text-secondary uppercase mb-6 tracking-tighter">Want to be featured?</h3>
-              <p className="text-slate-500 mb-12 max-w-xl mx-auto font-medium text-lg leading-relaxed">
-                Tag us in your photos or send them directly to our team via the contact form. 
-                We love seeing our gear in the wild!
-              </p>
-              <Link 
-               href="/contact" 
-               aria-label="Submit your fishing snap to be featured on Catch-22"
-               className="inline-block bg-secondary text-white font-black py-6 px-16 rounded-full transition-all uppercase tracking-[0.3em] text-xs hover:bg-primary shadow-2xl shadow-secondary/20 hover:scale-105"
-              >
-                Submit Your Snap
-              </Link>
-           </div>
-        </div>
       </div>
+
+      {/* Lightbox Modal */}
+      {selectedImage && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10">
+          <div 
+            className="absolute inset-0 bg-secondary/98 backdrop-blur-2xl"
+            onClick={() => setSelectedImage(null)}
+          />
+          <div className="relative w-full max-w-6xl aspect-[4/5] md:aspect-auto md:h-full bg-secondary rounded-[4rem] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-500 border border-white/5">
+            <div className="grid grid-cols-1 lg:grid-cols-4 h-full">
+              <div className="lg:col-span-3 relative bg-black flex items-center justify-center">
+                <Image
+                  src={getStorageUrl(selectedImage.url)}
+                  alt={selectedImage.caption}
+                  fill
+                  className="object-contain"
+                />
+                <button 
+                  className="absolute top-10 right-10 w-14 h-14 bg-white/10 hover:bg-primary hover:text-secondary rounded-full flex items-center justify-center text-white backdrop-blur-md transition-all z-20"
+                  onClick={() => setSelectedImage(null)}
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              <div className="p-12 lg:p-16 flex flex-col justify-center bg-secondary border-l border-white/5">
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-black italic">
+                    {selectedImage.author[1].toUpperCase()}
+                  </div>
+                  <div>
+                    <h4 className="text-white font-black uppercase tracking-widest text-sm">{selectedImage.author}</h4>
+                    <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest">Verified Angler</p>
+                  </div>
+                </div>
+                
+                <h3 className="text-4xl font-black text-white uppercase tracking-tighter leading-none mb-6 italic">
+                  {selectedImage.caption}
+                </h3>
+                
+                <div className="flex items-center gap-3 mb-12">
+                  <MapPin className="w-4 h-4 text-primary" />
+                  <span className="text-primary font-black uppercase tracking-widest text-[10px]">{selectedImage.location}</span>
+                </div>
+
+                <Link 
+                  href="/products"
+                  className="group flex items-center gap-4 text-white font-black uppercase tracking-[0.3em] text-[10px] hover:text-primary transition-all mt-auto"
+                >
+                  Shop the Setup <ChevronRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
+

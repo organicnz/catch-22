@@ -1,6 +1,6 @@
-import { createClient, getStorageUrl } from '@/lib/supabase';
 import Image from 'next/image';
 import Link from 'next/link';
+import { createClient, getStorageUrl } from '@/lib/supabase';
 import { Suspense } from 'react';
 import { Metadata } from 'next';
 import { sanitizeText } from '@/lib/sanitize';
@@ -20,13 +20,13 @@ export const metadata: Metadata = {
     siteName: 'Catch-22',
     locale: 'en_NZ',
     type: 'website',
-    images: [{ url: getStorageUrl('thunder-charter.jpg'), width: 1200, height: 630, alt: 'Catch-22 Premium Fishing Gear New Zealand' }],
+    images: [{ url: 'https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/media/site/thunder-charter.jpg', width: 1200, height: 630, alt: 'Catch-22 Premium Fishing Gear New Zealand' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Catch-22 | Premium Fishing Gear New Zealand',
     description: 'Premium fishing braid, lures, and apparel tested in the harshest New Zealand environments. Built to endure. Free NZ shipping available.',
-    images: [getStorageUrl('thunder-charter.jpg')],
+    images: ['https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/media/site/thunder-charter.jpg'],
   },
 };
 
@@ -201,7 +201,7 @@ export default async function Home() {
       {/* Hero Section: High Sensory Luxury */}
       <section aria-label="Hero — Equip Yourself for the Elements" className="relative h-[85vh] min-h-[700px] flex items-center overflow-hidden bg-secondary">
         <Image
-          src={getStorageUrl('hero.jpg')}
+          src={getStorageUrl('site/hero.jpg')}
           alt="Premium fishing gear in the New Zealand elements"
           fill
           className="object-cover opacity-60 scale-105 group-hover:scale-100 transition-transform duration-[2000ms]"

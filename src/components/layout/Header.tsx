@@ -2,30 +2,41 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCart, Menu, X, User, Search, LogOut, ChevronDown, Heart } from 'lucide-react';
+import { ShoppingCart, Menu, X, User, Search, LogOut, ChevronDown, Heart, ShoppingBag } from 'lucide-react';
 import { useCartStore } from '@/lib/store/cart';
 import { useWishlistStore } from '@/lib/store/wishlist';
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { createClient, getStorageUrl } from '@/lib/supabase';
 import { User as SupabaseUser } from '@supabase/supabase-js';
+import { useSettingsStore } from '@/lib/store/settings';
 
 export function Header() {
   const [isMounted, setIsMounted] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isShopOpen, setIsShopOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const [categories, setCategories] = useState<{name: string, slug: string}[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [user, setUser] = useState<SupabaseUser | null>(null);
+  
   const totalItems = useCartStore((state) => state.totalItems());
   const wishlistItems = useWishlistStore((state) => state.items.length);
   const router = useRouter();
+  const pathname = usePathname();
   const supabase = createClient();
 
+  // Pages that should have a transparent header initially
+  const isTransparentPage = pathname === '/' || pathname === '/gallery';
+
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMounted(true);
     
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+
     // Fetch categories
     supabase.from('categories').select('name, slug').order('name').then(({ data }) => {
       if (data) setCategories(data);
@@ -33,15 +44,20 @@ export function Header() {
 
     // Check initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      subscription.unsubscribe();
+    };
   }, [supabase]);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -54,230 +70,166 @@ export function Header() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    useSettingsStore.getState().reset();
     router.push('/');
   };
 
+  const navLinks = [
+    { name: 'Home', href: '/' },
+    { name: 'Shop', href: '/products' },
+    { name: 'Snaps', href: '/gallery' },
+    { name: 'Visit Our Partners', href: '/partners' },
+    { name: 'FAQs', href: '/faqs' },
+    { name: 'Contact', href: '/contact' },
+  ];
+
+  const headerBg = isScrolled 
+    ? 'bg-secondary/95 backdrop-blur-2xl py-4 shadow-2xl border-b border-white/5' 
+    : isTransparentPage ? 'bg-transparent py-8' : 'bg-secondary py-6 border-b border-white/5';
+
+  const textColor = 'text-white';
+  const logoInvert = !isScrolled && isTransparentPage ? 'brightness-0 invert' : '';
+
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${headerBg}`}>
+      <div className="max-w-[1800px] mx-auto px-6 md:px-12">
+        <div className="flex justify-between items-center">
+          {/* Mobile Menu Toggle */}
+          <button 
+            className="lg:hidden p-2 -ml-2 text-white hover:text-primary transition-colors"
+            onClick={() => setIsMenuOpen(true)}
+          >
+            <Menu size={24} />
+          </button>
+
           {/* Logo */}
-          <div className="flex-shrink-0 flex items-center mr-4">
-            <Link href="/" className="flex items-center">
+          <Link href="/" className="flex items-center gap-4 group">
               <Image 
-                src={getStorageUrl('logo.png')} 
+                src={getStorageUrl('site/logo.png')} 
                 alt="CATCH-22" 
                 width={220} 
                 height={138} 
                 className="h-14 w-auto"
                 priority
               />
-            </Link>
-          </div>
+          </Link>
 
-          {/* Desktop Navigation & Search */}
-          <div className="hidden md:flex flex-1 items-center justify-between ml-8">
-            <nav className="flex space-x-8">
-              <Link href="/" className="text-secondary hover:text-primary font-bold uppercase tracking-wider text-sm transition-colors py-8">
-                Home
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center gap-10">
+            {navLinks.map((link) => (
+              <Link 
+                key={link.name} 
+                href={link.href}
+                className={`text-[10px] font-black uppercase tracking-[0.4em] transition-all hover:text-primary relative group ${
+                  pathname === link.href ? 'text-primary' : 'text-white/70'
+                }`}
+              >
+                {link.name}
+                <span className={`absolute -bottom-2 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full ${pathname === link.href ? 'w-full' : ''}`} />
               </Link>
-              <div className="relative group">
-                <button 
-                  className="flex items-center gap-1 text-secondary hover:text-primary font-bold uppercase tracking-wider text-sm transition-colors py-8"
-                  onMouseEnter={() => setIsShopOpen(true)}
-                >
-                  Shop <ChevronDown size={14} strokeWidth={3} />
-                </button>
-                
-                {/* Desktop Dropdown */}
-                <div 
-                  className={`absolute top-full left-0 w-56 bg-white shadow-xl border border-slate-100 rounded-b-2xl py-4 transition-all duration-200 ${isShopOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible -translate-y-2'}`}
-                  onMouseLeave={() => setIsShopOpen(false)}
-                >
-                  <Link href="/products" className="block px-6 py-2 text-xs font-black text-secondary uppercase tracking-widest hover:text-primary hover:bg-slate-50 transition-colors">
-                    All Gear
-                  </Link>
-                  {categories.map((cat) => (
-                    <Link 
-                      key={cat.slug} 
-                      href={`/products?category=${cat.slug}`}
-                      className="block px-6 py-2 text-xs font-black text-secondary uppercase tracking-widest hover:text-primary hover:bg-slate-50 transition-colors"
-                    >
-                      {cat.name}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-              <Link href="/gallery" className="text-secondary hover:text-primary font-bold uppercase tracking-wider text-sm transition-colors py-8">
-                Snaps
-              </Link>
-              <Link href="/partners" className="text-secondary hover:text-primary font-bold uppercase tracking-wider text-sm transition-colors py-8">
-                Visit Our Partners
-              </Link>
-              <Link href="/faqs" className="text-secondary hover:text-primary font-bold uppercase tracking-wider text-sm transition-colors py-8">
-                FAQs
-              </Link>
-              <Link href="/contact" className="text-secondary hover:text-primary font-bold uppercase tracking-wider text-sm transition-colors py-8">
-                Contact
-              </Link>
-            </nav>
+            ))}
+          </nav>
 
-            <form onSubmit={handleSearch} className="relative ml-8 group">
+          {/* Actions */}
+          <div className="flex items-center gap-2 md:gap-8">
+            {/* Search Bar - Strictly Circular */}
+            <form onSubmit={handleSearch} className="hidden xl:block relative group">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search..."
-                className="w-12 h-12 md:w-64 md:h-12 pl-12 pr-6 py-2 bg-slate-50 border-2 border-slate-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition-all duration-500 font-black uppercase tracking-widest placeholder:text-slate-300"
+                className="w-12 h-12 focus:w-64 pl-12 pr-6 py-2 bg-white/5 border border-white/10 rounded-full text-xs focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white/10 focus:text-white transition-all duration-500 font-black uppercase tracking-widest placeholder:text-white/20 text-transparent focus:text-white"
               />
-              <Search className="absolute left-4 top-3.5 text-slate-400 group-focus-within:text-primary transition-colors" size={18} />
+              <Search className="absolute left-4 top-3.5 text-white/40 group-focus-within:text-primary transition-colors pointer-events-none" size={18} />
             </form>
-          </div>
 
-          {/* Cart, Account & Mobile Toggle */}
-          <div className="flex items-center space-x-2 md:space-x-4 ml-4">
-            <Link href={user ? "/account" : "/login"} className="p-2 text-secondary hover:text-primary transition-colors" title="Account">
-              <User size={24} />
-            </Link>
-            {user && (
-              <button onClick={handleLogout} className="p-2 text-secondary hover:text-primary transition-colors" title="Log out">
-                <LogOut size={20} />
-              </button>
-            )}
-            <Link href="/wishlist" className="relative p-2 text-secondary hover:text-primary transition-colors" title="Wishlist">
-              <Heart size={24} />
-              {isMounted && wishlistItems > 0 && (
-                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-[10px] font-black leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-primary rounded-full shadow-md">
-                  {wishlistItems}
-                </span>
-              )}
-            </Link>
-            <Link href="/cart" className="relative p-2 text-secondary hover:text-primary transition-colors" title="Cart">
-              <ShoppingCart size={24} />
-              {isMounted && totalItems > 0 && (
-                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-[10px] font-black leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-primary rounded-full shadow-md">
-                  {totalItems}
-                </span>
-              )}
-            </Link>
-            
-            <button 
-              className="md:hidden p-2 text-secondary hover:text-primary"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
+            <div className="flex items-center gap-1 md:gap-4">
+              <Link href={user ? "/account" : "/login"} className="p-3 rounded-full text-white hover:bg-white/10 hover:text-primary transition-all" title="Account">
+                <User size={20} />
+              </Link>
+              
+              <Link href="/wishlist" className="relative p-3 rounded-full text-white hover:bg-white/10 hover:text-primary transition-all" title="Wishlist">
+                <Heart size={20} />
+                {isMounted && wishlistItems > 0 && (
+                  <span className="absolute top-2 right-2 w-4 h-4 bg-primary text-secondary text-[8px] font-black rounded-full flex items-center justify-center border-2 border-secondary">
+                    {wishlistItems}
+                  </span>
+                )}
+              </Link>
+
+              <Link href="/cart" className="relative p-3 rounded-full text-white hover:bg-white/10 hover:text-primary transition-all" title="Cart">
+                <ShoppingBag size={20} />
+                {isMounted && totalItems > 0 && (
+                  <span className="absolute top-2 right-2 w-4 h-4 bg-primary text-secondary text-[8px] font-black rounded-full flex items-center justify-center border-2 border-secondary">
+                    {totalItems}
+                  </span>
+                )}
+              </Link>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Mobile Navigation */}
+      {/* Mobile Menu Overlay */}
       {isMenuOpen && (
-        <div className="md:hidden bg-white border-t border-slate-100 max-h-[80vh] overflow-y-auto">
-          <div className="px-6 py-6">
-            <form onSubmit={handleSearch} className="relative mb-8 group">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search gear..."
-                className="w-full h-14 pl-12 pr-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white font-black text-secondary uppercase tracking-widest placeholder:text-slate-300 transition-all duration-300"
-              />
-              <Search className="absolute left-4 top-4.5 text-slate-400 group-focus-within:text-primary" size={20} />
-            </form>
-            <div className="space-y-4">
-              <Link 
-                href="/" 
-                className="block text-base font-black uppercase tracking-widest text-secondary hover:text-primary py-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Home
-              </Link>
-              <div>
-                <button 
-                  className="flex items-center justify-between w-full text-left text-base font-black uppercase tracking-widest text-secondary mb-4"
-                  onClick={() => setIsShopOpen(!isShopOpen)}
-                >
-                  Shop <ChevronDown size={18} className={`transition-transform duration-200 ${isShopOpen ? 'rotate-180' : ''}`} />
-                </button>
-                
-                {isShopOpen && (
-                  <div className="pl-4 space-y-3 mb-6 border-l-2 border-primary/20">
-                    <Link 
-                      href="/products" 
-                      className="block text-sm font-bold uppercase tracking-wider text-slate-500 hover:text-primary"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      All Gear
-                    </Link>
-                    {categories.map((cat) => (
-                      <Link 
-                        key={cat.slug}
-                        href={`/products?category=${cat.slug}`} 
-                        className="block text-sm font-bold uppercase tracking-wider text-slate-500 hover:text-primary"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        {cat.name}
-                      </Link>
-                    ))}
-                  </div>
-                )}
+        <div className="fixed inset-0 z-[100] bg-secondary flex flex-col p-8 lg:hidden">
+          <div className="flex items-center justify-between mb-20">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                <span className="text-secondary font-black text-xl italic">22</span>
               </div>
-              
-              <Link 
-                href="/gallery" 
-                className="block text-base font-black uppercase tracking-widest text-secondary hover:text-primary py-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Snaps
-              </Link>
-              <Link 
-                href="/partners" 
-                className="block text-base font-black uppercase tracking-widest text-secondary hover:text-primary py-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Visit Our Partners
-              </Link>
-              <Link 
-                href="/faqs" 
-                className="block text-base font-black uppercase tracking-widest text-secondary hover:text-primary py-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                FAQs
-              </Link>
-              <Link 
-                href="/contact" 
-                className="block text-base font-black uppercase tracking-widest text-secondary hover:text-primary py-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Contact
-              </Link>
+              <span className="text-xl font-black uppercase tracking-tighter text-white">Catch 22</span>
             </div>
+            <button 
+              className="p-4 text-white hover:text-primary transition-colors"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <X size={32} />
+            </button>
+          </div>
 
-            <div className="mt-12 pt-8 border-t border-slate-100 flex items-center justify-between">
-                <Link 
-                href="/wishlist" 
-                className="flex items-center gap-3 text-xs font-black uppercase tracking-widest text-secondary"
+          <nav className="flex flex-col gap-8">
+            {navLinks.map((link) => (
+              <Link 
+                key={link.name} 
+                href={link.href}
                 onClick={() => setIsMenuOpen(false)}
-               >
-                 <Heart size={18} /> Wishlist ({wishlistItems})
-               </Link>
-               <Link 
-                href={user ? "/account" : "/login"} 
-                className="flex items-center gap-3 text-xs font-black uppercase tracking-widest text-secondary"
-                onClick={() => setIsMenuOpen(false)}
-               >
-                 <User size={18} /> {user ? "My Account" : "Sign In"}
-               </Link>
-               {user && (
-                 <button onClick={handleLogout} className="text-xs font-black uppercase tracking-widest text-rose-500">
-                   Log Out
-                 </button>
-               )}
-            </div>
+                className={`text-4xl font-black uppercase tracking-tighter transition-colors ${
+                  pathname === link.href ? 'text-primary' : 'text-white hover:text-primary'
+                }`}
+              >
+                {link.name}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="mt-auto pt-12 border-t border-white/5 flex flex-col gap-8">
+             <div className="flex justify-between items-center">
+                {user ? (
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-black italic">
+                      {user.email?.[0].toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Logged In As</p>
+                      <p className="text-sm font-bold text-white">{user.email}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <Link href="/login" onClick={() => setIsMenuOpen(false)} className="text-primary font-black uppercase tracking-widest text-xs">Sign In / Join</Link>
+                )}
+                {user && (
+                  <button onClick={handleLogout} className="text-red-500 font-black uppercase tracking-widest text-xs flex items-center gap-2">
+                    <LogOut size={14} /> Exit
+                  </button>
+                )}
+             </div>
+             <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.5em] text-center">Engineered for the Elements</p>
           </div>
         </div>
       )}
     </header>
   );
 }
+

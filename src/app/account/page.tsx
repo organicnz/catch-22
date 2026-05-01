@@ -1,21 +1,11 @@
-import { createServerClient } from '@supabase/ssr'
+import { createServerClient } from '@/lib/supabase'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { MfaSettings } from '@/components/account/MfaSettings'
+import { UserSettings } from '@/components/account/UserSettings'
 
 export default async function AccountPage() {
-  const cookieStore = await cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll()
-        }
-      }
-    }
-  );
+  const supabase = await createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -33,7 +23,7 @@ export default async function AccountPage() {
   const { data: customer } = await supabase
     .from('profiles')
     .select('id, first_name, last_name')
-    .eq('email', user.email)
+    .or(`email.eq.${user.email},user_id.eq.${user.id}`)
     .single();
 
   let orders: { id: number; created_at: string; status: string; total_amount: number; order_items: { product_name: string; quantity: number; total: number }[] }[] = [];
@@ -114,6 +104,9 @@ export default async function AccountPage() {
             ))}
           </div>
         )}
+
+        {/* User Preferences Section */}
+        <UserSettings />
 
         {/* 2FA Settings Section */}
         <div className="max-w-xl">

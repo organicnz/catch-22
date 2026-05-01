@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import { Quote } from 'lucide-react';
 import { getStorageUrl } from '@/lib/supabase';
 
 export function Footer() {
@@ -10,10 +11,10 @@ export function Footer() {
           <div className="col-span-1 md:col-span-1">
             <Link href="/" className="inline-block">
               <Image 
-                src={getStorageUrl('logo.png')} 
-                alt="CATCH-22" 
-                width={180} 
-                height={113} 
+                src={getStorageUrl('site/logo.png')} 
+                alt="Catch-22" 
+                width={120} 
+                height={60} 
                 className="h-10 w-auto brightness-0 invert" 
               />
             </Link>
