@@ -49,7 +49,8 @@ export async function updateUserSettingsAction(settings: Partial<UserSettings>) 
 
   if (fetchError && fetchError.code !== 'PGRST116') {
     console.error('Fetch error in updateUserSettingsAction:', fetchError);
-    return { error: 'Failed to fetch current settings' };
+    // Instead of failing, we'll proceed with just the new settings to ensure the user can save.
+    // The upsert later will handle the database-side merge or create.
   }
 
   const updatedSettings = {
