@@ -32,13 +32,13 @@ export async function generateMetadata({
           url: `https://catch-22.co.nz/products?category=${categorySlug}`,
           siteName: 'Catch-22',
           locale: 'en_NZ',
-          images: [{ url: 'https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/media/site/hero.jpg', width: 1200, height: 630, alt: `Catch-22 ${category.name}` }],
+          images: [{ url: 'https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/media/site/thunder-charter.jpg', width: 1200, height: 630, alt: `Catch-22 ${category.name}` }],
         },
         twitter: {
           card: 'summary_large_image',
           title,
           description,
-          images: ['https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/media/site/hero.jpg'],
+          images: ['https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/media/site/thunder-charter.jpg'],
         },
       };
     }
@@ -55,13 +55,13 @@ export async function generateMetadata({
       url: 'https://catch-22.co.nz/products',
       siteName: 'Catch-22',
       locale: 'en_NZ',
-      images: [{ url: 'https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/media/site/hero.jpg', width: 1200, height: 630, alt: 'Catch-22 Premium Fishing Gear' }],
+      images: [{ url: 'https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/media/site/thunder-charter.jpg', width: 1200, height: 630, alt: 'Catch-22 Premium Fishing Gear' }],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: ['https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/media/site/hero.jpg'],
+      images: ['https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/media/site/thunder-charter.jpg'],
     },
   };
 }

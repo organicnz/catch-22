@@ -13,13 +13,13 @@ export const metadata: Metadata = {
     siteName: 'Catch-22',
     locale: 'en_NZ',
     type: 'website',
-    images: [{ url: 'https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/media/site/hero.jpg', width: 1200, height: 630, alt: 'Catch-22 Premium Fishing Gear New Zealand' }],
+    images: [{ url: 'https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/media/site/thunder-charter.jpg', width: 1200, height: 630, alt: 'Catch-22 Premium Fishing Gear New Zealand' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'FAQs | Catch-22 New Zealand',
     description: 'Find answers to common questions about Catch-22 fishing gear, shipping to New Zealand, charter bookings, and more.',
-    images: ['https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/media/site/hero.jpg'],
+    images: ['https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/media/site/thunder-charter.jpg'],
   },
 };
 
