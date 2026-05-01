@@ -53,7 +53,7 @@ export default async function ContentPage({ params }: { params: { slug: string }
   const cleanBody = sanitizeWPContent(content.body || '');
 
   return (
-    <div className="bg-white min-h-screen py-16 px-4 sm:px-6 lg:px-8">
+    <div className="bg-white min-h-screen pt-28 pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <div className="flex flex-col mb-12">
           <h1 className="text-4xl md:text-5xl font-black tracking-tight text-secondary uppercase mb-4 leading-tight">
