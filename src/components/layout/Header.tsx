@@ -109,7 +109,7 @@ export function Header() {
                 </div>
               </div>
               <Link href="/gallery" className="text-secondary hover:text-primary font-bold uppercase tracking-wider text-sm transition-colors py-8">
-                Catch-22 Catch-Snaps
+                Snaps
               </Link>
               <Link href="/partners" className="text-secondary hover:text-primary font-bold uppercase tracking-wider text-sm transition-colors py-8">
                 Visit Our Partners
@@ -122,15 +122,15 @@ export function Header() {
               </Link>
             </nav>
 
-            <form onSubmit={handleSearch} className="relative ml-8 max-w-xs w-full">
+            <form onSubmit={handleSearch} className="relative ml-8 group">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search gear..."
-                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition-all font-medium"
+                placeholder="Search..."
+                className="w-12 h-12 md:w-64 md:h-12 pl-12 pr-6 py-2 bg-slate-50 border-2 border-slate-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition-all duration-500 font-black uppercase tracking-widest placeholder:text-slate-300"
               />
-              <Search className="absolute left-3 top-2.5 text-slate-400" size={16} />
+              <Search className="absolute left-4 top-3.5 text-slate-400 group-focus-within:text-primary transition-colors" size={18} />
             </form>
           </div>
 
@@ -175,15 +175,15 @@ export function Header() {
       {isMenuOpen && (
         <div className="md:hidden bg-white border-t border-slate-100 max-h-[80vh] overflow-y-auto">
           <div className="px-6 py-6">
-            <form onSubmit={handleSearch} className="relative mb-8">
+            <form onSubmit={handleSearch} className="relative mb-8 group">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search gear..."
-                className="w-full pl-10 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white font-bold text-secondary uppercase tracking-widest"
+                className="w-full h-14 pl-12 pr-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white font-black text-secondary uppercase tracking-widest placeholder:text-slate-300 transition-all duration-300"
               />
-              <Search className="absolute left-3 top-4 text-slate-400" size={18} />
+              <Search className="absolute left-4 top-4.5 text-slate-400 group-focus-within:text-primary" size={20} />
             </form>
             <div className="space-y-4">
               <Link 
@@ -229,7 +229,7 @@ export function Header() {
                 className="block text-base font-black uppercase tracking-widest text-secondary hover:text-primary py-2"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Catch-22 Catch-Snaps
+                Snaps
               </Link>
               <Link 
                 href="/partners" 
