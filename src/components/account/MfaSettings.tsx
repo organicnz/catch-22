@@ -34,6 +34,13 @@ export function MfaSettings() {
 
   async function startEnrollment() {
     setError('');
+    
+    // Check if an unverified factor already exists and remove it to avoid conflicts
+    const existingUnverified = factors.find(f => f.status === 'unverified');
+    if (existingUnverified) {
+      await supabase.auth.mfa.unenroll({ factorId: existingUnverified.id });
+    }
+
     setEnrolling(true);
     const { data, error } = await supabase.auth.mfa.enroll({
       factorType: 'totp',
