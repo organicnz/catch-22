@@ -5,6 +5,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { getStorageUrl } from '@/lib/supabase';
 
+const SLIDE_DURATION = 8000; // 8 seconds per slide
+
 const slides = [
   {
     image: 'site/thunder-charter.jpg',
@@ -25,6 +27,24 @@ const slides = [
     link: '/about-us'
   },
   {
+    image: 'site/partner-thunder.jpg',
+    upperTitle: 'Legendary Status',
+    title: 'Tested in',
+    highlight: 'the Wild.',
+    description: 'From the Three Kings to the Deep South, our gear is pushed to its absolute limits by NZ guides.',
+    cta: 'Meet Partners',
+    link: '/partners'
+  },
+  {
+    image: 'site/partner-seacleaners.jpg',
+    upperTitle: 'Sustainable Future',
+    title: 'Protect our',
+    highlight: 'Coast.',
+    description: 'We are proud to support Sea Cleaners by donating 2.5% of all profits to keeping NZ waters pristine.',
+    cta: 'Support Mission',
+    link: '/partners'
+  },
+  {
     image: 'site/snap1.jpg',
     upperTitle: 'Community First',
     title: 'Join the',
@@ -41,7 +61,7 @@ export function HeroSlider() {
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 6000);
+    }, SLIDE_DURATION);
     return () => clearInterval(timer);
   }, []);
 
@@ -54,7 +74,7 @@ export function HeroSlider() {
           className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
             index === currentSlide ? 'opacity-60 z-0 scale-100' : 'opacity-0 -z-10 scale-110'
           }`}
-          style={{ transition: 'opacity 1500ms ease-in-out, transform 8000ms linear' }}
+          style={{ transition: 'opacity 2000ms ease-in-out, transform 12000ms linear' }}
         >
           <Image
             src={getStorageUrl(slide.image)}
@@ -73,17 +93,17 @@ export function HeroSlider() {
       {/* Content */}
       <div className="relative z-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
         <div className="max-w-4xl">
-          <span className="text-primary font-black uppercase tracking-[0.5em] text-[10px] md:text-xs mb-8 block animate-fade-in key-{currentSlide}">
+          <span key={`upper-${currentSlide}`} className="text-primary font-black uppercase tracking-[0.5em] text-[10px] md:text-xs mb-8 block animate-fade-in">
             {slides[currentSlide].upperTitle}
           </span>
-          <h1 className="text-6xl md:text-8xl lg:text-[10rem] font-black tracking-tight text-white uppercase leading-[0.8] mb-12 animate-fade-in transition-all duration-700">
+          <h1 key={`title-${currentSlide}`} className="text-6xl md:text-8xl lg:text-[10rem] font-black tracking-tight text-white uppercase leading-[0.8] mb-12 animate-fade-in transition-all duration-700">
             {slides[currentSlide].title} <br /> 
             <span className="text-primary italic">{slides[currentSlide].highlight}</span>
           </h1>
-          <p className="mt-4 text-xl md:text-2xl text-slate-300 font-medium mb-16 max-w-2xl leading-relaxed animate-fade-in delay-200">
+          <p key={`desc-${currentSlide}`} className="mt-4 text-xl md:text-2xl text-slate-300 font-medium mb-16 max-w-2xl leading-relaxed animate-fade-in delay-200">
             {slides[currentSlide].description}
           </p>
-          <div className="flex flex-wrap gap-8 items-center animate-fade-in delay-500">
+          <div key={`cta-${currentSlide}`} className="flex flex-wrap gap-8 items-center animate-fade-in delay-500">
             <Link
               href={slides[currentSlide].link}
               className="group relative inline-flex items-center justify-center bg-primary text-secondary font-black py-6 px-16 rounded-full transition-all duration-500 uppercase tracking-[0.3em] text-xs shadow-2xl shadow-primary/20 hover:scale-105"
@@ -105,8 +125,11 @@ export function HeroSlider() {
           >
             {index === currentSlide && (
               <div 
-                className="absolute top-0 left-0 h-full bg-primary animate-[progress_6s_linear_forwards]"
-                style={{ width: '100%' }}
+                className="absolute top-0 left-0 h-full bg-primary"
+                style={{ 
+                  animation: `progress ${SLIDE_DURATION}ms linear forwards`,
+                  width: '100%' 
+                }}
               />
             )}
           </button>
@@ -125,10 +148,10 @@ export function HeroSlider() {
           to { transform: translateX(0); }
         }
         .animate-fade-in {
-          animation: fadeIn 1s ease-out forwards;
+          animation: fadeIn 1.2s ease-out forwards;
         }
         @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(20px); }
+          from { opacity: 0; transform: translateY(30px); }
           to { opacity: 1; transform: translateY(0); }
         }
       `}</style>
