@@ -40,8 +40,8 @@ export default function MfaChallengePage() {
     setError('');
 
     const { data: factors, error: factorsError } = await supabase.auth.mfa.listFactors();
-    if (factorsError) {
-      setError(factorsError.message);
+    if (factorsError || !factors?.all) {
+      setError(factorsError?.message || 'Could not load security factors. Please try again.');
       setLoading(false);
       return;
     }
