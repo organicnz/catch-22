@@ -20,29 +20,29 @@ const slides = [
   {
     image: 'site/about-hero.jpg',
     upperTitle: 'Proven Performance',
-    title: 'Tried and',
-    highlight: 'True.',
+    title: 'Tested in',
+    highlight: 'the Wild.',
     description: 'Tested by experts, trusted by charters. We provide tools that stand up to the challenge.',
     cta: 'Our Story',
     link: '/about-us'
   },
   {
-    image: 'site/partner-thunder.jpg',
-    upperTitle: 'Legendary Status',
-    title: 'Tested in',
-    highlight: 'the Wild.',
-    description: 'From the Three Kings to the Deep South, our gear is pushed to its absolute limits by NZ guides.',
-    cta: 'Meet Partners',
-    link: '/partners'
+    image: 'site/snap5.jpg',
+    upperTitle: 'Rugged Excellence',
+    title: 'Tried and',
+    highlight: 'True.',
+    description: 'From the Three Kings to the Deep South, our gear is pushed to its absolute limits by the elements.',
+    cta: 'View Gallery',
+    link: '/gallery'
   },
   {
-    image: 'site/partner-seacleaners.jpg',
-    upperTitle: 'Sustainable Future',
-    title: 'Protect our',
-    highlight: 'Coast.',
-    description: 'We are proud to support Sea Cleaners by donating 2.5% of all profits to keeping NZ waters pristine.',
-    cta: 'Support Mission',
-    link: '/partners'
+    image: 'site/snap4.jpg',
+    upperTitle: 'Precision Engineering',
+    title: 'Built for',
+    highlight: 'Results.',
+    description: 'Every piece of gear is designed for maximum feedback and durability in the heat of the catch.',
+    cta: 'Shop the Gear',
+    link: '/products'
   },
   {
     image: 'site/snap1.jpg',
@@ -50,7 +50,7 @@ const slides = [
     title: 'Join the',
     highlight: 'Crew.',
     description: 'A community of dedicated anglers sharing their best moments from the NZ coastline.',
-    cta: 'View Gallery',
+    cta: 'View Snaps',
     link: '/gallery'
   }
 ];
