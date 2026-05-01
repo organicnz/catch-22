@@ -83,7 +83,7 @@ export const useSettingsStore = create<SettingsState>()(
         const updatedSettings = { ...previousSettings, ...newSettings };
         
         // Optimistic update
-        set({ settings: updatedSettings });
+        set({ settings: updatedSettings, error: null });
 
         try {
           const result = await updateUserSettingsAction(newSettings);

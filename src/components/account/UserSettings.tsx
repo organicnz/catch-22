@@ -127,8 +127,16 @@ export function UserSettings() {
       </div>
 
       {error && (
-        <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl text-rose-600 text-xs font-black uppercase tracking-widest text-center">
-          Error saving settings: {error}
+        <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl text-rose-600 text-[10px] font-black uppercase tracking-widest text-center animate-in slide-in-from-top-2 duration-300">
+          Error: {error}
+          <p className="mt-1 text-[8px] opacity-60">If this persists, please try a hard reload (Cmd+Shift+R)</p>
+        </div>
+      )}
+
+      {!error && !isLoading && (
+        <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-2xl text-emerald-600 text-[10px] font-black uppercase tracking-widest text-center flex items-center justify-center gap-2">
+          <CheckCircle2 size={14} />
+          Settings are synced with the cloud
         </div>
       )}
     </div>
