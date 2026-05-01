@@ -41,13 +41,8 @@ export const metadata: Metadata = {
     images: ['https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/media/site/thunder-charter.jpg'],
   },
   icons: {
-    icon: [
-      { url: 'https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/media/site/logo.png' },
-      { url: 'https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/media/site/logo.png', sizes: '32x32', type: 'image/png' },
-    ],
-    apple: [
-      { url: 'https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/media/site/logo.png', sizes: '180x180', type: 'image/png' },
-    ],
+    icon: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
   },
 };
 
