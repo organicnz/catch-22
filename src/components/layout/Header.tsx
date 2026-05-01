@@ -145,9 +145,20 @@ export function Header() {
             </form>
 
             <div className="flex items-center gap-1 md:gap-4">
-              <Link href={user ? "/account" : "/login"} className="p-3 rounded-full text-white hover:bg-white/10 hover:text-primary transition-all" title="Account">
-                <User size={20} />
-              </Link>
+              <div className="flex items-center gap-1">
+                <Link href={user ? "/account" : "/login"} className="p-3 rounded-full text-white hover:bg-white/10 hover:text-primary transition-all" title="Account">
+                  <User size={20} />
+                </Link>
+                {user && (
+                  <button 
+                    onClick={handleLogout} 
+                    className="hidden md:flex p-3 rounded-full text-white hover:bg-white/10 hover:text-red-500 transition-all" 
+                    title="Sign Out"
+                  >
+                    <LogOut size={20} />
+                  </button>
+                )}
+              </div>
               
               <Link href="/wishlist" className="relative p-3 rounded-full text-white hover:bg-white/10 hover:text-primary transition-all" title="Wishlist">
                 <Heart size={20} />

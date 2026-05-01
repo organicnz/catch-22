@@ -2,6 +2,9 @@ import { createServerClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import { MfaSettings } from '@/components/account/MfaSettings'
 import { UserSettings } from '@/components/account/UserSettings'
+import { LogOut, ArrowRight } from 'lucide-react'
+import { createClient } from '@/lib/supabase'
+import { LogoutButton } from '@/components/account/LogoutButton'
 
 export default async function AccountPage() {
   const supabase = await createServerClient();
@@ -107,9 +110,17 @@ export default async function AccountPage() {
         {/* User Preferences Section */}
         <UserSettings />
 
-        {/* 2FA Settings Section */}
         <div className="max-w-xl">
            <MfaSettings />
+        </div>
+
+        {/* Danger Zone / Logout */}
+        <div className="mt-24 pt-12 border-t border-slate-100 flex flex-col items-start gap-8">
+          <div className="flex flex-col">
+            <h2 className="text-xl font-black text-secondary uppercase tracking-widest mb-2">Session Control</h2>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Sign out of your account on this device</p>
+          </div>
+          <LogoutButton />
         </div>
       </div>
     </div>
