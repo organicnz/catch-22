@@ -1,6 +1,6 @@
 'use server';
 
-import { createClient } from '@/lib/supabase';
+import { createServerClient } from '@/lib/supabase-server';
 import { revalidatePath } from 'next/cache';
 
 export async function submitContact(formData: FormData) {
@@ -30,7 +30,7 @@ export async function submitContact(formData: FormData) {
     return { error: 'Message flagged as potential spam. Please revise.' };
   }
 
-  const supabase = createClient();
+  const supabase = await createServerClient();
   
   const { error } = await supabase.from('contact_submissions').insert({
     name,

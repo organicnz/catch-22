@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { createClient, getStorageUrl } from '@/lib/supabase';
+import { getStorageUrl } from '@/lib/supabase';
+import { createServerClient } from '@/lib/supabase-server';
 import { Suspense } from 'react';
 import { Metadata } from 'next';
 import { sanitizeText } from '@/lib/sanitize';
@@ -33,7 +34,7 @@ export const metadata: Metadata = {
 };
 
 async function BestSellers() {
-  const supabase = createClient();
+  const supabase = await createServerClient();
   
   // Fetch featured products (Best Sellers)
   const { data: featuredProducts } = await supabase
@@ -67,9 +68,9 @@ function BestSellersLoading() {
 }
 
 async function DealOfTheDay() {
-  const supabase = createClient();
+  const supabase = await createServerClient();
   
-  // Fetch one product on sale
+  // Fetch a deal product (using the first product with a sale price)
   const { data: dealProduct, error: dealError } = await supabase
     .from('products')
     .select('id, name, slug, price, regular_price, sale_price, image_url, description')

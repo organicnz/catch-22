@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { getSettings } from "@/lib/supabase-server";
 import { SettingsHydrator } from "@/components/account/SettingsHydrator";
+import { Analytics } from "@vercel/analytics/react";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -63,6 +64,7 @@ export default async function RootLayout({
         <Header />
         <main className="flex-grow flex flex-col">{children}</main>
         <Footer />
+        <Analytics />
       </body>
     </html>
   );
