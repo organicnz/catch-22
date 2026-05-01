@@ -1,58 +1,50 @@
-import Image from 'next/image';
-import Link from 'next/link';
-import { getStorageUrl } from '@/lib/supabase';
+import Image from "next/image";
+import Link from "next/link";
+import { getStorageUrl } from "@/lib/supabase";
+import { Heart } from "lucide-react";
 
 export function CharitySection() {
   return (
-    <section aria-label="Charity — Sea Cleaners donation" className="bg-secondary py-20 text-white relative overflow-hidden">
-      {/* Dynamic Background Elements */}
-      <div className="absolute inset-0 opacity-20 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary rounded-full blur-[120px] animate-pulse delay-700" />
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 relative z-10">
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-24">
-          <div className="lg:w-1/2">
-            <div className="flex items-center gap-6 mb-8">
-               <div className="w-20 h-20 bg-primary rounded-3xl rotate-12 flex items-center justify-center text-secondary font-black text-3xl shadow-2xl shadow-primary/20">2.5%</div>
-               <div className="h-px w-24 bg-primary/30 hidden md:block"></div>
+    <section className="py-32 bg-secondary border-t border-white/5 overflow-hidden">
+      <div className="container mx-auto px-4">
+        <div className="flex flex-col lg:flex-row items-center gap-20 lg:gap-32">
+          <div className="lg:w-1/2 relative">
+            <div className="relative aspect-video rounded-[3rem] overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] z-10 border border-white/10 group">
+              <Image
+                src={getStorageUrl('site/partner-seacleaners.jpg')}
+                alt="Sea Cleaners NZ"
+                fill
+                className="object-cover group-hover:scale-110 transition-transform duration-[2000ms] ease-out"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-secondary/80 via-transparent to-transparent opacity-60" />
             </div>
-            
-            <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-[0.85] mb-8">
-              Protecting <br /> <span className="text-primary">The Waters</span> <br /> We Love
-            </h2>
-            
-            <p className="text-lg text-slate-300 font-medium mb-12 max-w-xl leading-relaxed">
-              We donate 2.5% of all profits to the <strong className="text-white">NZ Sea Cleaners Charity Trust</strong>. Every purchase you make directly contributes to removing plastic and debris from New Zealand&apos;s coastlines.
-            </p>
-
-            <div className="flex flex-wrap gap-6 items-center">
-              <Link href="/about-us" className="bg-primary hover:bg-primary-dark text-secondary font-black py-4 px-10 rounded-full transition-all uppercase tracking-widest text-xs">
-                Our Mission
-              </Link>
-              <a href="https://seacleaners.org.nz/" target="_blank" rel="noopener noreferrer" className="text-xs font-black uppercase tracking-[0.3em] text-primary border-b border-primary/40 hover:border-primary transition-all">
-                Visit Sea Cleaners
-              </a>
-            </div>
+            {/* Decorative background element */}
+            <div className="absolute -top-10 -left-10 w-40 h-40 bg-primary opacity-10 rounded-full blur-3xl z-0"></div>
+            <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-primary opacity-5 rounded-full blur-3xl z-0"></div>
           </div>
 
-          <div className="lg:w-1/2 relative group">
-            <div className="relative aspect-[4/3] rounded-[3rem] overflow-hidden border border-white/10 shadow-2xl transition-transform duration-700 group-hover:scale-[1.02]">
-              <Image 
-                src={getStorageUrl('partner-seacleaners.jpg')}
-                alt="NZ Sea Cleaners boat in action"
-                fill
-                className="object-cover grayscale hover:grayscale-0 transition-all duration-700"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-secondary via-transparent to-transparent opacity-60" />
+          <div className="lg:w-1/2 max-w-2xl">
+            <div className="inline-flex items-center gap-3 px-4 py-2 bg-primary/10 border border-primary/20 rounded-full mb-10">
+              <Heart className="w-3 h-3 text-primary fill-primary" />
+              <span className="text-primary font-black uppercase tracking-[0.3em] text-[10px]">Guardians of the Coast</span>
             </div>
-            {/* Floating label */}
-            <div className="absolute -bottom-6 -right-6 bg-white p-6 rounded-2xl shadow-2xl hidden md:block">
-              <p className="text-secondary font-black uppercase tracking-widest text-[10px] mb-1">Impact Report</p>
-              <p className="text-2xl font-black text-secondary tracking-tighter">10,000+ KG</p>
-              <p className="text-slate-500 font-bold text-[9px] uppercase tracking-wider">Plastic Removed Yearly</p>
-            </div>
+            
+            <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter leading-[0.9] mb-10">
+              Protecting Our <br /> <span className="text-primary italic">Playground</span>
+            </h2>
+            
+            <p className="text-slate-400 text-lg md:text-xl font-medium mb-12 leading-relaxed">
+              At Catch-22, we believe in preserving the rugged beauty of the New Zealand coast. 
+              A portion of every purchase goes directly to <span className="text-white font-black italic underline decoration-primary decoration-4 underline-offset-8">Sea Cleaners</span>, 
+              helping remove plastic and debris from our oceans to ensure future generations can experience the same thrill of the chase.
+            </p>
+
+            <Link 
+              href="/about-us" 
+              className="group inline-flex items-center gap-6 text-white font-black uppercase tracking-[0.4em] text-[10px] hover:text-primary transition-all"
+            >
+              Learn about our mission <span className="text-2xl group-hover:translate-x-4 transition-transform text-primary">&rarr;</span>
+            </Link>
           </div>
         </div>
       </div>

@@ -15,13 +15,13 @@ export const metadata: Metadata = {
     siteName: 'Catch-22',
     locale: 'en_NZ',
     type: 'website',
-    images: [{ url: getStorageUrl('partner-thunder.jpg'), width: 1200, height: 630, alt: 'Catch-22 Partners — THUNDER Charter and Sea Cleaners' }],
+    images: [{ url: 'https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/media/site/partner-thunder.jpg', width: 1200, height: 630, alt: 'Catch-22 Partners — THUNDER Charter and Sea Cleaners' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Our Partners | Catch-22 New Zealand',
     description: 'Meet the fishing guides, charters, and conservation organisations that test and trust Catch-22 gear in the harshest New Zealand conditions.',
-    images: [getStorageUrl('partner-thunder.jpg')],
+    images: ['https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/media/site/partner-thunder.jpg'],
   },
 };
 
@@ -31,35 +31,35 @@ export default function PartnersPage() {
       name: 'Ham & Ty\'s Fishing Adventures',
       description: 'Follow Ham & Ty for some off the hook entertainment. Check out their shop for custom mugs, hats, and the legendary Sledger Rigs.',
       link: 'https://www.hamandtys.com/',
-      image: getStorageUrl('partner-ham-ty.jpg'),
+      image: getStorageUrl('site/partner-ham-ty.jpg'),
       imageAlt: 'Ham and Ty fishing with Catch-22 gear'
     },
     {
       name: 'Northland Fishing and Mental Wellness Support Group',
       description: 'A dedicated initiative combining the healing power of fishing and the outdoors with community support for mental wellness. A safe place to share and heal.',
       link: 'https://givealittle.co.nz/cause/northland-fishing-and-mental-wellness-support-group',
-      image: getStorageUrl('snap1.jpg'), // Using a generic snap as placeholder if no partner logo exists
+      image: getStorageUrl('site/snap1.jpg'),
       imageAlt: 'Northland Fishing and Mental Wellness Support Group community'
     },
     {
       name: 'NZ ANGLER',
       description: 'Our mates down at NZ ANGLER provide solid acidwrap rods and pro-series reels for the serious fisho.',
       link: 'https://nzangler.co.nz/',
-      image: getStorageUrl('snap2.jpg'), // Using a generic snap as placeholder
+      image: getStorageUrl('site/snap2.jpg'),
       imageAlt: 'NZ Angler fishing rods and reels'
     },
     {
       name: 'THUNDER Charter',
       description: 'Run by Charles at Bay of Plenty Boat Hire. A premier charter experience testing Catch-22 gear in the toughest conditions.',
       link: 'https://www.bayofplentyboathire.co.nz',
-      image: getStorageUrl('partner-thunder.jpg'),
+      image: getStorageUrl('site/partner-thunder.jpg'),
       imageAlt: 'THUNDER Charter boat on Bay of Plenty waters'
     },
     {
       name: 'Sea Cleaners',
       description: 'Dedicated to preserving our New Zealand coastlines. We are proud to support their mission by donating 2.5% of all profits.',
       link: 'https://seacleaners.org.nz/',
-      image: getStorageUrl('partner-seacleaners.jpg'),
+      image: getStorageUrl('site/partner-seacleaners.jpg'),
       imageAlt: 'Sea Cleaners volunteers cleaning New Zealand coastline'
     }
   ];

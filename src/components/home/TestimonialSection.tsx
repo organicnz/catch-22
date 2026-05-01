@@ -1,85 +1,65 @@
-import Image from 'next/image';
-import { getStorageUrl } from '@/lib/supabase';
+import { Quote, Star } from "lucide-react";
 
-const TESTIMONIALS = [
+const testimonials = [
   {
-    quote: "There you go mate 40.1kg. We got 4 yesterday - your braid doing the business.",
-    author: "Charles Cockery",
-    org: "THUNDER Charter"
+    name: "Capt. Finn",
+    role: "Thunder Charters",
+    content: "We've been using Catch-22 braid on our commercial rigs for two seasons now. It's the only line that stands up to the abrasion of the Three Kings coast.",
+    stars: 5
   },
   {
-    quote: "We landed a couple of 30+kg kingies on the new line. All on your braid.",
-    author: "Charles Cockery",
-    org: "THUNDER Charter"
+    name: "Sarah Jenkins",
+    role: "Tournament Angler",
+    content: "The feedback through the rod with this braid is incredible. I can feel every micro-touch, even in deep water. A complete game changer for my setup.",
+    stars: 5
   },
   {
-    quote: "Been out catching 30kg kingfish on your 60lb braid 🤙 What your braid latched onto mate.",
-    author: "Charles Cockery",
-    org: "THUNDER Charter"
-  },
-  {
-    quote: "2.5% of all profits donated to NZ Sea Cleaners. Quality gear that gives back.",
-    author: "Ham & Ty",
-    org: "Sledger Rigs"
+    name: "Mike Thompson",
+    role: "Weekend Warrior",
+    content: "Finally, a premium brand that actually understands NZ conditions. The lures are practically indestructible and the colors are perfectly matched to our baitfish.",
+    stars: 5
   }
 ];
 
 export function TestimonialSection() {
   return (
-    <section aria-label="Testimonials — Trusted By Pros" className="bg-white py-32 overflow-hidden relative">
-      {/* Texture Layer */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
-
-      <div className="max-w-7xl mx-auto px-4 relative z-10">
-        <div className="flex flex-col md:flex-row items-end justify-between mb-24 gap-8">
-          <div className="max-w-xl">
-            <span className="text-primary font-black uppercase tracking-[0.4em] text-[10px] mb-4 block">Field Tested</span>
-            <h2 className="text-4xl md:text-6xl font-black text-secondary uppercase tracking-tighter leading-[0.9]">
-              Trusted <br /> By The <span className="text-slate-300">Pros</span>
-            </h2>
-          </div>
-          <div className="h-px flex-grow bg-slate-100 hidden md:block mb-4 mx-12"></div>
-          <p className="text-slate-400 font-black uppercase tracking-widest text-[10px] mb-4">Real results from NZ waters</p>
+    <section className="py-40 bg-white relative overflow-hidden">
+      <div className="container mx-auto px-4 relative z-10">
+        <div className="max-w-xl mb-24">
+          <span className="text-primary font-black uppercase tracking-[0.4em] text-[10px] mb-4 block">Proven Performance</span>
+          <h2 className="text-5xl md:text-7xl font-black text-secondary uppercase tracking-tighter leading-[0.9]">
+            Trusted By <br /> <span className="text-slate-300">The Pros</span>
+          </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {TESTIMONIALS.map((t, i) => (
-            <div 
-              key={i} 
-              className="bg-slate-50 p-10 rounded-[2.5rem] border border-slate-100 hover:border-primary/30 transition-all duration-500 group relative"
-            >
-              <div className="absolute top-8 left-8 text-4xl font-black text-slate-200 group-hover:text-primary transition-colors opacity-40">&quot;</div>
-              <div className="relative z-10 pt-8">
-                <p className="text-lg font-bold text-secondary leading-snug mb-10 min-h-[6rem]">
-                  {t.quote}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+          {testimonials.map((t, i) => (
+            <div key={i} className="group p-10 lg:p-12 rounded-[3.5rem] bg-slate-50 border border-slate-100 hover:bg-white hover:shadow-[0_80px_100px_-30px_rgba(0,0,0,0.1)] hover:-translate-y-3 transition-all duration-700 ease-out">
+              <div className="flex gap-1 mb-10">
+                {[...Array(t.stars)].map((_, i) => (
+                  <Star key={i} className="w-3 h-3 fill-primary text-primary" />
+                ))}
+              </div>
+              
+              <div className="relative mb-10">
+                <Quote className="w-12 h-12 text-primary/10 absolute -top-4 -left-4 group-hover:text-primary/20 transition-colors duration-500" />
+                <p className="text-slate-600 font-medium text-lg lg:text-xl leading-relaxed relative z-10 italic">
+                  "{t.content}"
                 </p>
-                <div className="flex items-center gap-4 border-t border-slate-200 pt-8">
-                  <div className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center text-white font-black text-[10px] uppercase">
-                    {t.author.split(' ').map(n => n[0]).join('')}
-                  </div>
-                  <div>
-                    <p className="font-black text-secondary uppercase tracking-widest text-[10px]">{t.author}</p>
-                    <p className="text-primary font-black uppercase tracking-widest text-[8px] mt-0.5">{t.org}</p>
-                  </div>
-                </div>
+              </div>
+
+              <div className="pt-8 border-t border-slate-100">
+                <h4 className="font-black text-secondary uppercase tracking-[0.2em] text-xs">{t.name}</h4>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">{t.role}</p>
               </div>
             </div>
           ))}
         </div>
-
-        {/* Brand Bar */}
-        <div className="mt-32 pt-16 border-t border-slate-100">
-           <div className="flex flex-wrap justify-center items-center gap-12 md:gap-24 opacity-30 grayscale hover:opacity-60 transition-all duration-500">
-              {/* Using local partner images identified earlier */}
-              <div className="relative h-12 w-32">
-                <Image src={getStorageUrl("logo.svg")} alt="Catch-22" fill className="object-contain" />
-              </div>
-              <p className="font-black text-secondary uppercase tracking-[0.5em] text-xs">Tested @ Bay of Plenty</p>
-              <p className="font-black text-secondary uppercase tracking-[0.5em] text-xs">Custom Lures</p>
-              <p className="font-black text-secondary uppercase tracking-[0.5em] text-xs">Premium Braid</p>
-           </div>
-        </div>
       </div>
+      
+      {/* Decorative background flair */}
+      <div className="absolute top-1/2 left-0 w-96 h-96 bg-primary opacity-[0.03] rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2" />
+      <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-secondary opacity-[0.02] rounded-full blur-[150px] translate-x-1/4 translate-y-1/4" />
     </section>
   );
 }
