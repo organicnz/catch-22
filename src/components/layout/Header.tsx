@@ -78,12 +78,15 @@ export function Header() {
           {/* Desktop Navigation & Search */}
           <div className="hidden md:flex flex-1 items-center justify-between ml-8">
             <nav className="flex space-x-8">
+              <Link href="/" className="text-secondary hover:text-primary font-bold uppercase tracking-wider text-sm transition-colors py-8">
+                Home
+              </Link>
               <div className="relative group">
                 <button 
                   className="flex items-center gap-1 text-secondary hover:text-primary font-bold uppercase tracking-wider text-sm transition-colors py-8"
                   onMouseEnter={() => setIsShopOpen(true)}
                 >
-                  Shop Gear <ChevronDown size={14} strokeWidth={3} />
+                  Shop <ChevronDown size={14} strokeWidth={3} />
                 </button>
                 
                 {/* Desktop Dropdown */}
@@ -92,7 +95,7 @@ export function Header() {
                   onMouseLeave={() => setIsShopOpen(false)}
                 >
                   <Link href="/products" className="block px-6 py-2 text-xs font-black text-secondary uppercase tracking-widest hover:text-primary hover:bg-slate-50 transition-colors">
-                    All Products
+                    All Gear
                   </Link>
                   {categories.map((cat) => (
                     <Link 
@@ -105,20 +108,17 @@ export function Header() {
                   ))}
                 </div>
               </div>
-              <Link href="/about-us" className="text-secondary hover:text-primary font-bold uppercase tracking-wider text-sm transition-colors py-8">
-                About
+              <Link href="/gallery" className="text-secondary hover:text-primary font-bold uppercase tracking-wider text-sm transition-colors py-8">
+                Catch-22 Catch-Snaps
               </Link>
-              <Link href="/contact" className="text-secondary hover:text-primary font-bold uppercase tracking-wider text-sm transition-colors py-8">
-                Contact
+              <Link href="/partners" className="text-secondary hover:text-primary font-bold uppercase tracking-wider text-sm transition-colors py-8">
+                Visit Our Partners
               </Link>
               <Link href="/faqs" className="text-secondary hover:text-primary font-bold uppercase tracking-wider text-sm transition-colors py-8">
                 FAQs
               </Link>
-              <Link href="/gallery" className="text-secondary hover:text-primary font-bold uppercase tracking-wider text-sm transition-colors py-8">
-                Snaps
-              </Link>
-              <Link href="/partners" className="text-secondary hover:text-primary font-bold uppercase tracking-wider text-sm transition-colors py-8">
-                Partners
+              <Link href="/contact" className="text-secondary hover:text-primary font-bold uppercase tracking-wider text-sm transition-colors py-8">
+                Contact
               </Link>
             </nav>
 
@@ -186,12 +186,19 @@ export function Header() {
               <Search className="absolute left-3 top-4 text-slate-400" size={18} />
             </form>
             <div className="space-y-4">
+              <Link 
+                href="/" 
+                className="block text-base font-black uppercase tracking-widest text-secondary hover:text-primary py-2"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Home
+              </Link>
               <div>
                 <button 
                   className="flex items-center justify-between w-full text-left text-base font-black uppercase tracking-widest text-secondary mb-4"
                   onClick={() => setIsShopOpen(!isShopOpen)}
                 >
-                  Shop Gear <ChevronDown size={18} className={`transition-transform duration-200 ${isShopOpen ? 'rotate-180' : ''}`} />
+                  Shop <ChevronDown size={18} className={`transition-transform duration-200 ${isShopOpen ? 'rotate-180' : ''}`} />
                 </button>
                 
                 {isShopOpen && (
@@ -201,7 +208,7 @@ export function Header() {
                       className="block text-sm font-bold uppercase tracking-wider text-slate-500 hover:text-primary"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      All Products
+                      All Gear
                     </Link>
                     {categories.map((cat) => (
                       <Link 
@@ -218,18 +225,18 @@ export function Header() {
               </div>
               
               <Link 
-                href="/about-us" 
+                href="/gallery" 
                 className="block text-base font-black uppercase tracking-widest text-secondary hover:text-primary py-2"
                 onClick={() => setIsMenuOpen(false)}
               >
-                About
+                Catch-22 Catch-Snaps
               </Link>
               <Link 
-                href="/contact" 
+                href="/partners" 
                 className="block text-base font-black uppercase tracking-widest text-secondary hover:text-primary py-2"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Contact
+                Visit Our Partners
               </Link>
               <Link 
                 href="/faqs" 
@@ -239,18 +246,11 @@ export function Header() {
                 FAQs
               </Link>
               <Link 
-                href="/gallery" 
+                href="/contact" 
                 className="block text-base font-black uppercase tracking-widest text-secondary hover:text-primary py-2"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Snaps
-              </Link>
-              <Link 
-                href="/partners" 
-                className="block text-base font-black uppercase tracking-widest text-secondary hover:text-primary py-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Partners
+                Contact
               </Link>
             </div>
 

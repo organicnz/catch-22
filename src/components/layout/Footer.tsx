@@ -22,24 +22,15 @@ export function Footer() {
             </p>
           </div>
           
-          <div>
-            <h3 className="text-primary text-sm font-black uppercase tracking-widest mb-6">Shop Gear</h3>
-            <ul className="space-y-4 text-sm font-bold">
-              <li><Link href="/products" className="hover:text-primary transition-colors uppercase tracking-wider">All Products</Link></li>
-              <li><Link href="/products/braid" className="hover:text-primary transition-colors uppercase tracking-wider">Fishing Braid</Link></li>
-              <li><Link href="/products/lures" className="hover:text-primary transition-colors uppercase tracking-wider">Lures</Link></li>
-              <li><Link href="/cart" className="hover:text-primary transition-colors uppercase tracking-wider">Your Cart</Link></li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="text-primary text-sm font-black uppercase tracking-widest mb-6">Information</h3>
-            <ul className="space-y-4 text-sm font-bold">
-              <li><Link href="/about-us" className="hover:text-primary transition-colors uppercase tracking-wider">About Us</Link></li>
+          <div className="col-span-1 md:col-span-2">
+            <h3 className="text-primary text-sm font-black uppercase tracking-widest mb-6">Navigation</h3>
+            <ul className="grid grid-cols-2 gap-4 text-sm font-bold">
+              <li><Link href="/" className="hover:text-primary transition-colors uppercase tracking-wider">Home</Link></li>
+              <li><Link href="/products" className="hover:text-primary transition-colors uppercase tracking-wider">Shop</Link></li>
+              <li><Link href="/gallery" className="hover:text-primary transition-colors uppercase tracking-wider">Catch-22 Catch-Snaps</Link></li>
+              <li><Link href="/partners" className="hover:text-primary transition-colors uppercase tracking-wider">Visit Our Partners</Link></li>
               <li><Link href="/faqs" className="hover:text-primary transition-colors uppercase tracking-wider">FAQs</Link></li>
-              <li><Link href="/gallery" className="hover:text-primary transition-colors uppercase tracking-wider">Catch Snaps</Link></li>
-              <li><Link href="/partners" className="hover:text-primary transition-colors uppercase tracking-wider">Our Partners</Link></li>
-              <li><Link href="/contact" className="hover:text-primary transition-colors uppercase tracking-wider">Contact Us</Link></li>
+              <li><Link href="/contact" className="hover:text-primary transition-colors uppercase tracking-wider">Contact</Link></li>
             </ul>
           </div>
 
