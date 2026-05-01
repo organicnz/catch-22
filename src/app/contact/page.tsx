@@ -24,7 +24,7 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="bg-white py-16 px-4 sm:px-6 lg:px-8 min-h-[80vh]">
+    <div className="bg-white pt-28 pb-16 px-4 sm:px-6 lg:px-8 min-h-[80vh]">
       <div className="max-w-2xl mx-auto bg-slate-50 p-8 sm:p-12 rounded-3xl border border-slate-100 shadow-sm">
         <div className="flex flex-col items-center text-center mb-10">
           <h1 className="text-4xl font-black text-secondary uppercase tracking-tight mb-2">Contact Us</h1>
