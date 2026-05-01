@@ -3,13 +3,22 @@ import Stripe from 'stripe';
 import { createServerClient } from '@/lib/supabase-server';
 import { headers } from 'next/headers';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-01-27-acacia' as any,
-});
+export const dynamic = 'force-dynamic';
 
-const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+function getStripe() {
+  const stripeKey = process.env.STRIPE_SECRET_KEY;
+  if (!stripeKey) {
+    throw new Error('STRIPE_SECRET_KEY is not configured');
+  }
+  return new Stripe(stripeKey, {
+    apiVersion: '2025-01-27-acacia' as any,
+  });
+}
 
 export async function POST(req: Request) {
+  const stripe = getStripe();
+  const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  
   const body = await req.text();
   const headersList = await headers();
   const sig = headersList.get('stripe-signature');
@@ -31,7 +40,7 @@ export async function POST(req: Request) {
     const session = event.data.object as Stripe.Checkout.Session;
     
     try {
-      await handleCheckoutSessionCompleted(session);
+      await handleCheckoutSessionCompleted(session, stripe);
     } catch (error: any) {
       console.error('Error handling checkout.session.completed:', error);
       return NextResponse.json({ error: 'Failed to process order' }, { status: 500 });
@@ -41,7 +50,7 @@ export async function POST(req: Request) {
   return NextResponse.json({ received: true });
 }
 
-async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
+async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, stripe: Stripe) {
   const supabase = await createServerClient();
   
   // 1. Get line items with product details
@@ -89,7 +98,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
   if (orderError) throw orderError;
 
   // 4. Create order items
-  const orderItems = lineItems.data.map((item) => {
+  const orderItems = lineItems.data.map((item: Stripe.LineItem) => {
     const product = item.price?.product as Stripe.Product;
     return {
       order_id: order.id,
