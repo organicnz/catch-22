@@ -27,8 +27,8 @@ const slides = [
     link: '/about-us'
   },
   {
-    image: 'site/snap5.jpg',
-    upperTitle: 'Rugged Excellence',
+    image: 'site/snap2.jpg',
+    upperTitle: 'Trophy Results',
     title: 'Tried and',
     highlight: 'True.',
     description: 'From the Three Kings to the Deep South, our gear is pushed to its absolute limits by the elements.',
@@ -36,7 +36,7 @@ const slides = [
     link: '/gallery'
   },
   {
-    image: 'site/snap4.jpg',
+    image: 'site/snap3.jpg',
     upperTitle: 'Precision Engineering',
     title: 'Built for',
     highlight: 'Results.',
