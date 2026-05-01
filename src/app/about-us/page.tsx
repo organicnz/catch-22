@@ -101,7 +101,7 @@ export default function AboutPage() {
             Ready to <span className="text-primary not-italic">get equipped?</span>
           </h2>
           <Link 
-            href="/shop" 
+            href="/products" 
             className="inline-block bg-primary hover:bg-primary-dark text-secondary font-black py-5 px-12 rounded-full transition-all uppercase tracking-[0.2em] text-sm shadow-xl shadow-primary/20"
           >
             Explore our Shop

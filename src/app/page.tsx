@@ -201,7 +201,7 @@ export default async function Home() {
       {/* Hero Section: High Sensory Luxury */}
       <section aria-label="Hero — Equip Yourself for the Elements" className="relative h-[85vh] min-h-[700px] flex items-center overflow-hidden bg-secondary">
         <Image
-          src={getStorageUrl('site/hero.jpg')}
+          src={getStorageUrl('site/thunder-charter.jpg')}
           alt="Premium fishing gear in the New Zealand elements"
           fill
           className="object-cover opacity-60 scale-105 group-hover:scale-100 transition-transform duration-[2000ms]"
