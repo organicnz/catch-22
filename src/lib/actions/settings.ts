@@ -27,13 +27,28 @@ export async function updateUserSettingsAction(settings: Partial<UserSettings>) 
   }
 
   // Fetch current settings to merge
-  const { data: profile, error: fetchError } = await supabase
+  let { data: profile, error: fetchError } = await supabase
     .from('profiles')
     .select('settings')
     .eq('user_id', user.id)
     .single();
 
+  if (fetchError && fetchError.code === 'PGRST116') {
+    // Try by email if user_id match fails (for legacy profiles)
+    const { data: emailData, error: emailError } = await supabase
+      .from('profiles')
+      .select('settings')
+      .eq('email', user.email)
+      .single();
+    
+    if (!emailError) {
+      profile = emailData;
+      fetchError = null;
+    }
+  }
+
   if (fetchError && fetchError.code !== 'PGRST116') {
+    console.error('Fetch error in updateUserSettingsAction:', fetchError);
     return { error: 'Failed to fetch current settings' };
   }
 
@@ -42,19 +57,32 @@ export async function updateUserSettingsAction(settings: Partial<UserSettings>) 
     ...filteredSettings
   };
 
-  const { error: updateError } = await supabase
+  const { error: upsertError } = await supabase
     .from('profiles')
-    .update({ settings: updatedSettings })
-    .eq('user_id', user.id);
+    .upsert({ 
+      user_id: user.id,
+      email: user.email,
+      settings: updatedSettings,
+      updated_at: new Date().toISOString()
+    }, {
+      onConflict: 'user_id'
+    });
 
-  if (updateError) {
-    // Fallback for legacy email-only profiles
+  if (upsertError) {
+    // Final fallback by email if user_id conflict occurs or fails
     const { error: emailError } = await supabase
       .from('profiles')
-      .update({ settings: updatedSettings })
-      .eq('email', user.email);
+      .upsert({
+        email: user.email,
+        user_id: user.id,
+        settings: updatedSettings,
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'email'
+      });
     
     if (emailError) {
+      console.error('Upsert error in updateUserSettingsAction:', emailError);
       return { error: emailError.message };
     }
   }
