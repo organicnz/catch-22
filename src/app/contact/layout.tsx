@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { getStorageUrl } from '@/lib/supabase';
 
 export const metadata: Metadata = {
   title: 'Contact Us | Catch-22 New Zealand',
@@ -10,13 +11,13 @@ export const metadata: Metadata = {
     siteName: 'Catch-22',
     locale: 'en_NZ',
     type: 'website',
-    images: [{ url: '/hero.jpg', width: 1200, height: 630, alt: 'Contact Catch-22 New Zealand' }],
+    images: [{ url: getStorageUrl('hero.jpg'), width: 1200, height: 630, alt: 'Contact Catch-22 New Zealand' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Contact Us | Catch-22 New Zealand',
     description: 'Get in touch with the Catch-22 team for questions about orders, gear recommendations, or partnership enquiries.',
-    images: ['/hero.jpg'],
+    images: [getStorageUrl('hero.jpg')],
   },
 };
 

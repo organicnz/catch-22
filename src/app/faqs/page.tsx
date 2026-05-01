@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { getStorageUrl } from '@/lib/supabase';
 import Link from 'next/link';
 
 export const revalidate = 60;
@@ -13,13 +14,13 @@ export const metadata: Metadata = {
     siteName: 'Catch-22',
     locale: 'en_NZ',
     type: 'website',
-    images: [{ url: '/hero.jpg', width: 1200, height: 630, alt: 'Catch-22 Premium Fishing Gear New Zealand' }],
+    images: [{ url: getStorageUrl('hero.jpg'), width: 1200, height: 630, alt: 'Catch-22 Premium Fishing Gear New Zealand' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'FAQs | Catch-22 New Zealand',
     description: 'Find answers to common questions about Catch-22 fishing gear, shipping to New Zealand, charter bookings, and more.',
-    images: ['/hero.jpg'],
+    images: [getStorageUrl('hero.jpg')],
   },
 };
 

@@ -26,7 +26,18 @@ export const metadata: Metadata = {
     url: "https://catch-22.co.nz",
     siteName: "Catch-22",
     locale: "en_NZ",
-    type: "website",
+    images: [
+      {
+        url: 'https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/photos/hero.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Catch-22 | Built for the Elements',
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ['https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/photos/hero.jpg'],
   },
 };
 

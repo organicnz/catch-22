@@ -20,13 +20,13 @@ export const metadata: Metadata = {
     siteName: 'Catch-22',
     locale: 'en_NZ',
     type: 'website',
-    images: [{ url: '/thunder-charter.jpg', width: 1200, height: 630, alt: 'Catch-22 Premium Fishing Gear New Zealand' }],
+    images: [{ url: getStorageUrl('thunder-charter.jpg'), width: 1200, height: 630, alt: 'Catch-22 Premium Fishing Gear New Zealand' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Catch-22 | Premium Fishing Gear New Zealand',
     description: 'Premium fishing braid, lures, and apparel tested in the harshest New Zealand environments. Built to endure. Free NZ shipping available.',
-    images: ['/thunder-charter.jpg'],
+    images: [getStorageUrl('thunder-charter.jpg')],
   },
 };
 
@@ -160,56 +160,6 @@ async function DealOfTheDay() {
   );
 }
 
-async function LatestLogbookEntries() {
-  const supabase = createClient();
-  
-  // Fetch latest 3 posts
-  const { data: posts, error: postsError } = await supabase
-    .from('content')
-    .select('id, title, slug, created_at')
-    .eq('status', 'publish')
-    .eq('type', 'post')
-    .order('created_at', { ascending: false })
-    .limit(3);
-
-  if (postsError || !posts || posts.length === 0) return (
-    <div className="text-center py-12">
-      <p className="text-slate-400 font-black uppercase tracking-widest text-xs">No logbook entries yet.</p>
-    </div>
-  );
-
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-      {posts.map((post) => {
-        const sanitizedTitle = sanitizeText(post.title);
-        return (
-          <article key={post.id} className="group bg-white p-10 rounded-[3rem] border border-slate-100 hover:border-primary/40 shadow-sm hover:shadow-2xl transition-all duration-500 relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-              <div className="w-24 h-24 bg-primary rounded-full blur-2xl" />
-            </div>
-            <time dateTime={post.created_at} className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-6 block">
-              {new Date(post.created_at).toLocaleDateString('en-NZ', {
-                month: 'short', day: 'numeric', year: 'numeric'
-              })}
-            </time>
-            <h3 className="text-xl font-black text-secondary uppercase leading-tight mb-8 group-hover:text-primary transition-colors line-clamp-2 min-h-[3.5rem]">
-              <Link href={`/${post.slug}`}>
-                {sanitizedTitle}
-              </Link>
-            </h3>
-            <Link 
-              href={`/${post.slug}`}
-              className="text-[10px] font-black text-primary uppercase tracking-[0.25em] inline-flex items-center gap-3 group-hover:gap-5 transition-all"
-            >
-              Read Story <span className="text-lg">&rarr;</span>
-            </Link>
-          </article>
-        );
-      })}
-    </div>
-  );
-}
-
 export default async function Home() {
   return (
     <div className="bg-white">
@@ -322,33 +272,6 @@ export default async function Home() {
       {/* Charity: NZ Sea Cleaners */}
       <CharitySection />
 
-      {/* Logbook: Storytelling Preview */}
-      <section className="bg-slate-50 border-y border-slate-100 py-32">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col items-center mb-24 text-center">
-            <span className="text-primary font-black uppercase tracking-[0.4em] text-[10px] mb-6">Field Reports</span>
-            <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-secondary uppercase leading-[0.9]">
-              The <br /> <span className="text-slate-400">Logbook</span>
-            </h2>
-            <p className="mt-8 text-slate-500 font-medium max-w-2xl leading-relaxed text-lg">
-              Stay updated with our latest adventures, gear reviews, and fishing tips from the Catch-22 crew.
-            </p>
-          </div>
-
-          <Suspense fallback={<div className="h-64 flex items-center justify-center text-slate-300 font-black uppercase tracking-[0.3em] text-[10px]">Loading Logbook...</div>}>
-            <LatestLogbookEntries />
-          </Suspense>
-
-          <div className="mt-24 text-center">
-            <Link 
-              href="/blog" 
-              className="group text-xs font-black text-primary uppercase tracking-[0.3em] hover:text-secondary transition-all flex items-center justify-center gap-4"
-            >
-              Explore more stories <span className="text-2xl group-hover:translate-x-2 transition-transform duration-500">&rarr;</span>
-            </Link>
-          </div>
-        </div>
-      </section>
 
       {/* Final CTA: Crew Join */}
       <section className="bg-white py-40 text-center overflow-hidden relative">
@@ -372,18 +295,17 @@ export default async function Home() {
               </div>
               <div className="w-px h-16 bg-slate-100 hidden md:block"></div>
               <div className="flex flex-col items-center">
-                 <div className="text-4xl font-black text-secondary tracking-tighter">PRO</div>
-                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">Tested In Elements</div>
+                 <div className="text-4xl font-black text-secondary tracking-tighter">FREE</div>
+                 <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">Returns Policy</div>
               </div>
            </div>
-
-           <Link href="/products" className="bg-secondary text-white font-black py-6 px-16 rounded-2xl transition-all duration-500 uppercase tracking-[0.4em] text-xs hover:bg-primary hover:text-secondary shadow-2xl">
-              Shop The Fleet
+           
+           <Link 
+             href="/login" 
+             className="inline-block bg-primary text-secondary font-black py-6 px-16 rounded-full transition-all uppercase tracking-[0.3em] text-xs shadow-2xl shadow-primary/20 hover:scale-105"
+           >
+             Sign Up Now
            </Link>
-         </div>
-         
-         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full opacity-[0.03] pointer-events-none">
-            <div className="w-[1000px] h-[1000px] bg-primary rounded-full blur-[180px] mx-auto" />
          </div>
       </section>
     </div>

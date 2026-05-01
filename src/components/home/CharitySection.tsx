@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { getStorageUrl } from '@/lib/supabase';
 
 export function CharitySection() {
   return (
@@ -39,7 +40,7 @@ export function CharitySection() {
           <div className="lg:w-1/2 relative group">
             <div className="relative aspect-[4/3] rounded-[3rem] overflow-hidden border border-white/10 shadow-2xl transition-transform duration-700 group-hover:scale-[1.02]">
               <Image 
-                src="/partner-seacleaners.jpg"
+                src={getStorageUrl('partner-seacleaners.jpg')}
                 alt="NZ Sea Cleaners boat in action"
                 fill
                 className="object-cover grayscale hover:grayscale-0 transition-all duration-700"

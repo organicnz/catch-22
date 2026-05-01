@@ -15,13 +15,13 @@ export const metadata: Metadata = {
     siteName: 'Catch-22',
     locale: 'en_NZ',
     type: 'website',
-    images: [{ url: '/partner-thunder.jpg', width: 1200, height: 630, alt: 'Catch-22 Partners — THUNDER Charter and Sea Cleaners' }],
+    images: [{ url: getStorageUrl('partner-thunder.jpg'), width: 1200, height: 630, alt: 'Catch-22 Partners — THUNDER Charter and Sea Cleaners' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Our Partners | Catch-22 New Zealand',
     description: 'Meet the fishing guides, charters, and conservation organisations that test and trust Catch-22 gear in the harshest New Zealand conditions.',
-    images: ['/partner-thunder.jpg'],
+    images: [getStorageUrl('partner-thunder.jpg')],
   },
 };
 
