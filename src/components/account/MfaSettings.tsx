@@ -33,27 +33,33 @@ export function MfaSettings() {
   }
 
   async function startEnrollment() {
-    setError('');
-    
-    // Check if an unverified factor already exists and remove it to avoid conflicts
-    const existingUnverified = factors.find(f => f.status === 'unverified');
-    if (existingUnverified) {
-      await supabase.auth.mfa.unenroll({ factorId: existingUnverified.id });
-    }
+    try {
+      setError('');
+      
+      // Check if an unverified factor already exists and remove it to avoid conflicts
+      const existingUnverified = (factors || []).find(f => f.status === 'unverified');
+      if (existingUnverified) {
+        await supabase.auth.mfa.unenroll({ factorId: existingUnverified.id });
+      }
 
-    setEnrolling(true);
-    const { data, error } = await supabase.auth.mfa.enroll({
-      factorType: 'totp',
-      issuer: 'Catch-22',
-      friendlyName: 'Default'
-    });
+      setEnrolling(true);
+      const { data, error } = await supabase.auth.mfa.enroll({
+        factorType: 'totp',
+        issuer: 'Catch-22',
+        friendlyName: 'Default'
+      });
 
-    if (error) {
-      setError(error.message);
+      if (error) {
+        setError(error.message);
+        setEnrolling(false);
+      } else if (data) {
+        setFactorId(data.id);
+        setQrCode(data.totp.qr_code);
+      }
+    } catch (err: any) {
+      console.error('MFA Enrollment error:', err);
+      setError('An unexpected error occurred. Please try again.');
       setEnrolling(false);
-    } else {
-      setFactorId(data.id);
-      setQrCode(data.totp.qr_code);
     }
   }
 
