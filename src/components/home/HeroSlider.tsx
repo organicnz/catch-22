@@ -66,7 +66,7 @@ export function HeroSlider() {
   }, []);
 
   return (
-    <section aria-label="Hero — Explore our World" className="relative h-screen w-full flex items-center overflow-hidden bg-secondary">
+    <section aria-label="Hero — Explore our World" className="relative h-screen min-h-screen h-[100dvh] w-full flex items-center overflow-hidden bg-secondary">
       {/* Background Images */}
       {slides.map((slide, index) => (
         <div
