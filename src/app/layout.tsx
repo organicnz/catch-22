@@ -3,7 +3,7 @@ import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { getSettings } from "@/lib/supabase";
+import { getSettings } from "@/lib/supabase-server";
 import { SettingsHydrator } from "@/components/account/SettingsHydrator";
 
 const inter = Inter({
