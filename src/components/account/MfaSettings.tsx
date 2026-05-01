@@ -133,8 +133,8 @@ export function MfaSettings() {
       ) : enrolling ? (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="flex flex-col items-center gap-6 p-6 bg-slate-50 rounded-[2rem] border border-slate-100">
-             <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-                <QRCodeSVG value={qrCode} size={180} />
+             <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 min-h-[212px] flex items-center justify-center">
+                {qrCode ? <QRCodeSVG value={qrCode} size={180} /> : <Loader2 className="animate-spin text-slate-300" size={32} />}
              </div>
              <p className="text-xs text-slate-500 text-center font-medium max-w-xs leading-relaxed">
                Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)
