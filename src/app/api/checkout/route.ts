@@ -20,6 +20,7 @@ export async function POST(req: Request) {
     }
 
     const supabase = await createServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
     // Fetch product details from Supabase to ensure price integrity
     const productIds = items.map(item => item.id);
@@ -70,8 +71,11 @@ export async function POST(req: Request) {
       },
       // Allow promo codes if needed
       allow_promotion_codes: true,
+      client_reference_id: user?.id,
+      customer_email: user?.email || undefined,
       metadata: {
         promoCode: promoCode || '',
+        userId: user?.id || '',
       },
     });
 
