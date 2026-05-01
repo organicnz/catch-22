@@ -4,7 +4,7 @@ import { MfaSettings } from '@/components/account/MfaSettings'
 import { UserSettings } from '@/components/account/UserSettings'
 import { LogOut, ArrowRight } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
-import { LogoutButton } from '@/components/account/LogoutButton'
+import { LogoutButton } from '../../components/account/LogoutButton'
 
 export default async function AccountPage() {
   const supabase = await createServerClient();
@@ -24,9 +24,17 @@ export default async function AccountPage() {
   // Find the profile record that matches the auth email
   const { data: customer } = await supabase
     .from('profiles')
-    .select('id, first_name, last_name')
+    .select('id, first_name, last_name, user_id')
     .or(`email.eq.${user.email},user_id.eq.${user.id}`)
     .single();
+
+  // If found by email but user_id is not set, link it now
+  if (customer && !customer.user_id) {
+    await supabase
+      .from('profiles')
+      .update({ user_id: user.id })
+      .eq('id', customer.id);
+  }
 
   let orders: { id: number; created_at: string; status: string; total_amount: number; order_items: { product_name: string; quantity: number; total: number }[] }[] = [];
   if (customer) {
