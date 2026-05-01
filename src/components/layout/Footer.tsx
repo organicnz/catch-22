@@ -27,7 +27,7 @@ export function Footer() {
             <ul className="grid grid-cols-2 gap-4 text-sm font-bold">
               <li><Link href="/" className="hover:text-primary transition-colors uppercase tracking-wider">Home</Link></li>
               <li><Link href="/products" className="hover:text-primary transition-colors uppercase tracking-wider">Shop</Link></li>
-              <li><Link href="/gallery" className="hover:text-primary transition-colors uppercase tracking-wider">Catch-22 Catch-Snaps</Link></li>
+              <li><Link href="/gallery" className="hover:text-primary transition-colors uppercase tracking-wider">Snaps</Link></li>
               <li><Link href="/partners" className="hover:text-primary transition-colors uppercase tracking-wider">Visit Our Partners</Link></li>
               <li><Link href="/faqs" className="hover:text-primary transition-colors uppercase tracking-wider">FAQs</Link></li>
               <li><Link href="/contact" className="hover:text-primary transition-colors uppercase tracking-wider">Contact</Link></li>
