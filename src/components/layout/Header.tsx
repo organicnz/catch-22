@@ -172,63 +172,62 @@ export function Header() {
       </div>
 
       {/* Mobile Menu Overlay */}
-      {isMenuOpen && (
-        <div className="fixed inset-0 z-[100] bg-secondary flex flex-col p-8 lg:hidden">
-          <div className="flex items-center justify-between mb-20">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                <span className="text-secondary font-black text-xl italic">22</span>
-              </div>
-              <span className="text-xl font-black uppercase tracking-tighter text-white">Catch 22</span>
+      <div className={`fixed inset-0 z-[100] bg-secondary flex flex-col p-8 lg:hidden transition-all duration-700 ease-sensory ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="flex items-center justify-between mb-20">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+              <span className="text-secondary font-black text-xl italic">22</span>
             </div>
-            <button 
-              className="p-4 text-white hover:text-primary transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <X size={32} />
-            </button>
+            <span className="text-xl font-black uppercase tracking-tighter text-white">Catch 22</span>
           </div>
-
-          <nav className="flex flex-col gap-8">
-            {navLinks.map((link) => (
-              <Link 
-                key={link.name} 
-                href={link.href}
-                onClick={() => setIsMenuOpen(false)}
-                className={`text-4xl font-black uppercase tracking-tighter transition-colors ${
-                  pathname === link.href ? 'text-primary' : 'text-white hover:text-primary'
-                }`}
-              >
-                {link.name}
-              </Link>
-            ))}
-          </nav>
-
-          <div className="mt-auto pt-12 border-t border-white/5 flex flex-col gap-8">
-             <div className="flex justify-between items-center">
-                {user ? (
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-black italic">
-                      {user.email?.[0].toUpperCase()}
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Logged In As</p>
-                      <p className="text-sm font-bold text-white">{user.email}</p>
-                    </div>
-                  </div>
-                ) : (
-                  <Link href="/login" onClick={() => setIsMenuOpen(false)} className="text-primary font-black uppercase tracking-widest text-xs">Sign In / Join</Link>
-                )}
-                {user && (
-                  <button onClick={handleLogout} className="text-red-500 font-black uppercase tracking-widest text-xs flex items-center gap-2">
-                    <LogOut size={14} /> Exit
-                  </button>
-                )}
-             </div>
-             <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.5em] text-center">Engineered for the Elements</p>
-          </div>
+          <button 
+            className="p-4 text-white hover:text-primary transition-colors"
+            onClick={() => setIsMenuOpen(false)}
+            aria-label="Close menu"
+          >
+            <X size={32} />
+          </button>
         </div>
-      )}
+
+        <nav className="flex flex-col gap-8">
+          {navLinks.map((link) => (
+            <Link 
+              key={link.name} 
+              href={link.href}
+              onClick={() => setIsMenuOpen(false)}
+              className={`text-4xl font-black uppercase tracking-tighter transition-colors ${
+                pathname === link.href ? 'text-primary' : 'text-white hover:text-primary'
+              }`}
+            >
+              {link.name}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="mt-auto pt-12 border-t border-white/5 flex flex-col gap-8">
+           <div className="flex justify-between items-center">
+              {user ? (
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-black italic">
+                    {user.email?.[0].toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Logged In As</p>
+                    <p className="text-sm font-bold text-white">{user.email}</p>
+                  </div>
+                </div>
+              ) : (
+                <Link href="/login" onClick={() => setIsMenuOpen(false)} className="text-primary font-black uppercase tracking-widest text-xs">Sign In / Join</Link>
+              )}
+              {user && (
+                <button onClick={handleLogout} className="text-red-500 font-black uppercase tracking-widest text-xs flex items-center gap-2">
+                  <LogOut size={14} /> Exit
+                </button>
+              )}
+           </div>
+           <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.5em] text-center">Engineered for the Elements</p>
+        </div>
+      </div>
     </header>
   );
 }

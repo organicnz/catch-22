@@ -6,6 +6,7 @@ import { AddToCartButton } from '@/components/checkout/AddToCartButton';
 import { WishlistButton } from '@/components/products/WishlistButton';
 import { Metadata } from 'next';
 import { ProductCard } from '@/components/products/ProductCard';
+import { ProductSlider } from '@/components/products/ProductSlider';
 import { sanitizeWPContent } from '@/lib/sanitize';
 
 export const revalidate = 60;
@@ -184,11 +185,7 @@ export default async function ProductDetails({ params }: { params: { slug: strin
               <h2 className="text-4xl font-black tracking-tighter text-secondary uppercase">You might also like</h2>
               <div className="h-2 w-24 bg-primary mt-4 rounded-full"></div>
             </div>
-            <div className="grid grid-cols-1 gap-y-12 gap-x-8 sm:grid-cols-2 lg:grid-cols-4">
-              {relatedProducts.map((relatedProduct) => (
-                <ProductCard key={relatedProduct.id} product={relatedProduct} />
-              ))}
-            </div>
+            <ProductSlider products={relatedProducts} />
           </div>
         )}
       </div>

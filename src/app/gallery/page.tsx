@@ -2,10 +2,9 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
-import { Camera, Maximize2, X, ChevronRight, Share2, MapPin } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Camera, Maximize2, X, ChevronRight, Share2, MapPin, ChevronLeft } from 'lucide-react';
 import { getStorageUrl } from '@/lib/supabase';
-import { Metadata } from 'next';
 
 // Temporary static data - will eventually come from Supabase DB
 const snaps = [
@@ -54,7 +53,35 @@ const snaps = [
 ];
 
 export default function GalleryPage() {
-  const [selectedImage, setSelectedImage] = useState<typeof snaps[0] | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+
+  const handleNext = useCallback(() => {
+    if (selectedIndex === null) return;
+    setSelectedIndex((prev) => (prev! + 1) % snaps.length);
+  }, [selectedIndex]);
+
+  const handlePrev = useCallback(() => {
+    if (selectedIndex === null) return;
+    setSelectedIndex((prev) => (prev! - 1 + snaps.length) % snaps.length);
+  }, [selectedIndex]);
+
+  const handleClose = useCallback(() => {
+    setSelectedIndex(null);
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (selectedIndex === null) return;
+      if (e.key === 'ArrowRight') handleNext();
+      if (e.key === 'ArrowLeft') handlePrev();
+      if (e.key === 'Escape') handleClose();
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedIndex, handleNext, handlePrev, handleClose]);
+
+  const selectedImage = selectedIndex !== null ? snaps[selectedIndex] : null;
 
   return (
     <main className="min-h-screen pt-32 pb-20 bg-secondary">
@@ -76,11 +103,11 @@ export default function GalleryPage() {
 
         {/* Masonry-style Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-          {snaps.map((snap) => (
+          {snaps.map((snap, index) => (
             <div 
               key={snap.id}
               className="group relative aspect-[4/5] bg-white/5 rounded-[3rem] overflow-hidden cursor-pointer shadow-2xl hover:shadow-primary/10 transition-all duration-700 hover:-translate-y-2 border border-white/5"
-              onClick={() => setSelectedImage(snap)}
+              onClick={() => setSelectedIndex(index)}
             >
               <Image
                 src={getStorageUrl(snap.url)}
@@ -116,20 +143,40 @@ export default function GalleryPage() {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10">
           <div 
             className="absolute inset-0 bg-secondary/98 backdrop-blur-2xl"
-            onClick={() => setSelectedImage(null)}
+            onClick={handleClose}
           />
-          <div className="relative w-full max-w-6xl aspect-[4/5] md:aspect-auto md:h-full bg-secondary rounded-[4rem] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-500 border border-white/5">
+          
+          {/* Navigation Arrows */}
+          <button 
+            onClick={(e) => { e.stopPropagation(); handlePrev(); }}
+            className="absolute left-4 md:left-10 z-[110] w-14 h-14 bg-white/5 hover:bg-primary hover:text-secondary rounded-full flex items-center justify-center text-white backdrop-blur-md transition-all hidden md:flex"
+            aria-label="Previous image"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          
+          <button 
+            onClick={(e) => { e.stopPropagation(); handleNext(); }}
+            className="absolute right-4 md:right-10 z-[110] w-14 h-14 bg-white/5 hover:bg-primary hover:text-secondary rounded-full flex items-center justify-center text-white backdrop-blur-md transition-all hidden md:flex"
+            aria-label="Next image"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
+
+          <div className="relative w-full max-w-6xl aspect-[4/5] md:aspect-auto md:h-full bg-secondary rounded-[4rem] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-500 border border-white/5 z-10">
             <div className="grid grid-cols-1 lg:grid-cols-4 h-full">
-              <div className="lg:col-span-3 relative bg-black flex items-center justify-center">
+              <div className="lg:col-span-3 relative bg-black flex items-center justify-center group/image">
                 <Image
+                  key={selectedImage.url}
                   src={getStorageUrl(selectedImage.url)}
                   alt={selectedImage.caption}
                   fill
-                  className="object-contain"
+                  className="object-contain transition-opacity duration-500"
                 />
                 <button 
                   className="absolute top-10 right-10 w-14 h-14 bg-white/10 hover:bg-primary hover:text-secondary rounded-full flex items-center justify-center text-white backdrop-blur-md transition-all z-20"
-                  onClick={() => setSelectedImage(null)}
+                  onClick={handleClose}
+                  aria-label="Close gallery"
                 >
                   <X className="w-6 h-6" />
                 </button>
@@ -168,4 +215,3 @@ export default function GalleryPage() {
     </main>
   );
 }
-

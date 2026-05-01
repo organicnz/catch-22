@@ -8,6 +8,7 @@ import { ProductCard } from '@/components/products/ProductCard';
 import { CharitySection } from '@/components/home/CharitySection';
 import { TestimonialSection } from '@/components/home/TestimonialSection';
 import { ProductSlider } from '@/components/products/ProductSlider';
+import { HeroSlider } from '@/components/home/HeroSlider';
 
 export const revalidate = 60;
 
@@ -196,48 +197,8 @@ export default async function Home() {
       />
 
       {/* Hero Section: High Sensory Luxury */}
-      <section aria-label="Hero — Equip Yourself for the Elements" className="relative h-[85vh] min-h-[700px] flex items-center overflow-hidden bg-secondary">
-        <Image
-          src={getStorageUrl('site/thunder-charter.jpg')}
-          alt="Premium fishing gear in the New Zealand elements"
-          fill
-          className="object-cover opacity-60 scale-105 group-hover:scale-100 transition-transform duration-[2000ms]"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-secondary/40 to-secondary" />
-        
-        <div className="relative z-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-          <div className="max-w-4xl">
-            <span className="text-primary font-black uppercase tracking-[0.5em] text-xs mb-8 block animate-fade-in">Established NZ 2020</span>
-            <h1 className="text-6xl md:text-8xl lg:text-[10rem] font-black tracking-tight text-white uppercase leading-[0.8] mb-12">
-              Built to <br /> <span className="text-primary">Endure.</span>
-            </h1>
-            <p className="mt-4 text-xl md:text-2xl text-slate-300 font-medium mb-16 max-w-2xl leading-relaxed">
-              Premium fishing gear, apparel, and accessories tested in the harshest New Zealand environments.
-            </p>
-            <div className="flex flex-wrap gap-8 items-center">
-              <Link
-                href="/products"
-                className="group relative inline-flex items-center justify-center bg-primary text-secondary font-black py-6 px-16 rounded-full transition-all duration-500 uppercase tracking-[0.3em] text-xs shadow-2xl shadow-primary/20 hover:scale-105"
-              >
-                Explore Collection
-              </Link>
-              <Link
-                href="/about-us"
-                className="text-xs font-black uppercase tracking-[0.4em] text-white border-b border-white/20 hover:border-primary hover:text-primary transition-all pb-2"
-              >
-                Our Story
-              </Link>
-            </div>
-          </div>
-        </div>
-        
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 text-white/40">
-           <span className="text-[8px] font-black uppercase tracking-[0.5em] vertical-rl">Scroll</span>
-           <div className="w-px h-12 bg-gradient-to-b from-primary to-transparent" />
-        </div>
-      </section>
+      {/* Hero Section: High Sensory Luxury Slider */}
+      <HeroSlider />
 
       {/* Featured Products: Best Sellers Grid */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
