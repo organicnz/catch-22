@@ -2,12 +2,17 @@ import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createClient } from '@/lib/supabase';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-01-27-acacia' as any,
-});
-
 export async function POST(req: Request) {
   try {
+    const stripeKey = process.env.STRIPE_SECRET_KEY;
+    if (!stripeKey) {
+      throw new Error('STRIPE_SECRET_KEY is not configured');
+    }
+
+    const stripe = new Stripe(stripeKey, {
+      apiVersion: '2025-01-27-acacia' as any,
+    });
+
     const { items, promoCode } = await req.json();
 
     if (!items || !Array.isArray(items) || items.length === 0) {
