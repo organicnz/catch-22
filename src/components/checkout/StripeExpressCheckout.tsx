@@ -67,7 +67,8 @@ export function StripeExpressCheckout() {
         options={{ 
           mode: 'payment', 
           amount: Math.round(amount * 100) > 0 ? Math.round(amount * 100) : 100, 
-          currency: 'nzd' 
+          currency: 'nzd',
+          locale: 'en'
         }}
       >
         <ExpressCheckoutElement 
