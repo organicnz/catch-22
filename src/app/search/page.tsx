@@ -17,8 +17,8 @@ export default async function SearchPage({
   const resolvedParams = await searchParams;
   const q = typeof resolvedParams.q === 'string' ? resolvedParams.q : '';
 
-  let products: { id: number; name: string; slug: string; price: number; image_url: string | null; stock_status: string }[] = [];
-  let posts: { id: number; title: string; slug: string; type: string; created_at: string }[] = [];
+  let products: { id: number; name: string; slug: string; price: number; image_url: string | null; stock_status: string | null }[] = [];
+  let posts: { id: number; title: string; slug: string; type: string | null; created_at: string | null }[] = [];
   
   if (q) {
     // 1. Search Products
@@ -120,8 +120,8 @@ export default async function SearchPage({
                      </Link>
                    </h3>
                    <div className="flex items-center gap-4">
-                      <span className="text-[10px] font-black bg-slate-200 text-slate-500 px-2 py-0.5 rounded uppercase tracking-widest">{post.type}</span>
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{new Date(post.created_at).toLocaleDateString()}</span>
+                      <span className="text-[10px] font-black bg-slate-200 text-slate-500 px-2 py-0.5 rounded uppercase tracking-widest">{post.type || 'Content'}</span>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{post.created_at ? new Date(post.created_at).toLocaleDateString() : 'No date'}</span>
                    </div>
                 </div>
               ))}

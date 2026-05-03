@@ -1,11 +1,12 @@
 import { createServerClient as createSupabaseServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { cache } from 'react'
+import { Database } from '@/types/supabase'
 
 export const createServerClient = async () => {
   const cookieStore = await cookies()
 
-  return createSupabaseServerClient(
+  return createSupabaseServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -33,7 +34,7 @@ export const createServerClient = async () => {
  * Admin client that bypasses RLS. Use ONLY for secure server-side operations.
  */
 export const createAdminClient = async () => {
-  return createSupabaseServerClient(
+  return createSupabaseServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     {
@@ -64,6 +65,8 @@ export const getSettings = cache(async () => {
     if (error) {
       if (error.code === 'PGRST116') {
         // Try by email if user_id match fails (for legacy profiles)
+        if (!user.email) return null
+
         const { data: emailData, error: emailError } = await supabase
           .from('profiles')
           .select('settings')

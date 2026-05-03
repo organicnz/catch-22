@@ -2,8 +2,6 @@ import { createServerClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import { MfaSettings } from '@/components/account/MfaSettings'
 import { UserSettings } from '@/components/account/UserSettings'
-import { LogOut, ArrowRight } from 'lucide-react'
-import { createClient } from '@/lib/supabase'
 import { LogoutButton } from '../../components/account/LogoutButton'
 
 export default async function AccountPage() {
@@ -36,7 +34,7 @@ export default async function AccountPage() {
       .eq('id', customer.id);
   }
 
-  let orders: { id: number; created_at: string; status: string; total_amount: number; order_items: { product_name: string; quantity: number; total: number }[] }[] = [];
+  let orders: { id: number; created_at: string | null; status: string | null; total_amount: number | null; order_items: { product_name: string | null; quantity: number | null; total: number | null }[] }[] = [];
   if (customer) {
     const { data } = await supabase
       .from('orders')
@@ -76,7 +74,7 @@ export default async function AccountPage() {
                 <div className="bg-slate-50 px-8 py-6 border-b border-slate-100 grid grid-cols-2 md:grid-cols-4 gap-6">
                   <div>
                     <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black mb-1">Order Placed</p>
-                    <p className="text-sm text-secondary font-black">{new Date(order.created_at).toLocaleDateString('en-NZ', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                    <p className="text-sm text-secondary font-black">{order.created_at ? new Date(order.created_at).toLocaleDateString('en-NZ', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A'}</p>
                   </div>
                   <div>
                     <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black mb-1">Total Amount</p>
@@ -96,7 +94,7 @@ export default async function AccountPage() {
                 </div>
                 <div className="px-8 py-6">
                   <ul className="divide-y divide-slate-50">
-                    {order.order_items.map((item: { product_name: string; quantity: number; total: number }, idx: number) => (
+                    {order.order_items.map((item, idx: number) => (
                       <li key={idx} className="py-4 flex justify-between items-center group">
                         <div className="flex items-center gap-4">
                           <div className="w-1.5 h-1.5 bg-primary rounded-full group-hover:scale-150 transition-transform"></div>
