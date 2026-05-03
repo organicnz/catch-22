@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     }
 
     const stripe = new Stripe(stripeKey, {
-      apiVersion: '2025-01-27-acacia' as any,
+      apiVersion: '2026-04-22.dahlia',
     });
 
     const { items, promoCode } = await req.json();
@@ -82,8 +82,9 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ url: session.url });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Internal Server Error';
     console.error('Checkout error:', error);
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

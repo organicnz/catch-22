@@ -1,4 +1,4 @@
-import { createServerClient as createSupabaseServerClient, type CookieOptions } from '@supabase/ssr'
+import { createServerClient as createSupabaseServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { cache } from 'react'
 
@@ -18,12 +18,28 @@ export const createServerClient = async () => {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options)
             )
-          } catch (error) {
+          } catch {
             // The `setAll` method was called from a Server Component.
             // This can be ignored if you have middleware refreshing
             // user sessions.
           }
         },
+      },
+    }
+  )
+}
+
+/**
+ * Admin client that bypasses RLS. Use ONLY for secure server-side operations.
+ */
+export const createAdminClient = async () => {
+  return createSupabaseServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      cookies: {
+        getAll() { return [] },
+        setAll() {},
       },
     }
   )
