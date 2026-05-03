@@ -6,6 +6,8 @@ import { Footer } from "@/components/layout/Footer";
 import { getSettings } from "@/lib/supabase-server";
 import { SettingsHydrator } from "@/components/account/SettingsHydrator";
 import { Analytics } from "@vercel/analytics/react";
+import { Toaster } from "sonner";
+import Providers from "./providers";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -47,6 +49,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { UserSettings } from "@/lib/store/settings";
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -60,10 +64,13 @@ export default async function RootLayout({
       className={`${inter.variable} ${outfit.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-white text-secondary font-sans selection:bg-primary selection:text-secondary">
-        <SettingsHydrator settings={settings} />
-        <Header />
-        <main className="flex-grow flex flex-col">{children}</main>
-        <Footer />
+        <Providers>
+          <SettingsHydrator settings={settings as UserSettings | null} />
+          <Header />
+          <main className="flex-grow flex flex-col">{children}</main>
+          <Footer />
+        </Providers>
+        <Toaster position="bottom-right" richColors theme="light" />
         <Analytics />
       </body>
     </html>

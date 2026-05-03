@@ -1,12 +1,12 @@
 import { getStorageUrl } from '@/lib/supabase';
 import { createServerClient } from '@/lib/supabase-server';
+import { Json } from '@/types/supabase';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { AddToCartButton } from '@/components/checkout/AddToCartButton';
 import { WishlistButton } from '@/components/products/WishlistButton';
 import { Metadata } from 'next';
-import { ProductCard } from '@/components/products/ProductCard';
 import { ProductSlider } from '@/components/products/ProductSlider';
 import { sanitizeWPContent } from '@/lib/sanitize';
 
@@ -51,7 +51,8 @@ export default async function ProductDetails({ params }: { params: { slug: strin
       *,
       product_categories (
         category_id
-      )
+      ),
+      product_variations (*)
     `)
     .eq('slug', slug)
     .single();
@@ -67,7 +68,7 @@ export default async function ProductDetails({ params }: { params: { slug: strin
     slug: string;
     price: number;
     image_url: string | null;
-    stock_status: string;
+    stock_status: string | null;
     product_categories: { category_id: number }[];
   }
 
@@ -122,9 +123,9 @@ export default async function ProductDetails({ params }: { params: { slug: strin
             </div>
             
             {/* Gallery placeholder if more images existed */}
-            {product.gallery_urls && product.gallery_urls.length > 0 && (
+            {product.gallery_urls && Array.isArray(product.gallery_urls) && product.gallery_urls.length > 0 && (
               <div className="mt-4 grid grid-cols-4 gap-4">
-                 {product.gallery_urls.slice(0, 4).map((url: string, index: number) => (
+                 {(product.gallery_urls as string[]).slice(0, 4).map((url: string, index: number) => (
                     <div key={index} className="aspect-square relative rounded-xl overflow-hidden bg-slate-50 border border-slate-100">
                       <Image src={getStorageUrl(url)} alt={`${product.name} gallery ${index}`} fill className="object-cover" />
                     </div>
@@ -162,7 +163,18 @@ export default async function ProductDetails({ params }: { params: { slug: strin
             </div>
             
             <div className="mt-10 pt-10 border-t border-slate-100 flex flex-col gap-4">
-              <AddToCartButton product={product} variations={product.product_variations || []} />
+              <AddToCartButton 
+                product={{
+                  ...product,
+                  stock_status: product.stock_status || 'instock'
+                }} 
+                variations={(product.product_variations as unknown as { id: number; price: number | null; attributes: Json | null; stock_status: string | null }[])?.map(v => ({
+                  id: v.id,
+                  price: v.price || 0,
+                  attributes: (v.attributes as Record<string, string>) || {},
+                  stock_status: v.stock_status
+                })) || []} 
+              />
               <WishlistButton product={product} showText={true} />
             </div>
 

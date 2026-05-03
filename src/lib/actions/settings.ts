@@ -3,6 +3,7 @@
 import { createServerClient } from '@/lib/supabase-server';
 import { revalidatePath } from 'next/cache';
 import { UserSettings } from '@/lib/store/settings';
+import { Json } from '@/types/supabase';
 
 /**
  * Server Action to update user settings.
@@ -12,8 +13,8 @@ export async function updateUserSettingsAction(settings: Partial<UserSettings>) 
   const supabase = await createServerClient();
   const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-  if (authError || !user) {
-    return { error: 'Unauthorized' };
+  if (authError || !user || !user.email) {
+    return { error: 'Unauthorized or missing email' };
   }
 
   // Simple validation
@@ -22,7 +23,7 @@ export async function updateUserSettingsAction(settings: Partial<UserSettings>) 
   
   for (const key of allowedKeys) {
     if (key in settings) {
-      filteredSettings[key] = settings[key] as any;
+      (filteredSettings as Record<string, unknown>)[key] = settings[key];
     }
   }
 
@@ -33,7 +34,7 @@ export async function updateUserSettingsAction(settings: Partial<UserSettings>) 
     .eq('user_id', user.id)
     .single();
 
-  if (fetchError && fetchError.code === 'PGRST116') {
+  if (fetchError && fetchError.code === 'PGRST116' && user.email) {
     // Try by email if user_id match fails (for legacy profiles)
     const { data: emailData, error: emailError } = await supabase
       .from('profiles')
@@ -54,7 +55,7 @@ export async function updateUserSettingsAction(settings: Partial<UserSettings>) 
   }
 
   const updatedSettings = {
-    ...(profile?.settings || {}),
+    ...(profile?.settings as Record<string, unknown> || {}),
     ...filteredSettings
   };
 
@@ -63,7 +64,7 @@ export async function updateUserSettingsAction(settings: Partial<UserSettings>) 
     .upsert({ 
       user_id: user.id,
       email: user.email,
-      settings: updatedSettings,
+      settings: updatedSettings as Json,
     }, {
       onConflict: 'user_id'
     });

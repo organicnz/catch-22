@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { WishlistButton } from './WishlistButton';
 import { getStorageUrl } from '@/lib/supabase';
+import { motion } from 'framer-motion';
 
 interface ProductCardProps {
   product: {
@@ -21,7 +22,13 @@ export function ProductCard({ product }: ProductCardProps) {
   const isOnSale = product.regular_price && product.regular_price > product.price;
 
   return (
-    <div className="group relative flex flex-col h-full bg-white border border-slate-100 rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-500">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -8 }}
+      transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+      className="group relative flex flex-col h-full bg-white border border-slate-100 rounded-4xl overflow-hidden shadow-sm hover:shadow-2xl transition-shadow duration-500"
+    >
       {/* Sale Badge */}
       {isOnSale && (
         <div className="absolute top-6 left-6 z-30 bg-primary text-white text-[10px] font-black px-4 py-2 rounded-full uppercase tracking-widest shadow-xl shadow-primary/20">
@@ -54,9 +61,9 @@ export function ProductCard({ product }: ProductCardProps) {
       </div>
 
       {/* Content */}
-      <div className="p-8 flex-grow flex flex-col justify-between relative z-10">
+      <div className="p-8 grow flex flex-col justify-between relative z-10">
         <div>
-          <h3 className="text-sm font-black text-secondary uppercase tracking-wider mb-2 line-clamp-2 min-h-[2.5rem] leading-tight group-hover:text-primary transition-colors duration-300">
+          <h3 className="text-sm font-black text-secondary uppercase tracking-wider mb-2 line-clamp-2 min-h-10 leading-tight group-hover:text-primary transition-colors duration-300">
             <Link href={`/products/${product.slug}`}>
               {product.name}
             </Link>
@@ -89,6 +96,6 @@ export function ProductCard({ product }: ProductCardProps) {
       
       {/* Bottom accent line */}
       <div className="absolute bottom-0 left-0 h-1 w-0 bg-primary group-hover:w-full transition-all duration-700 ease-in-out" />
-    </div>
+    </motion.div>
   );
 }

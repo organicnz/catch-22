@@ -8,7 +8,7 @@ interface Variation {
   id: number;
   price: number;
   attributes: Record<string, string>;
-  stock_status: string;
+  stock_status: string | null;
 }
 
 interface AddToCartButtonProps {
@@ -18,7 +18,7 @@ interface AddToCartButtonProps {
     price: number;
     image_url: string | null;
     slug: string;
-    stock_status: string;
+    stock_status: string | null;
   };
   variations?: Variation[];
 }

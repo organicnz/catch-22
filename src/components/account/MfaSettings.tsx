@@ -1,13 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { createClient } from '@/lib/supabase';
 import { QRCodeSVG } from 'qrcode.react';
 import { Shield, ShieldCheck, ShieldAlert, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/Dialog';
 
 export function MfaSettings() {
-  const [factors, setFactors] = useState<{ id: string; status: string; totp?: { qr_code: string } }[]>([]);
-  const [loading, setLoading] = useState(true);
   const [enrolling, setEnrolling] = useState(false);
   const [qrCode, setQrCode] = useState('');
   const [verifyCode, setVerifyCode] = useState('');
@@ -16,21 +23,16 @@ export function MfaSettings() {
   const [success, setSuccess] = useState('');
   
   const supabase = createClient();
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    fetchFactors();
-  }, []);
-
-  async function fetchFactors() {
-    setLoading(true);
-    const { data, error } = await supabase.auth.mfa.listFactors();
-    if (error) {
-      console.error('Error fetching factors:', error);
-    } else {
-      setFactors(data.all || []);
-    }
-    setLoading(false);
-  }
+  const { data: factors = [], isLoading } = useQuery({
+    queryKey: ['mfa-factors'],
+    queryFn: async () => {
+      const { data, error } = await supabase.auth.mfa.listFactors();
+      if (error) throw error;
+      return data.all || [];
+    },
+  });
 
   async function startEnrollment() {
     try {
@@ -56,7 +58,7 @@ export function MfaSettings() {
         setFactorId(data.id);
         setQrCode(data.totp.qr_code);
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('MFA Enrollment error:', err);
       setError('An unexpected error occurred. Please try again.');
       setEnrolling(false);
@@ -82,7 +84,7 @@ export function MfaSettings() {
     } else {
       setSuccess('2FA enabled successfully!');
       setEnrolling(false);
-      fetchFactors();
+      queryClient.invalidateQueries({ queryKey: ['mfa-factors'] });
     }
   }
 
@@ -95,11 +97,11 @@ export function MfaSettings() {
       setError(error.message);
     } else {
       setSuccess('2FA disabled.');
-      fetchFactors();
+      queryClient.invalidateQueries({ queryKey: ['mfa-factors'] });
     }
   }
 
-  if (loading) return <div className="flex justify-center p-8"><Loader2 className="animate-spin text-primary" /></div>;
+  if (isLoading) return <div className="flex justify-center p-8"><Loader2 className="animate-spin text-primary" /></div>;
 
   const activeFactor = factors.find(f => f.status === 'verified');
 
@@ -130,55 +132,58 @@ export function MfaSettings() {
             </button>
           </div>
         </div>
-      ) : enrolling ? (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <div className="flex flex-col items-center gap-6 p-6 bg-slate-50 rounded-[2rem] border border-slate-100">
-             <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 min-h-[212px] flex items-center justify-center">
-                {qrCode ? <QRCodeSVG value={qrCode} size={180} /> : <Loader2 className="animate-spin text-slate-300" size={32} />}
-             </div>
-             <p className="text-xs text-slate-500 text-center font-medium max-w-xs leading-relaxed">
-               Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)
-             </p>
-          </div>
-          
-          <div className="space-y-4">
-             <label className="block text-[10px] font-black text-secondary uppercase tracking-widest ml-1">Verification Code</label>
-             <div className="flex gap-4">
-               <input 
-                type="text" 
-                placeholder="000000"
-                value={verifyCode}
-                onChange={(e) => setVerifyCode(e.target.value)}
-                className="flex-1 px-5 py-4 bg-white border border-slate-200 rounded-2xl focus:ring-2 focus:ring-primary outline-none font-black text-secondary tracking-[0.5em] text-center"
-               />
-               <button 
-                onClick={verifyEnrollment}
-                className="bg-primary text-white font-black px-8 py-4 rounded-2xl hover:bg-primary-dark transition-all uppercase tracking-widest text-xs"
-               >
-                 Verify
-               </button>
-             </div>
-             <button 
-              onClick={() => setEnrolling(false)}
-              className="w-full py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-secondary transition-colors"
-             >
-               Cancel
-             </button>
-          </div>
-        </div>
       ) : (
         <div className="space-y-6">
           <p className="text-sm text-slate-500 font-medium leading-relaxed">
             Add an extra layer of security to your account. When enabled, you will be asked for a verification code from your mobile device when signing in.
           </p>
-          <button 
+          <Button 
             onClick={startEnrollment}
-            className="bg-secondary text-white font-black px-8 py-4 rounded-full hover:bg-primary transition-all uppercase tracking-widest text-xs shadow-lg shadow-secondary/10"
+            variant="secondary"
           >
             Enable 2FA
-          </button>
+          </Button>
         </div>
       )}
+
+      <Dialog open={enrolling} onOpenChange={setEnrolling}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Enable 2FA</DialogTitle>
+            <DialogDescription>Secure your account with TOTP</DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-8 py-4">
+            <div className="flex flex-col items-center gap-6 p-6 bg-slate-50 rounded-4xl border border-slate-100">
+               <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 min-h-[212px] flex items-center justify-center">
+                  {qrCode ? <QRCodeSVG value={qrCode} size={180} /> : <Loader2 className="animate-spin text-slate-300" size={32} />}
+               </div>
+               <p className="text-[10px] text-slate-400 text-center font-black uppercase tracking-widest max-w-xs leading-relaxed">
+                 Scan this QR code with your authenticator app
+               </p>
+            </div>
+            
+            <div className="space-y-4">
+               <label className="block text-[10px] font-black text-secondary uppercase tracking-widest ml-1">Verification Code</label>
+               <div className="flex flex-col gap-4">
+                 <input 
+                  type="text" 
+                  placeholder="000000"
+                  value={verifyCode}
+                  onChange={(e) => setVerifyCode(e.target.value)}
+                  className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-primary outline-none font-black text-secondary tracking-[0.5em] text-center text-xl"
+                 />
+                 <Button 
+                  onClick={verifyEnrollment}
+                  className="w-full"
+                 >
+                   Verify & Activate
+                 </Button>
+               </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {error && (
         <div className="mt-6 p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center gap-3 text-rose-600">

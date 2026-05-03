@@ -1,0 +1,9 @@
+# Bun configuration file
+# See https://bun.sh/docs/runtime/config for more information
+
+[install]
+# Ensure we use the lockfile
+lockfile = true
+
+[run]
+# Standard run options

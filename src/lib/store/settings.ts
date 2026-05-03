@@ -55,7 +55,7 @@ export const useSettingsStore = create<SettingsState>()(
             .eq('user_id', user.id)
             .single();
 
-          if (error) {
+          if (error && user.email) {
             // Try legacy email match if user_id fails
             const { data: emailData, error: emailError } = await supabase
               .from('profiles')
@@ -66,13 +66,13 @@ export const useSettingsStore = create<SettingsState>()(
             if (emailError) {
               if (emailError.code !== 'PGRST116') throw emailError;
             } else if (emailData?.settings) {
-              set({ settings: { ...DEFAULT_SETTINGS, ...emailData.settings } });
+              set({ settings: { ...DEFAULT_SETTINGS, ...(emailData.settings as Record<string, unknown> || {}) } });
             }
           } else if (data?.settings) {
-            set({ settings: { ...DEFAULT_SETTINGS, ...data.settings } });
+            set({ settings: { ...DEFAULT_SETTINGS, ...(data.settings as Record<string, unknown> || {}) } });
           }
-        } catch (err: any) {
-          set({ error: err.message });
+        } catch (err: unknown) {
+          set({ error: (err as Error).message });
         } finally {
           set({ isLoading: false });
         }
@@ -88,9 +88,9 @@ export const useSettingsStore = create<SettingsState>()(
         try {
           const result = await updateUserSettingsAction(newSettings);
           if (result.error) throw new Error(result.error);
-        } catch (err: any) {
+        } catch (err: unknown) {
           // Revert on error
-          set({ settings: previousSettings, error: err.message });
+          set({ settings: previousSettings, error: (err as Error).message });
         }
       },
 

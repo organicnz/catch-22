@@ -60,7 +60,7 @@ export default async function ContentPage({ params }: { params: { slug: string }
             {content.title}
           </h1>
           <div className="h-2 w-24 bg-primary"></div>
-          {content.type === 'post' && (
+          {content.type === 'post' && content.created_at && (
             <time dateTime={content.created_at} className="mt-6 text-xs font-black text-slate-400 uppercase tracking-[0.2em]">
                Published {new Date(content.created_at).toLocaleDateString('en-NZ', {
                   year: 'numeric',
