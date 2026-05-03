@@ -64,7 +64,6 @@ export async function updateUserSettingsAction(settings: Partial<UserSettings>) 
       user_id: user.id,
       email: user.email,
       settings: updatedSettings,
-      updated_at: new Date().toISOString()
     }, {
       onConflict: 'user_id'
     });
@@ -77,7 +76,6 @@ export async function updateUserSettingsAction(settings: Partial<UserSettings>) 
         email: user.email,
         user_id: user.id,
         settings: updatedSettings,
-        updated_at: new Date().toISOString()
       }, {
         onConflict: 'email'
       });
