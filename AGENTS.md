@@ -58,8 +58,8 @@ Transform the legacy WordPress/Elementor ecosystem (catch-22.co.nz) into a moder
 ### Phase 4: Production Hardening (Current)
 - [x] **Documentation**: Finalizing README, AGENTS, and CLAUDE guides.
 - [x] **Sensory Design**: Full hardening of ProductCard and Gallery components.
-- [ ] **Final QA**: End-to-end checkout flow validation and cross-device testing.
-- [ ] **Stripe Production**: Transitioning from test keys to live environment.
+- [x] **Final QA**: End-to-end checkout flow validation and cross-device testing.
+- [x] **Stripe Production**: Transitioning from test keys to live environment.
 
 ---
 
