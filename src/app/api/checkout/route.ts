@@ -68,6 +68,9 @@ export async function POST(req: Request) {
       mode: 'payment',
       currency: 'nzd',
       locale: 'en',
+      adaptive_pricing: {
+        enabled: false,
+      },
       success_url: `${req.headers.get('origin')}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get('origin')}/cart`,
       shipping_address_collection: {
