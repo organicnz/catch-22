@@ -98,6 +98,8 @@ export function Header() {
           <button 
             className="lg:hidden p-2 -ml-2 text-white hover:text-primary transition-colors"
             onClick={() => setIsMenuOpen(true)}
+            aria-label="Open menu"
+            aria-expanded={isMenuOpen}
           >
             <Menu size={24} />
           </button>
@@ -110,6 +112,7 @@ export function Header() {
                 width={220} 
                 height={138} 
                 className="h-14 w-auto"
+                sizes="(max-width: 768px) 100px, 220px"
                 priority
               />
           </Link>
@@ -146,21 +149,21 @@ export function Header() {
 
             <div className="flex items-center gap-1 md:gap-4">
               <div className="flex items-center gap-1">
-                <Link href={user ? "/account" : "/login"} className="p-3 rounded-full text-white hover:bg-white/10 hover:text-primary transition-all" title="Account">
+                <Link href={user ? "/account" : "/login"} className="p-3 rounded-full text-white hover:bg-white/10 hover:text-primary transition-all" aria-label="Account">
                   <User size={20} />
                 </Link>
                 {user && (
                   <button 
                     onClick={handleLogout} 
                     className="hidden md:flex p-3 rounded-full text-white hover:bg-white/10 hover:text-red-500 transition-all" 
-                    title="Sign Out"
+                    aria-label="Sign out"
                   >
                     <LogOut size={20} />
                   </button>
                 )}
               </div>
               
-              <Link href="/wishlist" className="relative p-3 rounded-full text-white hover:bg-white/10 hover:text-primary transition-all" title="Wishlist">
+              <Link href="/wishlist" className="relative p-3 rounded-full text-white hover:bg-white/10 hover:text-primary transition-all" aria-label={`Wishlist${isMounted && wishlistItems > 0 ? ` (${wishlistItems} items)` : ''}`}>
                 <Heart size={20} />
                 {isMounted && wishlistItems > 0 && (
                   <span className="absolute top-2 right-2 w-4 h-4 bg-primary text-secondary text-[8px] font-black rounded-full flex items-center justify-center border-2 border-secondary">
@@ -169,7 +172,7 @@ export function Header() {
                 )}
               </Link>
 
-              <Link href="/cart" className="relative p-3 rounded-full text-white hover:bg-white/10 hover:text-primary transition-all" title="Cart">
+              <Link href="/cart" className="relative p-3 rounded-full text-white hover:bg-white/10 hover:text-primary transition-all" aria-label={`Cart${isMounted && totalItems > 0 ? ` (${totalItems} items)` : ''}`}>
                 <ShoppingBag size={20} />
                 {isMounted && totalItems > 0 && (
                   <span className="absolute top-2 right-2 w-4 h-4 bg-primary text-secondary text-[8px] font-black rounded-full flex items-center justify-center border-2 border-secondary">

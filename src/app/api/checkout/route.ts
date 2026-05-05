@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createServerClient } from '@/lib/supabase-server';
 
+const STRIPE_API_VERSION = '2026-04-22.dahlia' as const;
+
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
@@ -12,13 +14,28 @@ export async function POST(req: Request) {
     }
 
     const stripe = new Stripe(stripeKey, {
-      apiVersion: '2026-04-22.dahlia',
+      apiVersion: STRIPE_API_VERSION,
     });
 
-    const { items, promoCode } = await req.json();
+    const body = await req.json();
+    const { items, promoCode } = body;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: 'No items in cart' }, { status: 400 });
+    }
+
+    // Validate item structure
+    for (const item of items) {
+      if (!item.id || typeof item.id !== 'number') {
+        return NextResponse.json({ error: 'Invalid item: id must be a number' }, { status: 400 });
+      }
+      if (!item.quantity || typeof item.quantity !== 'number' || item.quantity < 1 || item.quantity > 999 || !Number.isInteger(item.quantity)) {
+        return NextResponse.json({ error: 'Invalid item: quantity must be an integer between 1 and 999' }, { status: 400 });
+      }
+    }
+
+    if (promoCode !== undefined && (typeof promoCode !== 'string' || promoCode.length > 50)) {
+      return NextResponse.json({ error: 'Invalid promo code' }, { status: 400 });
     }
 
     const supabase = await createServerClient();
@@ -39,12 +56,16 @@ export async function POST(req: Request) {
     // Map database products for easy lookup
     const productMap = new Map(dbProducts.map(p => [p.id, p]));
 
+    // Validate all requested products exist before building line items
+    for (const item of items) {
+      if (!productMap.has(item.id)) {
+        return NextResponse.json({ error: `Product not found: ${item.id}` }, { status: 400 });
+      }
+    }
+
     // Build line items for Stripe
     const lineItems = items.map(item => {
-      const dbProduct = productMap.get(item.id);
-      if (!dbProduct) {
-        throw new Error(`Product not found: ${item.name}`);
-      }
+      const dbProduct = productMap.get(item.id)!;
 
       return {
         price_data: {

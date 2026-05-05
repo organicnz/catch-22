@@ -198,7 +198,7 @@ describe('Property 2: Preservation — existing action behaviour is unchanged', 
 
     const result = await updateUserSettingsAction({ preferred_currency: 'AUD' });
 
-    expect(result).toEqual({ error: 'Unauthorized' });
+    expect(result).toEqual({ error: 'Unauthorized or missing email' });
     expect(mockUpsert).not.toHaveBeenCalled();
   });
 
