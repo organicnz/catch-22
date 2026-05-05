@@ -47,7 +47,7 @@ export function Footer() {
         
         <div className="mt-16 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-xs text-slate-400 font-bold uppercase tracking-widest">
-            &copy; {new Date().getFullYear()} Catch-22.co.nz. Built for the elements.
+            &copy; {new Date().getFullYear()} Catch-22.co.nz. Never Out of a Catch.
           </div>
           <div className="flex gap-6">
              {/* Placeholder for social icons */}

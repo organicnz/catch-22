@@ -10,7 +10,7 @@ const SLIDE_DURATION = 8000; // 8 seconds per slide
 const slides = [
   {
     image: 'site/thunder-charter.jpg',
-    upperTitle: 'Established NZ 2020',
+    upperTitle: 'Established NZ 2015',
     title: 'Built to',
     highlight: 'Endure.',
     description: 'Premium fishing gear, apparel, and accessories tested in the harshest New Zealand environments.',
