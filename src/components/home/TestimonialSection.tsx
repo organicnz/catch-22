@@ -2,21 +2,21 @@ import { Quote, Star } from "lucide-react";
 
 const testimonials = [
   {
-    name: "Capt. Finn",
-    role: "Thunder Charters",
-    content: "We've been using Catch-22 braid on our commercial rigs for two seasons now. It's the only line that stands up to the abrasion of the Three Kings coast.",
+    name: "Capt. Charles",
+    role: "Thunder Charter",
+    content: "There you go mate! 40.1kg Kingfish, we got 4 yesterday. Your braid doing the business!",
     stars: 5
   },
   {
-    name: "Sarah Jenkins",
-    role: "Tournament Angler",
-    content: "The feedback through the rod with this braid is incredible. I can feel every micro-touch, even in deep water. A complete game changer for my setup.",
+    name: "Ham & Cheese",
+    role: "Local NZ Fishing Celebrities",
+    content: "She's like rope, it's bloody good stuff. Bay of Plenty Boat Hire use this stuff on their rods when they're catching the big stuff – This is the braid we use on all our gear.",
     stars: 5
   },
   {
     name: "Mike Thompson",
     role: "Weekend Warrior",
-    content: "Finally, a premium brand that actually understands NZ conditions. The lures are practically indestructible and the colors are perfectly matched to our baitfish.",
+    content: "What impressed me most is how well it holds up over time. No fraying, no colour bleed like I've had with other brands, it's super sensitive, you can feel every little nibble.",
     stars: 5
   }
 ];

@@ -201,6 +201,14 @@ export default async function Home() {
       {/* Hero Section: High Sensory Luxury Slider */}
       <HeroSlider />
 
+      {/* Deal of the Day: High Visibility */}
+      <Suspense fallback={<div className="h-[600px] bg-secondary animate-pulse" />}>
+        <DealOfTheDay />
+      </Suspense>
+
+      {/* Testimonials: Trusted By Pros */}
+      <TestimonialSection />
+
       {/* Featured Products: Best Sellers Grid */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
         <div className="flex flex-col md:flex-row items-end justify-between mb-24 gap-8">
@@ -219,14 +227,6 @@ export default async function Home() {
           <BestSellers />
         </Suspense>
       </section>
-
-      {/* Deal of the Day: High Visibility */}
-      <Suspense fallback={<div className="h-[600px] bg-secondary animate-pulse" />}>
-        <DealOfTheDay />
-      </Suspense>
-
-      {/* Testimonials: Trusted By Pros */}
-      <TestimonialSection />
 
       {/* Charity: NZ Sea Cleaners */}
       <CharitySection />

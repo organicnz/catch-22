@@ -62,7 +62,7 @@ export default function ShippingReturnsPage() {
                 <h3 className="text-lg font-black text-secondary uppercase m-0">Damaged Goods</h3>
               </div>
               <p className="text-slate-500 text-sm leading-relaxed">
-                Catch-22 is not responsible for loss or damage to goods caused by transit events once dispatched. We recommend inspecting your package upon arrival before signing.
+                Catch-22 is not responsible for loss or damage to goods caused by transit events once dispatched. If you receive a damaged item, please contact us so we can lodge this with NZ Post.
               </p>
             </div>
           </div>

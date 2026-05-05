@@ -91,7 +91,7 @@ All tasks are TypeScript. Testing uses Vitest + fast-check as specified in the d
   - [x] 4.6 Update `src/app/products/page.tsx` — extend the existing `generateMetadata` to include Open Graph and Twitter Card tags for both the default and category-filtered states
     - _Requirements: 8.1, 8.4, 8.5, 8.7_
 
-  - [~]* 4.7 Write unit tests for metadata title format
+  - [ ]* 4.7 Write unit tests for metadata title format
     - For each static page, assert the exported `metadata.title` matches `"* | Catch-22 New Zealand"` format
     - For `generateMetadata` on products page, assert the returned title matches the format for both default and category states
     - **Property 7: Metadata title format is always correct**
@@ -114,7 +114,7 @@ All tasks are TypeScript. Testing uses Vitest + fast-check as specified in the d
   - [x] 5.5 Audit and update `src/app/contact/page.tsx` — verify all form inputs have associated `<label>` elements (already present), add `aria-describedby` linking error/success messages to the form, and ensure the submit button has a visible focus ring
     - _Requirements: 10.1, 10.3, 10.6_
 
-  - [~]* 5.6 Write unit tests for image alt text presence
+  - [ ]* 5.6 Write unit tests for image alt text presence
     - Render each static page component in a jsdom environment and assert that no `<img>` element has an empty or missing `alt` attribute
     - **Property 8: Images always have non-empty alt text**
     - **Validates: Requirements 10.2**
@@ -151,7 +151,7 @@ All tasks are TypeScript. Testing uses Vitest + fast-check as specified in the d
   - [x] 8.4 Update `src/app/[slug]/page.tsx` — replace the inline `sanitizeWPContent` call with the shared import from `src/lib/sanitize.ts` (this should already be done in task 2.2; verify the import is correct and the inline function is fully removed)
     - _Requirements: 4.1, 7.5_
 
-  - [~]* 8.5 Write unit tests for Supabase error states
+  - [ ]* 8.5 Write unit tests for Supabase error states
     - Mock the Supabase client to return `{ data: null, error: { message: 'DB error' } }` and assert that the products page renders a non-crashing fallback UI
     - _Requirements: 7.7_
 
@@ -175,7 +175,7 @@ All tasks are TypeScript. Testing uses Vitest + fast-check as specified in the d
   - [x] 10.2 Update `src/app/page.tsx` — in `LatestLogbookEntries`, replace the inline spam regex with `sanitizeText(post.title)` from `src/lib/sanitize.ts`
     - _Requirements: 11.1, 11.2_
 
-  - [~]* 10.3 Write integration tests for the contact form server action
+  - [ ]* 10.3 Write integration tests for the contact form server action
     - Mock Supabase insert and assert `src/app/contact/actions.ts` returns `{ success: true }` on valid input and `{ error: string }` on Supabase failure
     - _Requirements: 4.5, 7.7_
 
