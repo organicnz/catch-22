@@ -34,9 +34,19 @@ export const createServerClient = async () => {
  * Admin client that bypasses RLS. Use ONLY for secure server-side operations.
  */
 export const createAdminClient = async () => {
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+  if (!serviceRoleKey) {
+    throw new Error('SUPABASE_SERVICE_ROLE_KEY is not configured — admin operations will fail');
+  }
+  if (!supabaseUrl) {
+    throw new Error('NEXT_PUBLIC_SUPABASE_URL is not configured');
+  }
+
   return createSupabaseServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    supabaseUrl,
+    serviceRoleKey,
     {
       cookies: {
         getAll() { return [] },

@@ -5,13 +5,15 @@ import { headers } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
 
+const STRIPE_API_VERSION = '2026-04-22.dahlia' as const;
+
 function getStripe() {
   const stripeKey = process.env.STRIPE_SECRET_KEY;
   if (!stripeKey) {
     throw new Error('STRIPE_SECRET_KEY is not configured');
   }
   return new Stripe(stripeKey, {
-    apiVersion: '2026-04-22.dahlia',
+    apiVersion: STRIPE_API_VERSION,
   });
 }
 
