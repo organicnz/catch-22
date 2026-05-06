@@ -9,6 +9,9 @@ import { Analytics } from "@vercel/analytics/react";
 import { Toaster } from "sonner";
 import Providers from "./providers";
 
+// Layout reads cookies for auth state — must be dynamic
+export const dynamic = 'force-dynamic';
+
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",

@@ -47,8 +47,8 @@ const slides = [
   {
     image: 'site/snap1.jpg',
     upperTitle: 'Community First',
-    title: 'Join the',
-    highlight: 'Crew.',
+    title: 'Never Out of',
+    highlight: 'a Catch.',
     description: 'A community of dedicated anglers sharing their best moments from the NZ coastline.',
     cta: 'View Snaps',
     link: '/gallery'
