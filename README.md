@@ -45,8 +45,8 @@ bun install
 Create a `.env.local` file in the root directory:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_your-key-here
+SUPABASE_SECRET_KEY=sb_secret_your-key-here
 STRIPE_SECRET_KEY=sk_test_...
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
