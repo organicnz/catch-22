@@ -209,7 +209,7 @@ export default async function Home() {
       {/* Testimonials: Trusted By Pros */}
       <TestimonialSection />
 
-      {/* Featured Products: Best Sellers Grid */}
+      {/* Featured Products: Best Sellers Grid — below Trusted By Pros */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
         <div className="flex flex-col md:flex-row items-end justify-between mb-24 gap-8">
           <div className="max-w-xl text-left">
