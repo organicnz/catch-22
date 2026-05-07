@@ -13,9 +13,9 @@ export function Footer() {
               <Image 
                 src={getStorageUrl('site/logo.png')} 
                 alt="Catch-22" 
-                width={120} 
-                height={60} 
-                className="h-10 w-auto brightness-0 invert" 
+                width={240} 
+                height={150} 
+                className="h-20 w-auto" 
               />
             </Link>
             <p className="mt-6 text-sm text-slate-300 leading-relaxed">

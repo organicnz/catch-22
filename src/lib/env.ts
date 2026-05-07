@@ -8,7 +8,7 @@ const envSchema = z.object({
   
   // Stripe
   STRIPE_SECRET_KEY: z.string().min(1),
-  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().min(1).optional(),
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().min(1).optional(), // Optional for now — checkout will fail without it
   
   // App
   NEXT_PUBLIC_SITE_URL: z.string().url().default('https://catch-22.co.nz'),
