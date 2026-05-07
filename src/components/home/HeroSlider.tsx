@@ -9,7 +9,7 @@ const SLIDE_DURATION = 8000; // 8 seconds per slide
 
 const slides = [
   {
-    image: 'site/thunder-charter.jpg',
+    image: 'site/snap3.jpg',
     upperTitle: 'Established NZ 2015',
     title: 'Built to',
     highlight: 'Endure.',

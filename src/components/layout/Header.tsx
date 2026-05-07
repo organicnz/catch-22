@@ -109,10 +109,10 @@ export function Header() {
               <Image 
                 src={getStorageUrl('site/logo.png')} 
                 alt="CATCH-22" 
-                width={220} 
-                height={138} 
-                className="h-14 w-auto"
-                sizes="(max-width: 768px) 100px, 220px"
+                width={280} 
+                height={175} 
+                className="h-20 w-auto"
+                sizes="(max-width: 768px) 140px, 280px"
                 priority
               />
           </Link>
