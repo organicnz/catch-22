@@ -30,6 +30,7 @@ const IMAGES = [
   'snap5.jpg',
   'snap6.jpg',
   'logo.png',
+  'nz-boat.png',
 ];
 
 const MIME_TYPES = {
