@@ -9,7 +9,7 @@ const SLIDE_DURATION = 8000; // 8 seconds per slide
 
 const slides = [
   {
-    image: 'site/snap3.jpg',
+    image: 'site/nz-boat.png',
     upperTitle: 'Established NZ 2020',
     title: 'Built to',
     highlight: 'Endure.',
@@ -18,7 +18,7 @@ const slides = [
     link: '/products'
   },
   {
-    image: 'site/about-hero.jpg',
+    image: 'site/hero.jpg',
     upperTitle: 'Proven Performance',
     title: 'Tested in',
     highlight: 'the Wild.',
@@ -36,7 +36,7 @@ const slides = [
     link: '/gallery'
   },
   {
-    image: 'site/snap3.jpg',
+    image: 'site/thunder-charter.jpg',
     upperTitle: 'Precision Engineering',
     title: 'Built for',
     highlight: 'Results.',
