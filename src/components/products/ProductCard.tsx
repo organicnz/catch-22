@@ -43,6 +43,7 @@ export function ProductCard({ product }: ProductCardProps) {
             src={getStorageUrl(product.image_url)}
             alt={product.name}
             fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             className="w-full h-full object-center object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
           />
         ) : (
