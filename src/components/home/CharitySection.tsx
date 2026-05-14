@@ -14,6 +14,7 @@ export function CharitySection() {
                 src={getStorageUrl('site/partner-seacleaners-dark.png')}
                 alt="Sea Cleaners NZ"
                 fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-contain p-12 group-hover:scale-110 transition-transform duration-[2000ms] ease-out"
               />
               <div className="absolute inset-0 bg-linear-to-t from-secondary/40 via-transparent to-transparent opacity-60" />
