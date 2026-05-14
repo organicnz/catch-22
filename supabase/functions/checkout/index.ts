@@ -124,6 +124,7 @@ Deno.serve(async (req) => {
       payment_method_types: ['card', 'link'],
       line_items,
       mode: 'payment',
+      currency: 'nzd',
       customer_email: userEmail,
       client_reference_id: userId,
       metadata: { userId: userId || 'guest' },
