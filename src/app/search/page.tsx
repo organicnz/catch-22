@@ -14,7 +14,7 @@ export default async function SearchPage({
   const resolvedParams = await searchParams;
   const q = typeof resolvedParams.q === 'string' ? resolvedParams.q : '';
 
-  let products: any[] = []; // Using any for Supabase dynamic select compatibility
+  let products: React.ComponentProps<typeof ProductCard>['product'][] = [];
   let posts: { id: number; title: string; slug: string; type: string | null; created_at: string | null }[] = [];
   
   if (q) {
@@ -64,7 +64,7 @@ export default async function SearchPage({
             <h2 className="text-2xl font-black text-secondary uppercase tracking-widest mb-8 border-b-2 border-primary pb-2 inline-block">Gear Found</h2>
             <div className="grid grid-cols-1 gap-y-10 gap-x-8 sm:grid-cols-2 lg:grid-cols-4">
               {products.map((product) => (
-                <ProductCard key={product.id} product={product as any} />
+                <ProductCard key={product.id} product={product} />
               ))}
             </div>
           </div>

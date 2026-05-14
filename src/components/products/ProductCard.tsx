@@ -12,8 +12,8 @@ interface ProductCardProps {
     name: string;
     slug: string;
     price: number;
-    regular_price?: number;
-    sale_price?: number;
+    regular_price?: number | null;
+    sale_price?: number | null;
     image_url: string | null;
   };
 }

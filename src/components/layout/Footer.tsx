@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { Quote } from 'lucide-react';
 import { getStorageUrl } from '@/lib/supabase';
 
 export function Footer() {
@@ -13,7 +12,7 @@ export function Footer() {
               <Image 
                 src={getStorageUrl('site/logo.png')} 
                 alt="Catch-22" 
-                width={240} 
+                width={212} 
                 height={150} 
                 className="h-20 w-auto" 
               />

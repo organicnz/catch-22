@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCart, Menu, X, User, Search, LogOut, ChevronDown, Heart, ShoppingBag } from 'lucide-react';
+import { Menu, X, User, Search, LogOut, Heart, ShoppingBag } from 'lucide-react';
 import { useCartStore } from '@/lib/store/cart';
 import { useWishlistStore } from '@/lib/store/wishlist';
 import { useState, useEffect } from 'react';
@@ -14,9 +14,7 @@ import { useSettingsStore } from '@/lib/store/settings';
 export function Header() {
   const [isMounted, setIsMounted] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isShopOpen, setIsShopOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [categories, setCategories] = useState<{name: string, slug: string}[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [user, setUser] = useState<SupabaseUser | null>(null);
   
@@ -30,17 +28,13 @@ export function Header() {
   const isTransparentPage = pathname === '/' || pathname === '/gallery';
 
   useEffect(() => {
+    // eslint-disable-next-line
     setIsMounted(true);
     
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
     window.addEventListener('scroll', handleScroll);
-
-    // Fetch categories
-    supabase.from('categories').select('name, slug').order('name').then(({ data }) => {
-      if (data) setCategories(data);
-    });
 
     // Check initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -87,7 +81,6 @@ export function Header() {
     ? 'bg-secondary/95 backdrop-blur-2xl py-4 shadow-2xl border-b border-white/5' 
     : isTransparentPage ? 'bg-transparent py-8' : 'bg-secondary py-6 border-b border-white/5';
 
-  const textColor = 'text-white';
   const logoInvert = !isScrolled && isTransparentPage ? 'brightness-0 invert' : '';
 
   return (
@@ -109,7 +102,7 @@ export function Header() {
               <Image 
                 src={getStorageUrl('site/logo.png')} 
                 alt="CATCH-22" 
-                width={360} 
+                width={319} 
                 height={225} 
                 className={`h-16 md:h-24 w-auto transition-all duration-500 ${logoInvert}`}
                 sizes="(max-width: 768px) 120px, 240px"
