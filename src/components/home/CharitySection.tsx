@@ -11,12 +11,12 @@ export function CharitySection() {
           <div className="lg:w-1/2 relative">
             <div className="relative aspect-video rounded-[3rem] overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] z-10 border border-white/10 bg-black group">
               <Image
-                src={getStorageUrl('site/partner-seacleaners-logos.png')}
+                src={getStorageUrl('site/partner-seacleaners-dark.png')}
                 alt="Sea Cleaners NZ"
                 fill
-                className="object-contain p-12 object-bottom group-hover:scale-110 transition-transform duration-[2000ms] ease-out"
+                className="object-contain p-12 group-hover:scale-110 transition-transform duration-[2000ms] ease-out"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-secondary/40 via-transparent to-transparent opacity-60" />
+              <div className="absolute inset-0 bg-linear-to-t from-secondary/40 via-transparent to-transparent opacity-60" />
             </div>
             {/* Decorative background element */}
             <div className="absolute -top-10 -left-10 w-40 h-40 bg-primary opacity-10 rounded-full blur-3xl z-0"></div>
