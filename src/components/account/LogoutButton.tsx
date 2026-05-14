@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
-import { LogOut, ArrowRight } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { useSettingsStore } from '@/lib/store/settings';
 import { useState } from 'react';
 

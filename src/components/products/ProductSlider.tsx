@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { ProductCard } from './ProductCard';
 
 interface ProductSliderProps {
-  products: any[];
+  products: React.ComponentProps<typeof ProductCard>['product'][];
 }
 
 export function ProductSlider({ products }: ProductSliderProps) {

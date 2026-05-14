@@ -1,8 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
 import { useSettingsStore } from '@/lib/store/settings';
-import { createClient } from '@/lib/supabase';
 import { Bell, Mail, CreditCard, Loader2, CheckCircle2 } from 'lucide-react';
 
 export function UserSettings() {

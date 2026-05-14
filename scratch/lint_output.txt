@@ -1,0 +1,73 @@
+$ eslint
+
+/Users/organic/dev/work/catch-22-next/.trunk/configs/svgo.config.mjs
+  1:1  warning  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+/Users/organic/dev/work/catch-22-next/middleware.ts
+  20:48  warning  'options' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/organic/dev/work/catch-22-next/scripts/upload_site_images.mjs
+  5:24  warning  'readdirSync' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/organic/dev/work/catch-22-next/src/app/login/page.tsx
+   5:10  warning  'Mail' is defined but never used          @typescript-eslint/no-unused-vars
+   5:16  warning  'Key' is defined but never used           @typescript-eslint/no-unused-vars
+   5:63  warning  'Info' is defined but never used          @typescript-eslint/no-unused-vars
+  62:21  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/organic/dev/work/catch-22-next/src/app/search/page.tsx
+  17:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  67:67  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/organic/dev/work/catch-22-next/src/components/account/LogoutButton.tsx
+  5:18  warning  'ArrowRight' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/organic/dev/work/catch-22-next/src/components/account/UserSettings.tsx
+  3:10  warning  'useEffect' is defined but never used     @typescript-eslint/no-unused-vars
+  5:10  warning  'createClient' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/organic/dev/work/catch-22-next/src/components/layout/Footer.tsx
+  3:10  warning  'Quote' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/organic/dev/work/catch-22-next/src/components/layout/Header.tsx
+   5:10  warning  'ShoppingCart' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+   5:55  warning  'ChevronDown' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          @typescript-eslint/no-unused-vars
+  17:10  warning  'isShopOpen' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+  17:22  warning  'setIsShopOpen' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               @typescript-eslint/no-unused-vars
+  19:10  warning  'categories' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+  33:5   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/Users/organic/dev/work/catch-22-next/src/components/layout/Header.tsx:33:5
+  31 |
+  32 |   useEffect(() => {
+> 33 |     setIsMounted(true);
+     |     ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  34 |     
+  35 |     const handleScroll = () => {
+  36 |       setIsScrolled(window.scrollY > 20);  react-hooks/set-state-in-effect
+  90:9   warning  'textColor' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+
+/Users/organic/dev/work/catch-22-next/src/components/products/ProductSlider.tsx
+  8:13  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/organic/dev/work/catch-22-next/src/lib/__tests__/sanitize.test.ts
+  3:29  warning  'sanitizeText' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/organic/dev/work/catch-22-next/src/lib/__tests__/settings-action.test.ts
+  100:7  warning  'POSTGREST_ERROR' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/Users/organic/dev/work/catch-22-next/supabase/functions/checkout/index.ts
+  6:3  error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+
+/Users/organic/dev/work/catch-22-next/supabase/functions/webhook/index.ts
+  6:3  error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+
+✖ 25 problems (7 errors, 18 warnings)
+
+error: script "lint" exited with code 1

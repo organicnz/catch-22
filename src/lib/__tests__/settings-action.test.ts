@@ -97,9 +97,6 @@ import { revalidatePath } from 'next/cache';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const POSTGREST_ERROR =
-  "Could not find the 'updated_at' column of 'profiles' in the schema cache.";
-
 const EXISTING_PROFILE_SETTINGS = {
   marketing_emails: false,
   order_updates: true,

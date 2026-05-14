@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase';
-import { Mail, Key, Shield, Globe, Code, ArrowRight, Loader2, Info, Lock, Fingerprint, Eye, EyeOff } from 'lucide-react';
+import { Shield, Globe, Code, ArrowRight, Loader2, Lock, Fingerprint, Eye, EyeOff } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
@@ -59,8 +59,12 @@ export default function LoginPage() {
           router.refresh();
         }
       }
-    } catch (error: any) {
-      setMessage({ type: 'error', text: `❌ ${error.message}` });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setMessage({ type: 'error', text: `❌ ${error.message}` });
+      } else {
+        setMessage({ type: 'error', text: '❌ An unknown error occurred.' });
+      }
     } finally {
       setLoading(false);
     }

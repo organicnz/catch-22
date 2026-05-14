@@ -1,6 +1,6 @@
 import fc from 'fast-check';
 import { describe, it, expect } from 'vitest';
-import { sanitizeWPContent, sanitizeText, SPAM_KEYWORDS, TRUSTED_DOMAINS } from '@/lib/sanitize';
+import { sanitizeWPContent, SPAM_KEYWORDS, TRUSTED_DOMAINS } from '@/lib/sanitize';
 
 // ─── Property 1: Spam keyword removal is total ───────────────────────────────
 // Feature: assets-migration, Property 1: Spam keyword removal is total

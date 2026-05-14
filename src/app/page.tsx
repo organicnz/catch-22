@@ -51,7 +51,7 @@ function BestSellersLoading() {
   return (
     <div className="flex gap-8 overflow-hidden pb-12 pt-4">
       {[1, 2, 3, 4].map((i) => (
-        <div key={i} className="min-w-[85%] sm:min-w-[45%] lg:min-w-[23%] flex flex-col h-full bg-slate-50 rounded-[2rem] border border-slate-100 overflow-hidden animate-pulse">
+        <div key={i} className="min-w-[85%] sm:min-w-[45%] lg:min-w-[23%] flex flex-col h-full bg-slate-50 rounded-4xl border border-slate-100 overflow-hidden animate-pulse">
            <div className="h-72 bg-slate-100"></div>
            <div className="p-8 space-y-6">
               <div className="h-4 bg-slate-100 rounded w-3/4"></div>
