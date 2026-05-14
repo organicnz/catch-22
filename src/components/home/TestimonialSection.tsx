@@ -1,23 +1,28 @@
 import { Quote, Star } from "lucide-react";
+import Image from "next/image";
+import { getStorageUrl } from "@/lib/supabase";
 
 const testimonials = [
   {
     name: "Capt. Charles",
     role: "Thunder Charter",
     content: "There you go mate! 40.1kg Kingfish, we got 4 yesterday. Your braid doing the business!",
-    stars: 5
+    stars: 5,
+    image: "site/charles-kingfish.png"
   },
   {
     name: "Ham & Cheese",
     role: "Local NZ Fishing Celebrities",
     content: "She's like rope, it's bloody good stuff. Bay of Plenty Boat Hire use this stuff on their rods when they're catching the big stuff – This is the braid we use on all our gear.",
-    stars: 5
+    stars: 5,
+    image: "site/ham-cheese-kingfish.png"
   },
   {
     name: "Mike Thompson",
     role: "Weekend Warrior",
     content: "What impressed me most is how well it holds up over time. No fraying, no colour bleed like I've had with other brands, it's super sensitive, you can feel every little nibble.",
-    stars: 5
+    stars: 5,
+    image: "site/mike-fish.png"
   }
 ];
 
@@ -41,10 +46,21 @@ export function TestimonialSection() {
                 ))}
               </div>
               
+              {t.image && (
+                <div className="relative w-full aspect-4/3 rounded-2xl overflow-hidden mb-10 border border-slate-100 shadow-inner">
+                  <Image 
+                    src={getStorageUrl(t.image)} 
+                    alt={t.name} 
+                    fill 
+                    className="object-cover group-hover:scale-105 transition-transform duration-700"
+                  />
+                </div>
+              )}
+              
               <div className="relative mb-10">
                 <Quote className="w-12 h-12 text-primary/10 absolute -top-4 -left-4 group-hover:text-primary/20 transition-colors duration-500" />
                 <p className="text-slate-600 font-medium text-lg lg:text-xl leading-relaxed relative z-10 italic">
-                  "{t.content}"
+                  &ldquo;{t.content}&rdquo;
                 </p>
               </div>
 

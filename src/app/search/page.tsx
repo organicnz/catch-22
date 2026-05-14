@@ -1,11 +1,8 @@
-import { getStorageUrl } from '@/lib/supabase';
 import { createServerClient } from '@/lib/supabase-server';
+import Link from 'next/link';
+import { ProductCard } from '@/components/products/ProductCard';
 
 export const dynamic = 'force-dynamic';
-import Image from 'next/image';
-import Link from 'next/link';
-import { WishlistButton } from '@/components/products/WishlistButton';
-
 export const revalidate = 60;
 
 export default async function SearchPage({
@@ -17,14 +14,14 @@ export default async function SearchPage({
   const resolvedParams = await searchParams;
   const q = typeof resolvedParams.q === 'string' ? resolvedParams.q : '';
 
-  let products: { id: number; name: string; slug: string; price: number; image_url: string | null; stock_status: string | null }[] = [];
+  let products: any[] = []; // Using any for Supabase dynamic select compatibility
   let posts: { id: number; title: string; slug: string; type: string | null; created_at: string | null }[] = [];
   
   if (q) {
     // 1. Search Products
     const { data: prodData } = await supabase
       .from('products')
-      .select('id, name, slug, price, image_url, stock_status')
+      .select('id, name, slug, price, regular_price, sale_price, image_url, stock_status')
       .ilike('name', `%${q}%`)
       .eq('stock_status', 'instock')
       .order('created_at', { ascending: false });
@@ -67,41 +64,7 @@ export default async function SearchPage({
             <h2 className="text-2xl font-black text-secondary uppercase tracking-widest mb-8 border-b-2 border-primary pb-2 inline-block">Gear Found</h2>
             <div className="grid grid-cols-1 gap-y-10 gap-x-8 sm:grid-cols-2 lg:grid-cols-4">
               {products.map((product) => (
-                <div key={product.id} className="group flex flex-col h-full border border-slate-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all">
-                  <Link href={`/products/${product.slug}`} className="relative h-64 overflow-hidden bg-slate-100 block">
-                    {product.image_url ? (
-                      <Image
-                        src={getStorageUrl(product.image_url)}
-                        alt={product.name}
-                        fill
-                        className="w-full h-full object-center object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-slate-400 font-black uppercase tracking-widest text-[10px]">No Image</div>
-                    )}
-                  </Link>
-                  <div className="absolute top-3 right-3 z-10 scale-90 origin-top-right">
-                    <WishlistButton product={product} />
-                  </div>
-                  <div className="p-4 flex-grow flex flex-col justify-between">
-                    <div>
-                      <h3 className="text-sm font-bold text-secondary uppercase mb-1 line-clamp-2 min-h-[2.5rem]">
-                        <Link href={`/products/${product.slug}`}>
-                          {product.name}
-                        </Link>
-                      </h3>
-                    </div>
-                    <div className="flex items-center justify-between mt-4">
-                       <p className="text-lg font-black text-primary">${product.price.toFixed(2)}</p>
-                       <Link 
-                        href={`/products/${product.slug}`}
-                        className="bg-secondary text-white text-[10px] font-bold px-4 py-2 rounded-full hover:bg-primary transition-colors uppercase tracking-widest"
-                       >
-                         View
-                       </Link>
-                    </div>
-                  </div>
-                </div>
+                <ProductCard key={product.id} product={product as any} />
               ))}
             </div>
           </div>

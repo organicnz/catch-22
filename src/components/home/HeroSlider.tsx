@@ -9,20 +9,20 @@ const SLIDE_DURATION = 8000; // 8 seconds per slide
 
 const slides = [
   {
-    image: 'site/nz-boat.png',
-    upperTitle: 'Established NZ 2020',
-    title: 'Built to',
-    highlight: 'Endure.',
-    description: 'Premium fishing gear, apparel, and accessories tested in the harshest New Zealand environments.',
-    cta: 'Explore Collection',
+    image: 'site/hero-luxury.png',
+    upperTitle: 'Precision Engineered in NZ',
+    title: 'Engineered to',
+    highlight: 'Perform.',
+    description: 'High-performance fishing gear, tested in the harshest New Zealand environments. Built for those who demand the best.',
+    cta: 'Shop the Collection',
     link: '/products'
   },
   {
-    image: 'site/hero.jpg',
+    image: 'site/hero-authentic.png',
     upperTitle: 'Proven Performance',
     title: 'Tested in',
     highlight: 'the Wild.',
-    description: 'Tested by experts, trusted by charters. We provide tools that stand up to the challenge.',
+    description: 'Battle-tested by experts, trusted by professional charters. We provide gear that stands up to the harshest challenges.',
     cta: 'Our Story',
     link: '/about-us'
   },

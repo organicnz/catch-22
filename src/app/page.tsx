@@ -4,12 +4,11 @@ import { getStorageUrl } from '@/lib/supabase';
 import { createServerClient } from '@/lib/supabase-server';
 import { Suspense } from 'react';
 import { Metadata } from 'next';
-import { sanitizeText } from '@/lib/sanitize';
-import { ProductCard } from '@/components/products/ProductCard';
-import { CharitySection } from '@/components/home/CharitySection';
-import { TestimonialSection } from '@/components/home/TestimonialSection';
 import { ProductSlider } from '@/components/products/ProductSlider';
 import { HeroSlider } from '@/components/home/HeroSlider';
+import { SustainableSection } from '@/components/home/SustainableSection';
+import { CharitySection } from '@/components/home/CharitySection';
+import { TestimonialSection } from '@/components/home/TestimonialSection';
 
 export const revalidate = 60;
 
@@ -86,7 +85,7 @@ async function DealOfTheDay() {
       {/* Visual background flair */}
       <div className="absolute inset-0 opacity-5 pointer-events-none">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-primary/20 -skew-x-12 translate-x-1/2" />
-        <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary to-transparent" />
+        <div className="absolute bottom-0 left-0 w-full h-px bg-linear-to-r from-transparent via-primary to-transparent" />
       </div>
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -227,6 +226,9 @@ export default async function Home() {
           <BestSellers />
         </Suspense>
       </section>
+
+      {/* Sustainable Fishing Blurb */}
+      <SustainableSection />
 
       {/* Charity: NZ Sea Cleaners */}
       <CharitySection />

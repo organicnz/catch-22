@@ -145,7 +145,12 @@ export default async function ProductDetails({ params }: { params: { slug: strin
                </nav>
                <h1 className="text-4xl font-black tracking-tight text-secondary uppercase leading-tight mb-4">{product.name}</h1>
                 <div className="flex items-center gap-4">
-                   <p className="text-3xl font-black text-primary">${product.price.toFixed(2)}</p>
+                  <div className="flex items-center gap-3">
+                    <p className="text-3xl font-black text-primary">${product.price.toFixed(2)}</p>
+                    {product.sale_price && product.regular_price && (product.regular_price as number) > product.price && (
+                      <p className="text-lg font-bold text-slate-400 line-through decoration-primary/40 decoration-2">${(product.regular_price as number).toFixed(2)}</p>
+                    )}
+                  </div>
                    {product.stock_status === 'instock' ? (
                      <span className="bg-emerald-50 text-emerald-600 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter border border-emerald-100">In Stock</span>
                    ) : (
