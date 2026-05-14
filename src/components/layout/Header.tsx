@@ -111,8 +111,8 @@ export function Header() {
                 alt="CATCH-22" 
                 width={360} 
                 height={225} 
-                className="h-24 md:h-32 w-auto"
-                sizes="(max-width: 768px) 160px, 360px"
+                className={`h-16 md:h-24 w-auto transition-all duration-500 ${logoInvert}`}
+                sizes="(max-width: 768px) 120px, 240px"
                 priority
               />
           </Link>

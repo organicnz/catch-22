@@ -92,20 +92,30 @@ export default async function ProductsPage({
   }
 
   // Fetch Products (with optional category filtering)
-  let query = supabase
-    .from('products')
-    .select(`
-      id, name, slug, price, image_url, stock_status,
-      product_categories!inner (
-        category_id,
-        categories!inner (slug)
-      )
-    `)
-    .eq('stock_status', 'instock')
-    .order('created_at', { ascending: false });
-
+  let query;
+  
   if (categorySlug) {
-    query = query.eq('product_categories.categories.slug', categorySlug);
+    // Category filtered query — needs !inner to filter by category slug
+    query = supabase
+      .from('products')
+      .select(`
+        id, name, slug, price, regular_price, sale_price, image_url, stock_status,
+        product_categories!inner (
+          categories!inner (slug)
+        )
+      `)
+      .eq('product_categories.categories.slug', categorySlug)
+      .eq('stock_status', 'instock')
+      .order('created_at', { ascending: false });
+  } else {
+    // All products query — more lenient, doesn't require category mapping
+    query = supabase
+      .from('products')
+      .select(`
+        id, name, slug, price, regular_price, sale_price, image_url, stock_status
+      `)
+      .eq('stock_status', 'instock')
+      .order('created_at', { ascending: false });
   }
 
   const { data: products, error } = await query;
@@ -115,13 +125,20 @@ export default async function ProductsPage({
     return <div className="p-8 text-center text-red-500">Failed to load products.</div>;
   }
 
+  // Map nulls to undefined for ProductCard compatibility
+  const formattedProducts = products?.map(p => ({
+    ...p,
+    regular_price: p.regular_price ?? undefined,
+    sale_price: p.sale_price ?? undefined,
+  }));
+
   return (
     <div className="bg-white min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-12">
         <div className="flex flex-col md:flex-row gap-12">
           
           {/* Sidebar / Categories */}
-          <div className="w-full md:w-64 flex-shrink-0">
+          <div className="w-full md:w-64 shrink-0">
             <h2 className="text-xl font-black text-secondary uppercase tracking-widest mb-6 border-b-2 border-primary pb-2 inline-block">Categories</h2>
             <ul className="space-y-1">
               <li>
@@ -173,7 +190,7 @@ export default async function ProductsPage({
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-y-12 gap-x-8 sm:grid-cols-2 lg:grid-cols-3">
-                {products?.map((product) => (
+                {formattedProducts?.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
