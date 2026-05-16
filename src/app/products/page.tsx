@@ -1,4 +1,4 @@
-import { createPublicClient } from '@/lib/supabase-server';
+import { createPublicClient, createAdminClient } from '@/lib/supabase-server';
 import Link from 'next/link';
 import { Metadata } from 'next';
 
@@ -14,7 +14,7 @@ export async function generateMetadata({
   const categorySlug = typeof resolvedParams.category === 'string' ? resolvedParams.category : null;
 
   if (categorySlug) {
-    const supabase = createPublicClient();
+    const supabase = await createAdminClient();
     const { data: category } = await supabase
       .from('categories')
       .select('name')
@@ -81,7 +81,7 @@ export default async function ProductsPage({
   const categorySlug = typeof resolvedSearchParams.category === 'string' ? resolvedSearchParams.category : null;
 
   // Fetch Categories for the Sidebar
-  const { data: categories, error: categoriesError } = await supabase
+  const { data: categories, error: categoriesError } = await (await createAdminClient())
     .from('categories')
     .select('*')
     .order('name');
