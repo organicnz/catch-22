@@ -1,4 +1,4 @@
-import { createServerClient } from '@/lib/supabase-server';
+import { createPublicClient } from '@/lib/supabase-server';
 import Link from 'next/link';
 import { Metadata } from 'next';
 
@@ -14,7 +14,7 @@ export async function generateMetadata({
   const categorySlug = typeof resolvedParams.category === 'string' ? resolvedParams.category : null;
 
   if (categorySlug) {
-    const supabase = await createServerClient();
+    const supabase = createPublicClient();
     const { data: category } = await supabase
       .from('categories')
       .select('name')
@@ -74,7 +74,7 @@ export default async function ProductsPage({
 }: {
   searchParams: { [key: string]: string | string[] | undefined }
 }) {
-  const supabase = await createServerClient();
+  const supabase = createPublicClient();
   
   // Await searchParams in Next 15+
   const resolvedSearchParams = await searchParams;
@@ -122,7 +122,12 @@ export default async function ProductsPage({
 
   if (error) {
     console.error('Error fetching products:', error);
-    return <div className="p-8 text-center text-red-500">Failed to load products.</div>;
+    return (
+      <div className="p-8 text-center text-red-500">
+        Failed to load products.
+        <div className="text-xs mt-2 opacity-50">{JSON.stringify(error)}</div>
+      </div>
+    );
   }
 
   // Map nulls to undefined for ProductCard compatibility

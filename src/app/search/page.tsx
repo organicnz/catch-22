@@ -1,4 +1,4 @@
-import { createServerClient } from '@/lib/supabase-server';
+import { createPublicClient } from '@/lib/supabase-server';
 import Link from 'next/link';
 import { ProductCard } from '@/components/products/ProductCard';
 
@@ -10,7 +10,7 @@ export default async function SearchPage({
 }: {
   searchParams: { [key: string]: string | string[] | undefined }
 }) {
-  const supabase = await createServerClient();
+  const supabase = createPublicClient();
   const resolvedParams = await searchParams;
   const q = typeof resolvedParams.q === 'string' ? resolvedParams.q : '';
 

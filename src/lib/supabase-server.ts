@@ -4,11 +4,22 @@ import { cache } from 'react'
 import { Database } from '@/types/supabase'
 
 export const createServerClient = async () => {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+
+  if (!supabaseUrl || !supabaseKey) {
+    console.error('[Supabase] Missing environment variables:', { 
+      url: !!supabaseUrl, 
+      key: !!supabaseKey 
+    })
+    throw new Error('Supabase environment variables are not configured')
+  }
+
   const cookieStore = await cookies()
 
   return createSupabaseServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    supabaseUrl,
+    supabaseKey,
     {
       cookies: {
         getAll() {
@@ -25,6 +36,31 @@ export const createServerClient = async () => {
             // user sessions.
           }
         },
+      },
+    }
+  )
+}
+
+/**
+ * Public client that doesn't use cookies.
+ * Ideal for public data fetches (products, categories) to avoid stale JWT issues.
+ */
+export const createPublicClient = () => {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+
+  if (!supabaseUrl || !supabaseKey) {
+    console.error('[Supabase] Missing environment variables for public client')
+    throw new Error('Supabase environment variables are not configured')
+  }
+
+  return createSupabaseServerClient<Database>(
+    supabaseUrl,
+    supabaseKey,
+    {
+      cookies: {
+        getAll() { return [] },
+        setAll() {},
       },
     }
   )

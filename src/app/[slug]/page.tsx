@@ -1,4 +1,4 @@
-import { createServerClient } from '@/lib/supabase-server';
+import { createPublicClient } from '@/lib/supabase-server';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import Link from 'next/link';
@@ -7,7 +7,7 @@ import { sanitizeWPContent } from '@/lib/sanitize';
 export const revalidate = 3600; // Cache for 1 hour
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const supabase = await createServerClient();
+  const supabase = createPublicClient();
   const slug = (await params).slug;
   
   const { data: content } = await supabase
@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 }
 
 export default async function ContentPage({ params }: { params: { slug: string } }) {
-  const supabase = await createServerClient();
+  const supabase = createPublicClient();
   const slug = (await params).slug;
   
   const { data: content, error } = await supabase
