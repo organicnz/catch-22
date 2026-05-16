@@ -122,12 +122,7 @@ export default async function ProductsPage({
 
   if (error) {
     console.error('Error fetching products:', error);
-    return (
-      <div className="p-8 text-center text-red-500">
-        Failed to load products.
-        <div className="text-xs mt-2 opacity-50">{JSON.stringify(error)}</div>
-      </div>
-    );
+    return <div className="p-8 text-center text-red-500">Failed to load products.</div>;
   }
 
   // Map nulls to undefined for ProductCard compatibility
