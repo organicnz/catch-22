@@ -10,45 +10,45 @@ import { getStorageUrl } from '@/lib/supabase';
 const snaps = [
   { 
     id: 1, 
-    url: '/stock-marlin-school.jpg', 
-    caption: 'Marlin Chasing Bait', 
-    location: 'Far North',
-    author: '@capt_finn'
+    url: '/snap1.jpg', 
+    caption: 'Speared Cape Kingfish', 
+    location: 'Cape Reinga',
+    author: '@diver_dan'
   },
   { 
     id: 2, 
-    url: '/stock-fish-school.jpg', 
-    caption: 'Massive Bait Ball', 
-    location: 'White Island',
-    author: '@kiwi_angler'
+    url: '/snap2.jpg', 
+    caption: 'Ranfurly Banks Quad', 
+    location: 'Ranfurly Banks',
+    author: '@catch22_crew'
   },
   { 
     id: 3, 
-    url: '/stock-fly-vector.png', 
-    caption: 'Classic Fly Design', 
-    location: 'Taupo',
-    author: '@catch22_nz'
+    url: '/snap3.jpg', 
+    caption: 'Hauraki Gulf Snapper', 
+    location: 'Hauraki Gulf',
+    author: '@snapper_slayer'
   },
   { 
     id: 4, 
-    url: 'site/snap4.jpg', 
-    caption: 'Catch of a Lifetime', 
-    location: 'Bay of Islands',
-    author: '@saltwater_therapy'
+    url: '/snap4.jpg', 
+    caption: 'Double Hapuku Drop', 
+    location: 'White Island',
+    author: '@deep_drop_specialist'
   },
   { 
     id: 5, 
-    url: '/stock-hooks.jpg', 
-    caption: 'The Right Tools', 
-    location: 'East Cape',
-    author: '@ocean_wanderer'
+    url: '/snap5.jpg', 
+    caption: 'Three Kings Groper', 
+    location: 'Three Kings Islands',
+    author: '@groper_hunter'
   },
   { 
     id: 6, 
-    url: '/stock-split-fish.jpg', 
-    caption: 'Mid-Water Strike', 
-    location: 'HQ',
-    author: '@catch22_team'
+    url: '/stock-marlin-school.jpg', 
+    caption: 'Marlin Baitball Strike', 
+    location: 'Bay of Islands',
+    author: '@saltwater_therapy'
   },
 ];
 
