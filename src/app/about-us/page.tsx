@@ -83,11 +83,19 @@ export default function AboutPage() {
                 Our gear is tested down at Bay of Plenty Boat Hire by none other than Charles of the legendary 
                 THUNDER charter. We don&apos;t just sell gear; we provide tools that we use and trust every day on the water.
               </p>
-              <div className="mt-8 flex items-center gap-4">
-                 <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-secondary font-black text-xl shadow-lg shadow-primary/20">2.5</div>
-                 <p className="text-sm font-black text-secondary uppercase tracking-widest">
-                   % of all profits donated to NZ Sea Cleaners
-                 </p>
+              <div className="mt-8 flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-10">
+                 <div className="flex items-center gap-4">
+                   <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-secondary font-black text-xl shadow-lg shadow-primary/20">2.5</div>
+                   <p className="text-sm font-black text-secondary uppercase tracking-widest">
+                     % of all profits donated to NZ Sea Cleaners
+                   </p>
+                 </div>
+                 <Link 
+                   href="/products/catch-22-sustainable-fishing-bumper-sticker"
+                   className="inline-block bg-secondary hover:bg-primary text-white hover:text-secondary font-black py-4 px-6 rounded-2xl transition-all uppercase tracking-wider text-xs shadow-lg text-center whitespace-nowrap"
+                 >
+                   Get Your Sticker Today
+                 </Link>
               </div>
             </div>
           </section>
