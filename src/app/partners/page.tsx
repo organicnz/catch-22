@@ -28,38 +28,50 @@ export const metadata: Metadata = {
 export default function PartnersPage() {
   const partners = [
     {
-      name: 'Ham & Ty\'s Fishing Adventures',
-      description: 'Follow Ham & Ty for some off the hook entertainment. Check out their shop for custom mugs, hats, and the legendary Sledger Rigs.',
-      link: 'https://www.hamandtys.com/',
-      image: getStorageUrl('site/partner-ham-ty.jpg'),
-      imageAlt: 'Ham and Ty fishing with Catch-22 gear'
+      name: 'Ham & Cheese Fishing Adventures',
+      description: 'Follow Ham & Cheese for some off the hook entertainment. Check out their shop for custom mugs, hats, and the legendary Sledger Rigs.',
+      links: [
+        { label: 'Facebook', url: 'https://www.facebook.com/share/g/1HJnwn1Pt9/' },
+        { label: 'YouTube', url: 'https://www.youtube.com/@hamandtysfishingadventures9685' }
+      ],
+      image: '/partners/ham-cheese-logo.jpg',
+      imageAlt: 'Ham and Cheese Fishing Adventures'
     },
     {
       name: 'Northland Fishing and Mental Wellness Support Group',
       description: 'A dedicated initiative combining the healing power of fishing and the outdoors with community support for mental wellness. A safe place to share and heal.',
-      link: 'https://givealittle.co.nz/cause/northland-fishing-and-mental-wellness-support-group',
-      image: getStorageUrl('site/snap1.jpg'),
+      links: [
+        { label: 'Facebook Group', url: 'https://www.facebook.com/groups/531386178569441/' },
+        { label: 'Donate', url: 'https://givealittle.co.nz/cause/koha-towards-community-fishing-program-focusing-on' }
+      ],
+      image: '/partners/northland-logo.jpg',
       imageAlt: 'Northland Fishing and Mental Wellness Support Group community'
     },
     {
       name: 'NZ ANGLER',
       description: 'Our mates down at NZ ANGLER provide solid acidwrap rods and pro-series reels for the serious fisho.',
-      link: 'https://nzangler.co.nz/',
+      links: [
+        { label: 'Visit Website', url: 'https://nzangler.co.nz/' }
+      ],
       image: getStorageUrl('site/snap2.jpg'),
       imageAlt: 'NZ Angler fishing rods and reels'
     },
     {
       name: 'THUNDER Charter',
       description: 'Run by Charles at Bay of Plenty Boat Hire. A premier charter experience testing Catch-22 gear in the toughest conditions.',
-      link: 'https://www.bayofplentyboathire.co.nz',
-      image: getStorageUrl('site/partner-thunder.jpg'),
+      links: [
+        { label: 'Visit Website', url: 'https://www.bayofplentyboathire.co.nz' }
+      ],
+      image: '/partners/thunder-logo.jpg',
       imageAlt: 'THUNDER Charter boat on Bay of Plenty waters'
     },
     {
       name: 'Sea Cleaners',
       description: 'Dedicated to preserving our New Zealand coastlines. We are proud to support their mission by donating 2.5% of all profits.',
-      link: 'https://seacleaners.org.nz/',
-      image: getStorageUrl('site/partner-seacleaners.jpg'),
+      links: [
+        { label: 'Visit Website', url: 'https://seacleaners.org.nz/' }
+      ],
+      image: '/seacleaners-logos.png',
       imageAlt: 'Sea Cleaners volunteers cleaning New Zealand coastline'
     }
   ];
@@ -77,33 +89,38 @@ export default function PartnersPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
           {partners.map((partner, idx) => (
-            <div key={idx} className="group bg-slate-50 rounded-[2.5rem] overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 ease-out">
-              <div className="relative h-64 overflow-hidden">
-                <div aria-hidden="true" className="absolute inset-0 bg-secondary/20 group-hover:bg-secondary/10 transition-colors z-10"></div>
+            <div key={idx} className="group bg-slate-50 rounded-[2.5rem] overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 ease-out flex flex-col">
+              <div className="relative h-64 overflow-hidden bg-white">
+                <div aria-hidden="true" className="absolute inset-0 bg-secondary/20 group-hover:bg-secondary/10 transition-colors z-10 pointer-events-none"></div>
                 <Image 
                   src={partner.image} 
                   alt={partner.imageAlt} 
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                  className="object-contain p-8 group-hover:scale-105 transition-transform duration-500 ease-out"
                 />
               </div>
-              <div className="p-8">
+              <div className="p-8 flex flex-col flex-1">
                 <h2 className="text-2xl font-black text-secondary uppercase mb-4 leading-tight">
                   {partner.name}
                 </h2>
-                <p className="text-slate-600 font-medium mb-8 line-clamp-3">
+                <p className="text-slate-600 font-medium mb-8">
                   {partner.description}
                 </p>
-                <a 
-                  href={partner.link} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  aria-label={`Visit ${partner.name} website (opens in new tab)`}
-                  className="inline-block bg-white text-secondary border-2 border-secondary hover:bg-secondary hover:text-white font-black py-3 px-8 rounded-full transition-all uppercase tracking-widest text-xs"
-                >
-                  Visit Website
-                </a>
+                <div className="flex flex-wrap gap-4 mt-auto">
+                  {partner.links.map((link, i) => (
+                    <a 
+                      key={i}
+                      href={link.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      aria-label={`Visit ${partner.name} ${link.label} (opens in new tab)`}
+                      className="inline-block bg-white text-secondary border-2 border-secondary hover:bg-secondary hover:text-white font-black py-3 px-6 rounded-full transition-all uppercase tracking-widest text-[10px]"
+                    >
+                      {link.label}
+                    </a>
+                  ))}
+                </div>
               </div>
             </div>
           ))}
