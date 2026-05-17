@@ -113,6 +113,27 @@ const snaps = [
     location: 'Poor Knights Islands',
     author: '@gaff_master'
   },
+  { 
+    id: 16, 
+    url: '/snap16.jpg', 
+    caption: 'Trophy Cape Kingfish', 
+    location: 'Cape Karikari',
+    author: '@saltwater_elite'
+  },
+  { 
+    id: 17, 
+    url: '/snap17.jpg', 
+    caption: 'Sledging the Banks', 
+    location: 'Ranfurly Banks',
+    author: '@banks_basher'
+  },
+  { 
+    id: 18, 
+    url: '/snap18.jpg', 
+    caption: 'Weigh-in Double', 
+    location: 'White Island',
+    author: '@stussy_scales'
+  },
 ];
 
 export default function GalleryPage() {
