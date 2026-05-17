@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getStorageUrl } from "@/lib/supabase";
 import { Heart } from "lucide-react";
 
 export function CharitySection() {
@@ -11,7 +10,7 @@ export function CharitySection() {
           <div className="lg:w-1/2 relative">
             <div className="relative aspect-video rounded-[3rem] overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] z-10 border border-white/10 bg-black group">
               <Image
-                src={getStorageUrl('site/partner-seacleaners-dark.png')}
+                src="/seacleaners-logos.png"
                 alt="Sea Cleaners NZ"
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"

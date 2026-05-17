@@ -96,7 +96,6 @@ export default function GalleryPage() {
             Catch <br /> <span className="text-primary italic">Snaps</span>
           </h1>
           <p className="text-slate-400 text-lg md:text-2xl font-medium max-w-2xl leading-relaxed tracking-wide">
-            Tag <span className="text-primary font-black italic">#CATCH22</span> to be featured. 
             A visual collection of moments from the rugged New Zealand coastline.
           </p>
         </div>

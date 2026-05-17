@@ -35,7 +35,7 @@ export default function ContactPage() {
           Have a question about our gear or an existing order? Send us a message and we&apos;ll get back to you as soon as possible.
         </p>
         <p className="text-primary mb-10 text-center font-black uppercase tracking-widest text-[10px] bg-primary/5 py-3 rounded-full">
-          Note: Our store is currently TEMPORARILY ONLINE ONLY
+          Note: We've gone online! Pick ups are still available by appointment within Auckland (North Shore).
         </p>
 
         {status === 'success' && (
