@@ -78,6 +78,41 @@ const snaps = [
     location: 'Tauranga Harbour',
     author: '@family_fishing_nz'
   },
+  { 
+    id: 11, 
+    url: '/snap11.jpg', 
+    caption: 'Pure Kingfish Hype', 
+    location: 'Cape Reinga',
+    author: '@screaming_reel'
+  },
+  { 
+    id: 12, 
+    url: '/snap12.jpg', 
+    caption: 'Young Gun Catch', 
+    location: 'Aldermen Islands',
+    author: '@junior_angler'
+  },
+  { 
+    id: 13, 
+    url: '/snap13.jpg', 
+    caption: 'Sledging Offshore', 
+    location: 'Mayor Island',
+    author: '@mayor_boss'
+  },
+  { 
+    id: 14, 
+    url: '/snap14.jpg', 
+    caption: 'Deep Drop Groper Double', 
+    location: 'Ranfurly Banks',
+    author: '@hapuku_master'
+  },
+  { 
+    id: 15, 
+    url: '/snap15.jpg', 
+    caption: 'The Money Shot', 
+    location: 'Poor Knights Islands',
+    author: '@gaff_master'
+  },
 ];
 
 export default function GalleryPage() {
