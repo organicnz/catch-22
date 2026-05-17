@@ -10,23 +10,23 @@ import { getStorageUrl } from '@/lib/supabase';
 const snaps = [
   { 
     id: 1, 
-    url: 'site/snap1.jpg', 
-    caption: 'Sunrise at Three Kings', 
+    url: '/stock-marlin-school.jpg', 
+    caption: 'Marlin Chasing Bait', 
     location: 'Far North',
     author: '@capt_finn'
   },
   { 
     id: 2, 
-    url: 'site/snap2.jpg', 
-    caption: '20kg Kingie on 30lb Braid', 
+    url: '/stock-fish-school.jpg', 
+    caption: 'Massive Bait Ball', 
     location: 'White Island',
     author: '@kiwi_angler'
   },
   { 
     id: 3, 
-    url: 'site/snap3.jpg', 
-    caption: 'Product testing in the BoP', 
-    location: 'Tauranga',
+    url: '/stock-fly-vector.png', 
+    caption: 'Classic Fly Design', 
+    location: 'Taupo',
     author: '@catch22_nz'
   },
   { 
@@ -38,15 +38,15 @@ const snaps = [
   },
   { 
     id: 5, 
-    url: 'site/snap5.jpg', 
-    caption: 'The rugged coast', 
+    url: '/stock-hooks.jpg', 
+    caption: 'The Right Tools', 
     location: 'East Cape',
     author: '@ocean_wanderer'
   },
   { 
     id: 6, 
-    url: 'site/snap6.jpg', 
-    caption: 'New Gear Drop', 
+    url: '/stock-split-fish.jpg', 
+    caption: 'Mid-Water Strike', 
     location: 'HQ',
     author: '@catch22_team'
   },
@@ -109,7 +109,7 @@ export default function GalleryPage() {
               onClick={() => setSelectedIndex(index)}
             >
               <Image
-                src={getStorageUrl(snap.url)}
+                src={snap.url.startsWith('/') ? snap.url : getStorageUrl(snap.url)}
                 alt={snap.caption}
                 fill
                 className="object-cover transition-transform duration-1000 group-hover:scale-110 opacity-80 group-hover:opacity-100"
@@ -167,7 +167,7 @@ export default function GalleryPage() {
               <div className="lg:col-span-3 relative bg-black flex items-center justify-center group/image">
                 <Image
                   key={selectedImage.url}
-                  src={getStorageUrl(selectedImage.url)}
+                  src={selectedImage.url.startsWith('/') ? selectedImage.url : getStorageUrl(selectedImage.url)}
                   alt={selectedImage.caption}
                   fill
                   className="object-contain transition-opacity duration-500"
