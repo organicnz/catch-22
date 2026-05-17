@@ -74,11 +74,11 @@ export function ProductSlider({ products }: ProductSliderProps) {
       {/* Slider Container */}
       <div
         ref={scrollRef}
-        className="flex gap-8 overflow-x-auto pb-12 pt-4 hide-scrollbar snap-x snap-mandatory"
+        className="flex gap-4 sm:gap-8 overflow-x-auto pb-12 pt-4 hide-scrollbar snap-x snap-mandatory"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {products.map((product) => (
-          <div key={product.id} className="min-w-[85%] sm:min-w-[45%] lg:min-w-[23%] snap-start">
+          <div key={product.id} className="min-w-[46%] xs:min-w-[45%] lg:min-w-[23%] snap-start">
             <ProductCard product={product} />
           </div>
         ))}

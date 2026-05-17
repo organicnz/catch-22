@@ -1,16 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getStorageUrl } from "@/lib/supabase";
+
 
 export function SustainableSection() {
   return (
     <section className="bg-slate-50 py-32 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
-          <div className="lg:w-1/2 order-2 lg:order-1">
-            <div className="relative aspect-square w-full max-w-[500px] mx-auto rounded-[3rem] overflow-hidden shadow-2xl border border-slate-200 group">
+          <div className="lg:w-1/2 order-1 lg:order-1">
+            <div className="relative aspect-square w-full max-w-[500px] mx-auto rounded-[3rem] overflow-hidden shadow-2xl border border-slate-200 group mb-8 lg:mb-0">
               <Image 
-                src={getStorageUrl('site/sustainable-bumper.png')}
+                src="/sustainable-bumper.png"
                 alt="Catch-22 Sustainable Fishing Bumper Sticker"
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
@@ -20,7 +20,7 @@ export function SustainableSection() {
             </div>
           </div>
           
-          <div className="lg:w-1/2 order-1 lg:order-2">
+          <div className="lg:w-1/2 order-2 lg:order-2">
             <span className="text-primary font-black uppercase tracking-[0.4em] text-[10px] mb-6 block">Our Commitment</span>
             <h2 className="text-5xl md:text-7xl font-black text-secondary uppercase tracking-tighter leading-[0.9] mb-10">
               Be Proud To Be A <br /> <span className="text-slate-300">Sustainable</span> <br /> Fisherman
