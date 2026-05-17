@@ -9,7 +9,7 @@ const SLIDE_DURATION = 8000; // 8 seconds per slide
 
 const slides = [
   {
-    image: 'site/hero-luxury.png',
+    image: '/stock-split-fish.jpg',
     upperTitle: 'Precision Engineered in NZ',
     title: 'Engineered to',
     highlight: 'Perform.',
@@ -18,7 +18,7 @@ const slides = [
     link: '/products'
   },
   {
-    image: 'site/hero-authentic.png',
+    image: '/stock-hooks.jpg',
     upperTitle: 'Proven Performance',
     title: 'Tested in',
     highlight: 'the Wild.',
@@ -27,7 +27,7 @@ const slides = [
     link: '/about-us'
   },
   {
-    image: 'site/snap2.jpg',
+    image: '/stock-reel-hands.jpg',
     upperTitle: 'Trophy Results',
     title: 'Tried and',
     highlight: 'True.',
@@ -36,7 +36,7 @@ const slides = [
     link: '/gallery'
   },
   {
-    image: 'site/thunder-charter.jpg',
+    image: '/stock-reel-close.jpg',
     upperTitle: 'Precision Engineering',
     title: 'Built for',
     highlight: 'Results.',
@@ -45,7 +45,7 @@ const slides = [
     link: '/products'
   },
   {
-    image: 'site/snap1.jpg',
+    image: '/stock-marlin-vector.png',
     upperTitle: 'Community First',
     title: 'Never Out of',
     highlight: 'a Catch.',
@@ -77,7 +77,7 @@ export function HeroSlider() {
           style={{ transition: 'opacity 2000ms ease-in-out, transform 12000ms linear' }}
         >
           <Image
-            src={getStorageUrl(slide.image)}
+            src={slide.image.startsWith('/') ? slide.image : getStorageUrl(slide.image)}
             alt={slide.title}
             fill
             className="object-cover"
