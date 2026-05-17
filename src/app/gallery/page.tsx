@@ -45,10 +45,38 @@ const snaps = [
   },
   { 
     id: 6, 
-    url: '/stock-marlin-school.jpg', 
-    caption: 'Marlin Baitball Strike', 
-    location: 'Bay of Islands',
-    author: '@saltwater_therapy'
+    url: '/snap6.jpg', 
+    caption: 'Ramp Kingfish Double', 
+    location: 'Mangawhai',
+    author: '@harbour_boys'
+  },
+  { 
+    id: 7, 
+    url: '/snap7.jpg', 
+    caption: 'Offshore Yellowtail', 
+    location: 'Tutukaka',
+    author: '@blue_water_junkie'
+  },
+  { 
+    id: 8, 
+    url: '/snap8.jpg', 
+    caption: 'Firth Kingfish Lure', 
+    location: 'Firth of Thames',
+    author: '@camo_angler'
+  },
+  { 
+    id: 9, 
+    url: '/snap9.jpg', 
+    caption: 'Sharing the Catch', 
+    location: 'Mercury Islands',
+    author: '@red_boat_adventures'
+  },
+  { 
+    id: 10, 
+    url: '/snap10.jpg', 
+    caption: 'Father & Son Trophy', 
+    location: 'Tauranga Harbour',
+    author: '@family_fishing_nz'
   },
 ];
 
