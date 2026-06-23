@@ -133,6 +133,43 @@ Deno.serve(async (req) => {
       cancel_url: `${appUrl}/cart`,
       billing_address_collection: 'required',
       shipping_address_collection: { allowed_countries: ['NZ', 'AU'] },
+      shipping_options: [
+        {
+          shipping_rate_data: {
+            type: 'fixed_amount',
+            fixed_amount: { amount: 800, currency: 'nzd' },
+            display_name: 'Standard (non-rural) tracked postage',
+          },
+        },
+        {
+          shipping_rate_data: {
+            type: 'fixed_amount',
+            fixed_amount: { amount: 1400, currency: 'nzd' },
+            display_name: 'Rural tracked postage',
+          },
+        },
+        {
+          shipping_rate_data: {
+            type: 'fixed_amount',
+            fixed_amount: { amount: 1000, currency: 'nzd' },
+            display_name: 'Standard (non-rural) tracked courier postage',
+          },
+        },
+        {
+          shipping_rate_data: {
+            type: 'fixed_amount',
+            fixed_amount: { amount: 1500, currency: 'nzd' },
+            display_name: 'Rural tracked courier',
+          },
+        },
+        {
+          shipping_rate_data: {
+            type: 'fixed_amount',
+            fixed_amount: { amount: 0, currency: 'nzd' },
+            display_name: 'Pick-up by appointment from Chatswood (North Shore Auckland)',
+          },
+        },
+      ],
     })
 
     return new Response(JSON.stringify({ sessionId: session.id, url: session.url }), {
