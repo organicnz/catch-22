@@ -97,6 +97,43 @@ export async function POST(req: Request) {
       shipping_address_collection: {
         allowed_countries: ['NZ', 'AU'],
       },
+      shipping_options: [
+        {
+          shipping_rate_data: {
+            type: 'fixed_amount',
+            fixed_amount: { amount: 800, currency: 'nzd' },
+            display_name: 'Standard (non-rural) tracked postage',
+          },
+        },
+        {
+          shipping_rate_data: {
+            type: 'fixed_amount',
+            fixed_amount: { amount: 1400, currency: 'nzd' },
+            display_name: 'Rural tracked postage',
+          },
+        },
+        {
+          shipping_rate_data: {
+            type: 'fixed_amount',
+            fixed_amount: { amount: 1000, currency: 'nzd' },
+            display_name: 'Standard (non-rural) tracked courier postage',
+          },
+        },
+        {
+          shipping_rate_data: {
+            type: 'fixed_amount',
+            fixed_amount: { amount: 1500, currency: 'nzd' },
+            display_name: 'Rural tracked courier',
+          },
+        },
+        {
+          shipping_rate_data: {
+            type: 'fixed_amount',
+            fixed_amount: { amount: 0, currency: 'nzd' },
+            display_name: 'Pick-up by appointment from Chatswood (North Shore Auckland)',
+          },
+        },
+      ],
       // Allow promo codes if needed
       allow_promotion_codes: true,
       client_reference_id: user?.id,
