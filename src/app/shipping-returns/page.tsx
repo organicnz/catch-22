@@ -19,6 +19,33 @@ export default function ShippingReturnsPage() {
             <h2 className="text-xl font-black text-secondary uppercase mb-4">Shipping Policy</h2>
             <div className="space-y-4 text-slate-600 font-medium leading-relaxed">
               <p>We take every care in packing and dispatching your purchase. Title is retained by us until payment is received in full.</p>
+              
+              <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm my-4 text-sm">
+                <h3 className="font-black text-secondary uppercase tracking-wide mb-3">Shipping Rates</h3>
+                <ul className="space-y-3">
+                  <li className="flex justify-between items-center border-b border-slate-50 pb-2">
+                    <span>Standard (non-rural) tracked postage</span> 
+                    <span className="font-black text-secondary">$8.00</span>
+                  </li>
+                  <li className="flex justify-between items-center border-b border-slate-50 pb-2">
+                    <span>Rural tracked postage</span> 
+                    <span className="font-black text-secondary">$14.00</span>
+                  </li>
+                  <li className="flex justify-between items-center border-b border-slate-50 pb-2">
+                    <span>Standard (non-rural) tracked courier</span> 
+                    <span className="font-black text-secondary">$10.00</span>
+                  </li>
+                  <li className="flex justify-between items-center border-b border-slate-50 pb-2">
+                    <span>Rural tracked courier</span> 
+                    <span className="font-black text-secondary">$15.00</span>
+                  </li>
+                  <li className="flex justify-between items-center pt-1">
+                    <span>Pick-up by appointment (Chatswood, North Shore)</span> 
+                    <span className="font-black text-primary">No cost</span>
+                  </li>
+                </ul>
+              </div>
+
               <ul className="space-y-2 list-disc list-inside text-sm">
                 <li>NZ Wide Delivery via tracked courier</li>
                 <li>Dispatched from Catch-22 Warehouse</li>
