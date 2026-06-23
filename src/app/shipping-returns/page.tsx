@@ -1,6 +1,7 @@
 'use client';
 
 import { Truck, RotateCcw, ShieldCheck, Clock } from 'lucide-react';
+import { SHIPPING_RATES } from '@/config/shipping';
 
 export default function ShippingReturnsPage() {
   return (
@@ -23,26 +24,12 @@ export default function ShippingReturnsPage() {
               <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm my-4 text-sm">
                 <h3 className="font-black text-secondary uppercase tracking-wide mb-3">Shipping Rates</h3>
                 <ul className="space-y-3">
-                  <li className="flex justify-between items-center border-b border-slate-50 pb-2">
-                    <span>Standard (non-rural) tracked postage</span> 
-                    <span className="font-black text-secondary">$8.00</span>
-                  </li>
-                  <li className="flex justify-between items-center border-b border-slate-50 pb-2">
-                    <span>Rural tracked postage</span> 
-                    <span className="font-black text-secondary">$14.00</span>
-                  </li>
-                  <li className="flex justify-between items-center border-b border-slate-50 pb-2">
-                    <span>Standard (non-rural) tracked courier</span> 
-                    <span className="font-black text-secondary">$10.00</span>
-                  </li>
-                  <li className="flex justify-between items-center border-b border-slate-50 pb-2">
-                    <span>Rural tracked courier</span> 
-                    <span className="font-black text-secondary">$15.00</span>
-                  </li>
-                  <li className="flex justify-between items-center pt-1">
-                    <span>Pick-up by appointment (Chatswood, North Shore)</span> 
-                    <span className="font-black text-primary">No cost</span>
-                  </li>
+                  {SHIPPING_RATES.map((rate, i) => (
+                    <li key={rate.id} className={`flex justify-between items-center ${i === SHIPPING_RATES.length - 1 ? 'pt-1' : 'border-b border-slate-50 pb-2'}`}>
+                      <span>{rate.name}</span>
+                      <span className={`font-black ${rate.amount === 0 ? 'text-primary' : 'text-secondary'}`}>{rate.displayPrice}</span>
+                    </li>
+                  ))}
                 </ul>
               </div>
 

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createServerClient } from '@/lib/supabase-server';
+import { getStripeShippingOptions } from '@/config/shipping';
 
 const STRIPE_API_VERSION = '2026-04-22.dahlia' as const;
 
@@ -95,45 +96,9 @@ export async function POST(req: Request) {
       success_url: `${req.headers.get('origin')}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get('origin')}/cart`,
       shipping_address_collection: {
-        allowed_countries: ['NZ', 'AU'],
+        allowed_countries: ['NZ'],
       },
-      shipping_options: [
-        {
-          shipping_rate_data: {
-            type: 'fixed_amount',
-            fixed_amount: { amount: 800, currency: 'nzd' },
-            display_name: 'Standard (non-rural) tracked postage',
-          },
-        },
-        {
-          shipping_rate_data: {
-            type: 'fixed_amount',
-            fixed_amount: { amount: 1400, currency: 'nzd' },
-            display_name: 'Rural tracked postage',
-          },
-        },
-        {
-          shipping_rate_data: {
-            type: 'fixed_amount',
-            fixed_amount: { amount: 1000, currency: 'nzd' },
-            display_name: 'Standard (non-rural) tracked courier postage',
-          },
-        },
-        {
-          shipping_rate_data: {
-            type: 'fixed_amount',
-            fixed_amount: { amount: 1500, currency: 'nzd' },
-            display_name: 'Rural tracked courier',
-          },
-        },
-        {
-          shipping_rate_data: {
-            type: 'fixed_amount',
-            fixed_amount: { amount: 0, currency: 'nzd' },
-            display_name: 'Pick-up by appointment from Chatswood (North Shore Auckland)',
-          },
-        },
-      ],
+      shipping_options: getStripeShippingOptions(),
       // Allow promo codes if needed
       allow_promotion_codes: true,
       client_reference_id: user?.id,

@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { SHIPPING_RATES } from '@/config/shipping';
 
 export const revalidate = 60;
 
@@ -34,7 +35,7 @@ export default function FAQPage() {
         },
         {
           q: 'What are the shipping costs?',
-          a: 'Standard (non-rural) tracked postage is $8.00. Rural tracked postage is $14.00. Standard (non-rural) tracked courier is $10.00. Rural tracked courier is $15.00. Pick-up by appointment from Chatswood (North Shore Auckland) is free of charge.'
+          a: SHIPPING_RATES.map((rate) => `${rate.name} is ${rate.amount === 0 ? 'free of charge' : rate.displayPrice}.`).join(' ')
         },
         {
           q: 'Where will my order be shipped from?',
