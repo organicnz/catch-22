@@ -135,9 +135,14 @@ export default function CartPage() {
                 <dt className="text-xs font-black text-slate-500 uppercase tracking-widest">Subtotal</dt>
                 <dd className="text-lg font-black text-secondary">${totalPrice().toFixed(2)}</dd>
               </div>
-              <div className="flex items-center justify-between">
-                <dt className="text-xs font-black text-slate-500 uppercase tracking-widest">Shipping</dt>
-                <dd className="text-xs font-black text-emerald-600 uppercase tracking-widest">Calculated at Checkout</dd>
+              <div className="flex items-start justify-between">
+                <dt className="text-xs font-black text-slate-500 uppercase tracking-widest mt-0.5">Shipping</dt>
+                <dd className="text-right">
+                  <span className="text-xs font-black text-emerald-600 uppercase tracking-widest block">Calculated at Checkout</span>
+                  <a href="/shipping-returns" className="text-[10px] text-slate-400 font-medium underline hover:text-primary transition-colors mt-1 inline-block">
+                    View Rates (From $8.00 or Free Pickup)
+                  </a>
+                </dd>
               </div>
               <div className="border-t border-slate-200 pt-6 flex items-center justify-between">
                 <dt className="text-xl font-black text-secondary uppercase tracking-tight">Order total</dt>
