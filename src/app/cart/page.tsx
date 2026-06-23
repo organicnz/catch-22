@@ -6,6 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Trash2, Plus, Minus, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
+import { SHIPPING_RATES } from '@/config/shipping';
 
 import { StripeExpressCheckout } from '@/components/checkout/StripeExpressCheckout';
 
@@ -140,7 +141,7 @@ export default function CartPage() {
                 <dd className="text-right">
                   <span className="text-xs font-black text-emerald-600 uppercase tracking-widest block">Calculated at Checkout</span>
                   <a href="/shipping-returns" className="text-[10px] text-slate-400 font-medium underline hover:text-primary transition-colors mt-1 inline-block">
-                    View Rates (From $8.00 or Free Pickup)
+                    View Rates (From {SHIPPING_RATES.find(r => r.id === 'standard')?.displayPrice || '$8.00'} or Free Pickup)
                   </a>
                 </dd>
               </div>

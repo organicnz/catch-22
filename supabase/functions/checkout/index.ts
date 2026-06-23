@@ -2,6 +2,7 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import Stripe from 'npm:stripe@17'
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import { getStripeShippingOptions } from '../../../src/config/shipping.ts'
 
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, {
   // @ts-ignore - acacia is a valid API version
@@ -132,44 +133,8 @@ Deno.serve(async (req) => {
       success_url: `${appUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/cart`,
       billing_address_collection: 'required',
-      shipping_address_collection: { allowed_countries: ['NZ', 'AU'] },
-      shipping_options: [
-        {
-          shipping_rate_data: {
-            type: 'fixed_amount',
-            fixed_amount: { amount: 800, currency: 'nzd' },
-            display_name: 'Standard (non-rural) tracked postage',
-          },
-        },
-        {
-          shipping_rate_data: {
-            type: 'fixed_amount',
-            fixed_amount: { amount: 1400, currency: 'nzd' },
-            display_name: 'Rural tracked postage',
-          },
-        },
-        {
-          shipping_rate_data: {
-            type: 'fixed_amount',
-            fixed_amount: { amount: 1000, currency: 'nzd' },
-            display_name: 'Standard (non-rural) tracked courier postage',
-          },
-        },
-        {
-          shipping_rate_data: {
-            type: 'fixed_amount',
-            fixed_amount: { amount: 1500, currency: 'nzd' },
-            display_name: 'Rural tracked courier',
-          },
-        },
-        {
-          shipping_rate_data: {
-            type: 'fixed_amount',
-            fixed_amount: { amount: 0, currency: 'nzd' },
-            display_name: 'Pick-up by appointment from Chatswood (North Shore Auckland)',
-          },
-        },
-      ],
+      shipping_address_collection: { allowed_countries: ['NZ'] },
+      shipping_options: getStripeShippingOptions(),
     })
 
     return new Response(JSON.stringify({ sessionId: session.id, url: session.url }), {
