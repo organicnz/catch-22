@@ -1,6 +1,7 @@
 import { createPublicClient } from '@/lib/supabase-server';
 import Link from 'next/link';
 import { ProductCard } from '@/components/products/ProductCard';
+import { isSpamContent } from '@/lib/sanitize';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 60;
@@ -36,13 +37,7 @@ export default async function SearchPage({
       .eq('status', 'publish')
       .limit(10);
 
-    const spamKeywords = ['casino', 'slot', 'betting', 'gambling', 'poker', 'bingo', 'judi', 'genset'];
-    posts = contentData?.filter(item => {
-      const titleLower = item.title.toLowerCase();
-      const isSpam = spamKeywords.some(kw => titleLower.includes(kw));
-      const hasNonLatin = /[^\u0000-\u007F]/.test(item.title) && !titleLower.includes('catch-22');
-      return !isSpam && !hasNonLatin;
-    }) || [];
+    posts = contentData?.filter(item => !isSpamContent(item.title)) || [];
   }
 
   return (

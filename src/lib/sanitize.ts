@@ -30,6 +30,23 @@ export const TRUSTED_DOMAINS = [
 ] as const;
 
 /**
+ * Utility to check if a given string contains spam keywords or non-latin characters.
+ * Used for aggressively filtering out malicious injections or spam pages.
+ */
+export function isSpamContent(text: string): boolean {
+  if (!text) return false;
+  const lowerText = text.toLowerCase();
+  
+  // Check for spam keywords
+  const hasSpamKeyword = SPAM_KEYWORDS.some(kw => lowerText.includes(kw));
+  
+  // Check for non-Latin characters (allowing standard punctuation/emoji if needed, but strict here)
+  const hasNonLatin = /[^\u0000-\u007F]/.test(text) && !lowerText.includes('catch-22');
+  
+  return hasSpamKeyword || hasNonLatin;
+}
+
+/**
  * Removes WordPress artifacts, spam content, and XSS vectors from HTML strings.
  * Safe to call on any user-generated or legacy-migrated content.
  */

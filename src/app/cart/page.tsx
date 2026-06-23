@@ -140,9 +140,9 @@ export default function CartPage() {
                 <dt className="text-xs font-black text-slate-500 uppercase tracking-widest mt-0.5">Shipping</dt>
                 <dd className="text-right">
                   <span className="text-xs font-black text-emerald-600 uppercase tracking-widest block">Calculated at Checkout</span>
-                  <a href="/shipping-returns" className="text-[10px] text-slate-400 font-medium underline hover:text-primary transition-colors mt-1 inline-block">
+                  <Link href="/shipping-returns" className="text-[10px] text-slate-400 font-medium underline hover:text-primary transition-colors mt-1 inline-block">
                     View Rates (From {SHIPPING_RATES.find(r => r.id === 'standard')?.displayPrice || '$8.00'} or Free Pickup)
-                  </a>
+                  </Link>
                 </dd>
               </div>
               <div className="border-t border-slate-200 pt-6 flex items-center justify-between">
