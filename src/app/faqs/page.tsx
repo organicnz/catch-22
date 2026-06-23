@@ -33,6 +33,10 @@ export default function FAQPage() {
           a: 'Standard deliveries typically take between 2-5 business days. For rural deliveries please allow an additional 1-3 business days. Please select courier option for faster shipping.'
         },
         {
+          q: 'What are the shipping costs?',
+          a: 'Standard (non-rural) tracked postage is $8.00. Rural tracked postage is $14.00. Standard (non-rural) tracked courier is $10.00. Rural tracked courier is $15.00. Pick-up by appointment from Chatswood (North Shore Auckland) is free of charge.'
+        },
+        {
           q: 'Where will my order be shipped from?',
           a: 'Orders are shipped from within Auckland.'
         },
