@@ -23,8 +23,9 @@ export default async function AccountPage() {
     redirect('/auth/mfa');
   }
 
-  // Find the profile record that matches the auth email
-  const { data: customer } = await supabase
+  // Find the profile record — use admin client to bypass RLS
+  const adminClient = await createAdminClient();
+  const { data: customer } = await adminClient
     .from('profiles')
     .select('id, first_name, last_name, user_id, is_admin')
     .or(`email.eq.${user.email},user_id.eq.${user.id}`)
@@ -57,7 +58,6 @@ export default async function AccountPage() {
 
   let allOrders: AdminOrder[] = [];
   if (isAdmin) {
-    const adminClient = await createAdminClient();
     const { data } = await adminClient
       .from('orders')
       .select(`
