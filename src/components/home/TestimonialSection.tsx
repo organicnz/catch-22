@@ -50,7 +50,10 @@ export function TestimonialSection() {
             >
               <div className="flex gap-1 mb-10">
                 {Array.from({ length: t.stars }, (_, starIdx) => (
-                  <Star key={`${t.name}-star-${starIdx}`} className="w-3 h-3 fill-primary text-primary" />
+                  <Star
+                    key={`${t.name}-star-${starIdx}`}
+                    className="w-3 h-3 fill-primary text-primary"
+                  />
                 ))}
               </div>
 

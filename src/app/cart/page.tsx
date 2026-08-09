@@ -137,12 +137,12 @@ export default function CartPage() {
                         </div>
 
                         <div className="absolute top-0 right-0">
-                <button
-                  type="button"
-                  className="-m-2 p-2 inline-flex text-slate-300 hover:text-rose-500 transition-colors"
-                  onClick={() => removeItem(item.id)}
-                  aria-label={`Remove ${item.name} from cart`}
-                >
+                          <button
+                            type="button"
+                            className="-m-2 p-2 inline-flex text-slate-300 hover:text-rose-500 transition-colors"
+                            onClick={() => removeItem(item.id)}
+                            aria-label={`Remove ${item.name} from cart`}
+                          >
                             <span className="sr-only">Remove</span>
                             <Trash2 size={20} strokeWidth={2} />
                           </button>
