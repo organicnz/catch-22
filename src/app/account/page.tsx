@@ -1,4 +1,4 @@
-import { AccountTabs, type TabDef } from '@/components/account/AccountTabs';
+import { AccountTabs, type TabDef, type PanelMap } from '@/components/account/AccountTabs';
 import { AdminOrdersPanel } from '@/components/account/AdminOrdersPanel';
 import { MyOrdersPanel } from '@/components/account/MyOrdersPanel';
 import { MfaSettings } from '@/components/account/MfaSettings';
@@ -70,18 +70,16 @@ export default async function AccountPage() {
   const processing = allOrders.filter((o) => o.status === 'processing').length;
 
   // Build tab list — admins get "All Orders" first
-  type TabId = 'admin' | 'orders' | 'settings';
-
-  const tabs: TabDef<TabId>[] = [
+  const tabs: TabDef[] = [
     ...(isAdmin
-      ? [{ id: 'admin' as const, label: 'All Orders', icon: Package, badge: processing }]
+      ? [{ id: 'admin', label: 'All Orders', icon: Package, badge: processing }]
       : []),
     { id: 'orders',   label: isAdmin ? 'My Orders' : 'Orders', icon: ShoppingBag },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
-  // Panel components — zero-arg so only the active one mounts
-  const panels: Record<TabId, React.ComponentType> = {
+  // Panel render functions — only the active one is called
+  const panels: PanelMap = {
     admin:    () => <AdminOrdersPanel orders={allOrders} />,
     orders:   () => <MyOrdersPanel orders={myOrders} />,
     settings: () => (

@@ -1,38 +1,41 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useCallback, useTransition, type ComponentType } from 'react';
+import { Suspense, useCallback, useTransition } from 'react';
 import type { LucideIcon } from 'lucide-react';
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
-export interface TabDef<TId extends string = string> {
-  id: TId;
+export interface TabDef {
+  id: string;
   label: string;
   icon: LucideIcon;
   badge?: number;
 }
 
-interface TabsProps<TId extends string> {
-  tabs: TabDef<TId>[];
-  panels: Record<TId, ComponentType>;
-  defaultTab?: TId;
+// Panel map: tab id → zero-arg render function
+export type PanelMap = Record<string, () => React.ReactNode>;
+
+interface TabsProps {
+  tabs: TabDef[];
+  panels: PanelMap;
+  defaultTab?: string;
 }
 
 // ---------------------------------------------------------------------------
 // Inner component (uses useSearchParams — must be wrapped in Suspense)
 // ---------------------------------------------------------------------------
-function TabsInner<TId extends string>({ tabs, panels, defaultTab }: TabsProps<TId>) {
+function TabsInner({ tabs, panels, defaultTab }: TabsProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
-  const activeId = (searchParams.get('tab') as TId) ?? defaultTab ?? tabs[0].id;
-  const ActivePanel = panels[activeId] ?? panels[tabs[0].id];
+  const activeId = searchParams.get('tab') ?? defaultTab ?? tabs[0]?.id ?? '';
+  const renderPanel = panels[activeId] ?? panels[tabs[0]?.id ?? ''];
 
   const setTab = useCallback(
-    (id: TId) => {
+    (id: string) => {
       const params = new URLSearchParams(searchParams.toString());
       params.set('tab', id);
       startTransition(() => {
@@ -51,7 +54,7 @@ function TabsInner<TId extends string>({ tabs, panels, defaultTab }: TabsProps<T
         className="flex border-b border-slate-100 mb-10 overflow-x-auto"
         style={{ scrollbarWidth: 'none' }}
       >
-        {tabs.map((tab) => {
+        {tabs.map((tab, idx) => {
           const Icon = tab.icon;
           const isActive = activeId === tab.id;
           return (
@@ -64,9 +67,8 @@ function TabsInner<TId extends string>({ tabs, panels, defaultTab }: TabsProps<T
               tabIndex={isActive ? 0 : -1}
               onClick={() => setTab(tab.id)}
               onKeyDown={(e) => {
-                const idx = tabs.findIndex((t) => t.id === tab.id);
                 if (e.key === 'ArrowRight') setTab(tabs[(idx + 1) % tabs.length].id);
-                if (e.key === 'ArrowLeft') setTab(tabs[(idx - 1 + tabs.length) % tabs.length].id);
+                if (e.key === 'ArrowLeft')  setTab(tabs[(idx - 1 + tabs.length) % tabs.length].id);
               }}
               className={[
                 'relative flex items-center gap-2 px-5 py-4',
@@ -93,7 +95,7 @@ function TabsInner<TId extends string>({ tabs, panels, defaultTab }: TabsProps<T
         })}
       </div>
 
-      {/* Active panel only — no hidden DOM bloat */}
+      {/* Active panel only — nothing else mounts */}
       <div
         role="tabpanel"
         id={`panel-${activeId}`}
@@ -101,16 +103,16 @@ function TabsInner<TId extends string>({ tabs, panels, defaultTab }: TabsProps<T
         tabIndex={0}
         className="outline-none"
       >
-        <ActivePanel />
+        {renderPanel?.()}
       </div>
     </div>
   );
 }
 
 // ---------------------------------------------------------------------------
-// Public export — wraps inner in Suspense (required for useSearchParams)
+// Public export — Suspense required for useSearchParams in App Router
 // ---------------------------------------------------------------------------
-export function AccountTabs<TId extends string>(props: TabsProps<TId>) {
+export function AccountTabs(props: TabsProps) {
   return (
     <Suspense
       fallback={
