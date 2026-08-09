@@ -31,4 +31,5 @@ export async function updateOrderStatus(orderId: number, status: string) {
   if (error) throw new Error(error.message);
 
   revalidatePath('/admin');
+  revalidatePath('/account');
 }

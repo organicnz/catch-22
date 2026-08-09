@@ -39,7 +39,7 @@ export default async function AccountPage() {
   const isAdmin = customer?.is_admin === true;
 
   // Admin: fetch all orders; regular user: fetch own orders only
-  type OrderItem = { product_name: string | null; quantity: number | null; total: number | null };
+  type OrderItem = { id?: number; product_name: string | null; quantity: number | null; total: number | null };
   type ShippingAddress = {
     line1?: string; line2?: string; city?: string;
     state?: string; postal_code?: string; country?: string;
@@ -50,8 +50,10 @@ export default async function AccountPage() {
     status: string | null;
     total_amount: number | null;
     currency: string | null;
+    payment_method: string | null;
     stripe_session_id: string | null;
     shipping_address: ShippingAddress | null;
+    billing_address: ShippingAddress | null;
     order_items: OrderItem[];
     profiles: { first_name: string | null; last_name: string | null; email: string | null } | null;
   };
@@ -62,8 +64,9 @@ export default async function AccountPage() {
       .from('orders')
       .select(`
         id, created_at, status, total_amount, currency,
-        stripe_session_id, shipping_address,
-        order_items ( product_name, quantity, total ),
+        payment_method, stripe_session_id,
+        shipping_address, billing_address,
+        order_items ( id, product_name, quantity, total ),
         profiles ( first_name, last_name, email )
       `)
       .order('created_at', { ascending: false })
@@ -230,7 +233,7 @@ export default async function AccountPage() {
                         <ul className="divide-y divide-slate-50">
                           {order.order_items.map((item) => (
                             <li
-                              key={item.product_name ?? String(Math.random())}
+                              key={item.id ?? item.product_name ?? String(Math.random())}
                               className="py-3 flex justify-between items-center group"
                             >
                               <div className="flex items-center gap-3">
