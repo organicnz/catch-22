@@ -83,7 +83,7 @@ export default function MfaChallengePage() {
     );
 
   return (
-    <div className="min-h-[80vh] bg-white flex items-center justify-center px-4 py-16">
+    <div className="min-h-[80vh] bg-white flex items-center justify-center px-4 pt-28 pb-16">
       <div className="max-w-md w-full bg-slate-50 p-10 rounded-3xl shadow-sm text-center border border-slate-100">
         <div className="flex flex-col items-center mb-8">
           <div className="p-4 bg-primary/10 text-primary rounded-2xl mb-4">
