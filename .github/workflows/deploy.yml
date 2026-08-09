@@ -119,13 +119,12 @@ jobs:
           deploy_function "webhook"  "supabase/functions/webhook/index.ts"
 
   # ─────────────────────────────────────────────────────────────────────────────
-  # 4. Vercel — production deployment via self-hosted runner
-  #    Runs on backend-runner (self-hosted) — bypasses Hobby plan contributor
-  #    restriction because deploys originate from your own machine, not GitHub's
+  # 4. Vercel — production deployment
+  #    gitForkProtection disabled on project — all pushes deploy regardless of author
   # ─────────────────────────────────────────────────────────────────────────────
   deploy:
     name: Deploy to Vercel
-    runs-on: [self-hosted, Linux, ARM64]
+    runs-on: ubuntu-latest
     needs: [lint, test, supabase]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
