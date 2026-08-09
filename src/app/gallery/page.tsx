@@ -244,7 +244,9 @@ export default function GalleryPage() {
             role="button"
             tabIndex={0}
             onClick={handleClose}
-            onKeyDown={(e) => { if (e.key === 'Escape' || e.key === 'Enter') handleClose(); }}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape' || e.key === 'Enter') handleClose();
+            }}
             aria-label="Close gallery"
           />
 

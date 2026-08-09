@@ -136,21 +136,19 @@ export default async function ProductDetails({ params }: { params: { slug: strin
               Array.isArray(product.gallery_urls) &&
               product.gallery_urls.length > 0 && (
                 <div className="mt-4 grid grid-cols-4 gap-4">
-                  {(product.gallery_urls as string[])
-                    .slice(0, 4)
-                    .map((url: string) => (
-                      <div
-                        key={url}
-                        className="aspect-square relative rounded-xl overflow-hidden bg-slate-50 border border-slate-100"
-                      >
-                        <Image
-                          src={getStorageUrl(url)}
-                          alt={`${product.name} gallery ${index}`}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                    ))}
+                  {(product.gallery_urls as string[]).slice(0, 4).map((url: string) => (
+                    <div
+                      key={url}
+                      className="aspect-square relative rounded-xl overflow-hidden bg-slate-50 border border-slate-100"
+                    >
+                      <Image
+                        src={getStorageUrl(url)}
+                        alt={`${product.name} gallery ${index}`}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  ))}
                 </div>
               )}
           </div>
