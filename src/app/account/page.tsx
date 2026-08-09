@@ -1,5 +1,12 @@
-import { AccountTabs, type AdminOrder, type MyOrder } from '@/components/account/AccountTabs';
+import { AccountTabs, type TabDef } from '@/components/account/AccountTabs';
+import { AdminOrdersPanel } from '@/components/account/AdminOrdersPanel';
+import { MyOrdersPanel } from '@/components/account/MyOrdersPanel';
+import { MfaSettings } from '@/components/account/MfaSettings';
+import { UserSettings } from '@/components/account/UserSettings';
+import { LogoutButton } from '@/components/account/LogoutButton';
 import { createAdminClient, createServerClient } from '@/lib/supabase-server';
+import type { AdminOrder, MyOrder } from '@/types/orders';
+import { Package, Settings, ShoppingBag } from 'lucide-react';
 import { redirect } from 'next/navigation';
 
 export const metadata = {
@@ -10,13 +17,10 @@ export const metadata = {
 export default async function AccountPage() {
   const supabase = await createServerClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  // MFA check
+  // MFA gate
   const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
   if (aalData?.nextLevel !== aalData?.currentLevel && aalData?.nextLevel === 'aal2') {
     redirect('/auth/mfa');
@@ -30,14 +34,14 @@ export default async function AccountPage() {
     .or(`email.eq.${user.email},user_id.eq.${user.id}`)
     .single();
 
-  // Link auth user_id if missing (legacy profiles)
+  // Backfill user_id on legacy profiles so future queries use the faster index
   if (profile && !profile.user_id) {
     await adminClient.from('profiles').update({ user_id: user.id }).eq('id', profile.id);
   }
 
   const isAdmin = profile?.is_admin === true;
 
-  // Fetch data in parallel
+  // Parallel data fetch — only fetch allOrders when admin
   const [allOrdersResult, myOrdersResult] = await Promise.all([
     isAdmin
       ? adminClient
@@ -51,23 +55,55 @@ export default async function AccountPage() {
           `)
           .order('created_at', { ascending: false })
           .limit(200)
-      : Promise.resolve({ data: [] }),
+      : Promise.resolve({ data: [] as AdminOrder[] }),
     profile
       ? supabase
           .from('orders')
           .select('id, created_at, status, total_amount, order_items(product_name, quantity, total)')
           .eq('customer_id', profile.id)
           .order('created_at', { ascending: false })
-      : Promise.resolve({ data: [] }),
+      : Promise.resolve({ data: [] as MyOrder[] }),
   ]);
 
-  const allOrders = (allOrdersResult.data || []) as AdminOrder[];
-  const myOrders = (myOrdersResult.data || []) as MyOrder[];
+  const allOrders = (allOrdersResult.data ?? []) as AdminOrder[];
+  const myOrders  = (myOrdersResult.data  ?? []) as MyOrder[];
+  const processing = allOrders.filter((o) => o.status === 'processing').length;
+
+  // Build tab list — admins get "All Orders" first
+  type TabId = 'admin' | 'orders' | 'settings';
+
+  const tabs: TabDef<TabId>[] = [
+    ...(isAdmin
+      ? [{ id: 'admin' as const, label: 'All Orders', icon: Package, badge: processing }]
+      : []),
+    { id: 'orders',   label: isAdmin ? 'My Orders' : 'Orders', icon: ShoppingBag },
+    { id: 'settings', label: 'Settings', icon: Settings },
+  ];
+
+  // Panel components — zero-arg so only the active one mounts
+  const panels: Record<TabId, React.ComponentType> = {
+    admin:    () => <AdminOrdersPanel orders={allOrders} />,
+    orders:   () => <MyOrdersPanel orders={myOrders} />,
+    settings: () => (
+      <div className="max-w-2xl space-y-12">
+        <UserSettings />
+        <MfaSettings />
+        <div className="pt-8 border-t border-slate-100">
+          <h3 className="text-sm font-black text-secondary uppercase tracking-widest mb-1">
+            Session Control
+          </h3>
+          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-6">
+            Signed in as <span className="text-secondary">{user.email}</span>
+          </p>
+          <LogoutButton />
+        </div>
+      </div>
+    ),
+  };
 
   return (
     <div className="bg-white min-h-screen py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
         <div className="flex flex-col mb-10">
           <h1 className="text-4xl font-black tracking-tight text-secondary uppercase">
             {isAdmin ? 'Dashboard' : 'My Account'}
@@ -76,10 +112,9 @@ export default async function AccountPage() {
         </div>
 
         <AccountTabs
-          isAdmin={isAdmin}
-          allOrders={allOrders}
-          myOrders={myOrders}
-          email={user.email ?? ''}
+          tabs={tabs}
+          panels={panels}
+          defaultTab={tabs[0].id}
         />
       </div>
     </div>
