@@ -27,16 +27,22 @@ export default async function AccountPage() {
   }
 
   // Profile — admin client bypasses RLS so is_admin is always readable
-  const adminClient = await createAdminClient();
-  const { data: profile } = await adminClient
-    .from('profiles')
-    .select('id, first_name, last_name, user_id, is_admin')
-    .or(`email.eq.${user.email},user_id.eq.${user.id}`)
-    .single();
+  let profile: { id: number; first_name: string | null; last_name: string | null; user_id: string | null; is_admin: boolean } | null = null;
+  try {
+    const adminClient = await createAdminClient();
+    const { data } = await adminClient
+      .from('profiles')
+      .select('id, first_name, last_name, user_id, is_admin')
+      .or(`email.eq.${user.email},user_id.eq.${user.id}`)
+      .single();
+    profile = data;
 
-  // Backfill user_id on legacy profiles so future queries use the faster index
-  if (profile && !profile.user_id) {
-    await adminClient.from('profiles').update({ user_id: user.id }).eq('id', profile.id);
+    // Backfill user_id on legacy profiles so future queries use the faster index
+    if (profile && !profile.user_id) {
+      await adminClient.from('profiles').update({ user_id: user.id }).eq('id', profile.id);
+    }
+  } catch (e) {
+    console.error('[Account] Admin client error — SUPABASE_SECRET_KEY may not be set in Vercel env vars:', e);
   }
 
   const isAdmin = profile?.is_admin === true;
@@ -44,7 +50,7 @@ export default async function AccountPage() {
   // Parallel data fetch — only fetch allOrders when admin
   const [allOrdersResult, myOrdersResult] = await Promise.all([
     isAdmin
-      ? adminClient
+      ? createAdminClient().then(ac => ac
           .from('orders')
           .select(`
             id, created_at, status, total_amount, currency,
@@ -54,7 +60,7 @@ export default async function AccountPage() {
             profiles ( first_name, last_name, email )
           `)
           .order('created_at', { ascending: false })
-          .limit(200)
+          .limit(200))
       : Promise.resolve({ data: [] as AdminOrder[] }),
     profile
       ? supabase
