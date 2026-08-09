@@ -28,7 +28,7 @@ export function AccountTabShell({ tabs, activeTab, children }: Props) {
 
   const setTab = (id: string) => {
     startTransition(() => {
-      router.push(`?tab=${id}`, { scroll: false });
+      router.push(`?tab=${id}`, { scroll: true });
     });
   };
 
