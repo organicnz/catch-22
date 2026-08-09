@@ -1,15 +1,17 @@
-import { createPublicClient } from '@/lib/supabase-server';
-import { notFound } from 'next/navigation';
-import { Metadata } from 'next';
-import Link from 'next/link';
 import { sanitizeWPContent } from '@/lib/sanitize';
+import { createPublicClient } from '@/lib/supabase-server';
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
 
 export const revalidate = 3600; // Cache for 1 hour
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: { params: { slug: string } }): Promise<Metadata> {
   const supabase = createPublicClient();
   const slug = (await params).slug;
-  
+
   const { data: content } = await supabase
     .from('content')
     .select('title, body')
@@ -22,8 +24,11 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 
   const cleanBody = sanitizeWPContent(content.body || '');
-  const rawText = cleanBody.replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim();
-  const description = rawText.length > 150 ? rawText.substring(0, 147) + '...' : rawText;
+  const rawText = cleanBody
+    .replace(/<[^>]*>?/gm, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const description = rawText.length > 150 ? `${rawText.substring(0, 147)}...` : rawText;
 
   return {
     title: `${content.title} | Catch-22`,
@@ -38,7 +43,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 export default async function ContentPage({ params }: { params: { slug: string } }) {
   const supabase = createPublicClient();
   const slug = (await params).slug;
-  
+
   const { data: content, error } = await supabase
     .from('content')
     .select('*')
@@ -59,19 +64,23 @@ export default async function ContentPage({ params }: { params: { slug: string }
           <h1 className="text-4xl md:text-5xl font-black tracking-tight text-secondary uppercase mb-4 leading-tight">
             {content.title}
           </h1>
-          <div className="h-2 w-24 bg-primary"></div>
+          <div className="h-2 w-24 bg-primary" />
           {content.type === 'post' && content.created_at && (
-            <time dateTime={content.created_at} className="mt-6 text-xs font-black text-slate-400 uppercase tracking-[0.2em]">
-               Published {new Date(content.created_at).toLocaleDateString('en-NZ', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}
+            <time
+              dateTime={content.created_at}
+              className="mt-6 text-xs font-black text-slate-400 uppercase tracking-[0.2em]"
+            >
+              Published{' '}
+              {new Date(content.created_at).toLocaleDateString('en-NZ', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
             </time>
           )}
         </div>
-        
-        <div 
+
+        <div
           className="prose prose-slate prose-lg max-w-none 
             prose-headings:text-secondary prose-headings:uppercase prose-headings:font-black
             prose-p:text-slate-600 prose-p:leading-relaxed
@@ -80,15 +89,15 @@ export default async function ContentPage({ params }: { params: { slug: string }
             prose-img:rounded-3xl prose-img:shadow-lg"
           dangerouslySetInnerHTML={{ __html: cleanBody }}
         />
-        
         {content.type === 'post' && (
           <div className="mt-20 pt-10 border-t border-slate-100 flex justify-between items-center">
-             <Link href="/" className="text-sm font-black text-secondary uppercase tracking-widest hover:text-primary transition-colors flex items-center gap-2">
-                <span>&larr;</span> Back to Home
-             </Link>
-             <div className="flex gap-4">
-                {/* Social share placeholders */}
-             </div>
+            <Link
+              href="/"
+              className="text-sm font-black text-secondary uppercase tracking-widest hover:text-primary transition-colors flex items-center gap-2"
+            >
+              <span>&larr;</span> Back to Home
+            </Link>
+            <div className="flex gap-4">{/* Social share placeholders */}</div>
           </div>
         )}
       </div>

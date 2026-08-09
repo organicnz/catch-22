@@ -1,9 +1,9 @@
 'use client';
 
-import { createClient } from '@/lib/supabase';
-import { useRouter } from 'next/navigation';
-import { LogOut } from 'lucide-react';
 import { useSettingsStore } from '@/lib/store/settings';
+import { createClient } from '@/lib/supabase';
+import { LogOut } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 export function LogoutButton() {
@@ -26,6 +26,7 @@ export function LogoutButton() {
 
   return (
     <button
+      type="button"
       onClick={handleLogout}
       disabled={isLoggingOut}
       className="inline-flex items-center gap-4 px-10 py-5 bg-secondary text-white rounded-full font-black uppercase tracking-[0.2em] text-sm hover:bg-primary transition-all group shadow-xl shadow-secondary/10 disabled:opacity-50"

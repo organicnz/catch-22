@@ -33,8 +33,8 @@ export const SHIPPING_RATES = [
     amount: 0,
     currency: 'nzd',
     displayPrice: 'No cost',
-    stripeDisplayName: 'Pick-up by appointment from Chatswood (North Shore Auckland)'
-  }
+    stripeDisplayName: 'Pick-up by appointment from Chatswood (North Shore Auckland)',
+  },
 ];
 
 export function getStripeShippingOptions() {

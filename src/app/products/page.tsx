@@ -1,6 +1,6 @@
-import { createPublicClient, createAdminClient } from '@/lib/supabase-server';
+import { createAdminClient, createPublicClient } from '@/lib/supabase-server';
+import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 60; // Revalidate every 60 seconds
@@ -8,7 +8,7 @@ export const revalidate = 60; // Revalidate every 60 seconds
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined }
+  searchParams: { [key: string]: string | string[] | undefined };
 }): Promise<Metadata> {
   const resolvedParams = await searchParams;
   const categorySlug = typeof resolvedParams.category === 'string' ? resolvedParams.category : null;
@@ -33,20 +33,30 @@ export async function generateMetadata({
           url: `https://catch-22.co.nz/products?category=${categorySlug}`,
           siteName: 'Catch-22',
           locale: 'en_NZ',
-          images: [{ url: 'https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/media/site/thunder-charter.jpg', width: 1200, height: 630, alt: `Catch-22 ${category.name}` }],
+          images: [
+            {
+              url: 'https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/media/site/thunder-charter.jpg',
+              width: 1200,
+              height: 630,
+              alt: `Catch-22 ${category.name}`,
+            },
+          ],
         },
         twitter: {
           card: 'summary_large_image',
           title,
           description,
-          images: ['https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/media/site/thunder-charter.jpg'],
+          images: [
+            'https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/media/site/thunder-charter.jpg',
+          ],
         },
       };
     }
   }
 
   const title = 'All Gear | Catch-22 New Zealand';
-  const description = 'Browse our full collection of premium fishing braid, lures, and apparel. High-performance gear built for New Zealand conditions.';
+  const description =
+    'Browse our full collection of premium fishing braid, lures, and apparel. High-performance gear built for New Zealand conditions.';
   return {
     title,
     description,
@@ -56,13 +66,22 @@ export async function generateMetadata({
       url: 'https://catch-22.co.nz/products',
       siteName: 'Catch-22',
       locale: 'en_NZ',
-      images: [{ url: 'https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/media/site/thunder-charter.jpg', width: 1200, height: 630, alt: 'Catch-22 Premium Fishing Gear' }],
+      images: [
+        {
+          url: 'https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/media/site/thunder-charter.jpg',
+          width: 1200,
+          height: 630,
+          alt: 'Catch-22 Premium Fishing Gear',
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: ['https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/media/site/thunder-charter.jpg'],
+      images: [
+        'https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/media/site/thunder-charter.jpg',
+      ],
     },
   };
 }
@@ -72,13 +91,14 @@ import { ProductCard } from '@/components/products/ProductCard';
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined }
+  searchParams: { [key: string]: string | string[] | undefined };
 }) {
   const supabase = createPublicClient();
-  
+
   // Await searchParams in Next 15+
   const resolvedSearchParams = await searchParams;
-  const categorySlug = typeof resolvedSearchParams.category === 'string' ? resolvedSearchParams.category : null;
+  const categorySlug =
+    typeof resolvedSearchParams.category === 'string' ? resolvedSearchParams.category : null;
 
   // Fetch Categories for the Sidebar
   const { data: categories, error: categoriesError } = await (await createAdminClient())
@@ -92,33 +112,21 @@ export default async function ProductsPage({
   }
 
   // Fetch Products (with optional category filtering)
-  let query;
-  
-  if (categorySlug) {
-    // Category filtered query — needs !inner to filter by category slug
-    query = supabase
-      .from('products')
-      .select(`
-        id, name, slug, price, regular_price, sale_price, image_url, stock_status,
-        product_categories!inner (
-          categories!inner (slug)
+  const { data: products, error } = await (categorySlug
+    ? supabase
+        .from('products')
+        .select(
+          `id, name, slug, price, regular_price, sale_price, image_url, stock_status,
+          product_categories!inner ( categories!inner (slug) )`
         )
-      `)
-      .eq('product_categories.categories.slug', categorySlug)
-      .eq('stock_status', 'instock')
-      .order('created_at', { ascending: false });
-  } else {
-    // All products query — more lenient, doesn't require category mapping
-    query = supabase
-      .from('products')
-      .select(`
-        id, name, slug, price, regular_price, sale_price, image_url, stock_status
-      `)
-      .eq('stock_status', 'instock')
-      .order('created_at', { ascending: false });
-  }
-
-  const { data: products, error } = await query;
+        .eq('product_categories.categories.slug', categorySlug)
+        .eq('stock_status', 'instock')
+        .order('created_at', { ascending: false })
+    : supabase
+        .from('products')
+        .select('id, name, slug, price, regular_price, sale_price, image_url, stock_status')
+        .eq('stock_status', 'instock')
+        .order('created_at', { ascending: false }));
 
   if (error) {
     console.error('Error fetching products:', error);
@@ -126,7 +134,7 @@ export default async function ProductsPage({
   }
 
   // Map nulls to undefined for ProductCard compatibility
-  const formattedProducts = products?.map(p => ({
+  const formattedProducts = products?.map((p) => ({
     ...p,
     regular_price: p.regular_price ?? undefined,
     sale_price: p.sale_price ?? undefined,
@@ -136,14 +144,15 @@ export default async function ProductsPage({
     <div className="bg-white min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-12">
         <div className="flex flex-col md:flex-row gap-12">
-          
           {/* Sidebar / Categories */}
           <div className="w-full md:w-64 shrink-0">
-            <h2 className="text-xl font-black text-secondary uppercase tracking-widest mb-6 border-b-2 border-primary pb-2 inline-block">Categories</h2>
+            <h2 className="text-xl font-black text-secondary uppercase tracking-widest mb-6 border-b-2 border-primary pb-2 inline-block">
+              Categories
+            </h2>
             <ul className="space-y-1">
               <li>
-                <Link 
-                  href="/products" 
+                <Link
+                  href="/products"
                   className={`block px-4 py-3 rounded-lg text-sm font-bold uppercase tracking-wider transition-all ${!categorySlug ? 'bg-primary text-white shadow-md' : 'text-secondary hover:bg-slate-50 hover:text-primary'}`}
                 >
                   All Gear
@@ -151,7 +160,7 @@ export default async function ProductsPage({
               </li>
               {categories?.map((category) => (
                 <li key={category.id}>
-                  <Link 
+                  <Link
                     href={`/products?category=${category.slug}`}
                     className={`block px-4 py-3 rounded-lg text-sm font-bold uppercase tracking-wider transition-all ${categorySlug === category.slug ? 'bg-primary text-white shadow-md' : 'text-secondary hover:bg-slate-50 hover:text-primary'}`}
                   >
@@ -162,11 +171,16 @@ export default async function ProductsPage({
             </ul>
 
             <div className="mt-12 bg-slate-50 p-6 rounded-2xl border border-slate-100 hidden md:block">
-              <h3 className="text-sm font-black text-secondary uppercase tracking-widest mb-4">Need Help?</h3>
+              <h3 className="text-sm font-black text-secondary uppercase tracking-widest mb-4">
+                Need Help?
+              </h3>
               <p className="text-xs text-slate-500 leading-relaxed mb-4 font-medium">
                 Can&apos;t find what you&apos;re looking for? Contact our gear experts for advice.
               </p>
-              <Link href="/contact" className="text-xs font-black text-primary uppercase hover:underline">
+              <Link
+                href="/contact"
+                className="text-xs font-black text-primary uppercase hover:underline"
+              >
                 Contact Us &rarr;
               </Link>
             </div>
@@ -176,15 +190,22 @@ export default async function ProductsPage({
           <div className="flex-1">
             <div className="flex flex-col mb-10">
               <h1 className="text-4xl font-black tracking-tight text-secondary uppercase">
-                {categorySlug ? categories?.find(c => c.slug === categorySlug)?.name || 'Gear' : 'All Catch-22 Gear'}
+                {categorySlug
+                  ? categories?.find((c) => c.slug === categorySlug)?.name || 'Gear'
+                  : 'All Catch-22 Gear'}
               </h1>
-              <div className="h-1.5 w-24 bg-primary mt-3"></div>
+              <div className="h-1.5 w-24 bg-primary mt-3" />
             </div>
-            
+
             {products?.length === 0 ? (
               <div className="text-center py-24 bg-slate-50 rounded-3xl border border-dashed border-slate-200">
-                <p className="text-slate-500 font-bold uppercase tracking-widest">No gear found in this category.</p>
-                <Link href="/products" className="inline-block mt-4 text-primary font-black uppercase text-sm hover:underline">
+                <p className="text-slate-500 font-bold uppercase tracking-widest">
+                  No gear found in this category.
+                </p>
+                <Link
+                  href="/products"
+                  className="inline-block mt-4 text-primary font-black uppercase text-sm hover:underline"
+                >
                   View all products
                 </Link>
               </div>
@@ -196,7 +217,6 @@ export default async function ProductsPage({
               </div>
             )}
           </div>
-
         </div>
       </div>
     </div>

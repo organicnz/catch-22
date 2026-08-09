@@ -1,138 +1,138 @@
 'use client';
 
+import { getStorageUrl } from '@/lib/supabase';
+import { Camera, ChevronLeft, ChevronRight, MapPin, Maximize2, Share2, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState, useEffect, useCallback } from 'react';
-import { Camera, Maximize2, X, ChevronRight, Share2, MapPin, ChevronLeft } from 'lucide-react';
-import { getStorageUrl } from '@/lib/supabase';
+import { useCallback, useEffect, useState } from 'react';
 
 // Temporary static data - will eventually come from Supabase DB
 const snaps = [
-  { 
-    id: 1, 
-    url: '/snap1.jpg', 
-    caption: 'Speared Cape Kingfish', 
+  {
+    id: 1,
+    url: '/snap1.jpg',
+    caption: 'Speared Cape Kingfish',
     location: 'Cape Reinga',
-    author: '@diver_dan'
+    author: '@diver_dan',
   },
-  { 
-    id: 2, 
-    url: '/snap2.jpg', 
-    caption: 'Ranfurly Banks Quad', 
+  {
+    id: 2,
+    url: '/snap2.jpg',
+    caption: 'Ranfurly Banks Quad',
     location: 'Ranfurly Banks',
-    author: '@catch22_crew'
+    author: '@catch22_crew',
   },
-  { 
-    id: 3, 
-    url: '/snap3.jpg', 
-    caption: 'Hauraki Gulf Snapper', 
+  {
+    id: 3,
+    url: '/snap3.jpg',
+    caption: 'Hauraki Gulf Snapper',
     location: 'Hauraki Gulf',
-    author: '@snapper_slayer'
+    author: '@snapper_slayer',
   },
-  { 
-    id: 4, 
-    url: '/snap4.jpg', 
-    caption: 'Double Hapuku Drop', 
+  {
+    id: 4,
+    url: '/snap4.jpg',
+    caption: 'Double Hapuku Drop',
     location: 'White Island',
-    author: '@deep_drop_specialist'
+    author: '@deep_drop_specialist',
   },
-  { 
-    id: 5, 
-    url: '/snap5.jpg', 
-    caption: 'Three Kings Groper', 
+  {
+    id: 5,
+    url: '/snap5.jpg',
+    caption: 'Three Kings Groper',
     location: 'Three Kings Islands',
-    author: '@groper_hunter'
+    author: '@groper_hunter',
   },
-  { 
-    id: 6, 
-    url: '/snap6.jpg', 
-    caption: 'Ramp Kingfish Double', 
+  {
+    id: 6,
+    url: '/snap6.jpg',
+    caption: 'Ramp Kingfish Double',
     location: 'Mangawhai',
-    author: '@harbour_boys'
+    author: '@harbour_boys',
   },
-  { 
-    id: 7, 
-    url: '/snap7.jpg', 
-    caption: 'Offshore Yellowtail', 
+  {
+    id: 7,
+    url: '/snap7.jpg',
+    caption: 'Offshore Yellowtail',
     location: 'Tutukaka',
-    author: '@blue_water_junkie'
+    author: '@blue_water_junkie',
   },
-  { 
-    id: 8, 
-    url: '/snap8.jpg', 
-    caption: 'Firth Kingfish Lure', 
+  {
+    id: 8,
+    url: '/snap8.jpg',
+    caption: 'Firth Kingfish Lure',
     location: 'Firth of Thames',
-    author: '@camo_angler'
+    author: '@camo_angler',
   },
-  { 
-    id: 9, 
-    url: '/snap9.jpg', 
-    caption: 'Sharing the Catch', 
+  {
+    id: 9,
+    url: '/snap9.jpg',
+    caption: 'Sharing the Catch',
     location: 'Mercury Islands',
-    author: '@red_boat_adventures'
+    author: '@red_boat_adventures',
   },
-  { 
-    id: 10, 
-    url: '/snap10.jpg', 
-    caption: 'Father & Son Trophy', 
+  {
+    id: 10,
+    url: '/snap10.jpg',
+    caption: 'Father & Son Trophy',
     location: 'Tauranga Harbour',
-    author: '@family_fishing_nz'
+    author: '@family_fishing_nz',
   },
-  { 
-    id: 11, 
-    url: '/snap11.jpg', 
-    caption: 'Pure Kingfish Hype', 
+  {
+    id: 11,
+    url: '/snap11.jpg',
+    caption: 'Pure Kingfish Hype',
     location: 'Cape Reinga',
-    author: '@screaming_reel'
+    author: '@screaming_reel',
   },
-  { 
-    id: 12, 
-    url: '/snap12.jpg', 
-    caption: 'Young Gun Catch', 
+  {
+    id: 12,
+    url: '/snap12.jpg',
+    caption: 'Young Gun Catch',
     location: 'Aldermen Islands',
-    author: '@junior_angler'
+    author: '@junior_angler',
   },
-  { 
-    id: 13, 
-    url: '/snap13.jpg', 
-    caption: 'Sledging Offshore', 
+  {
+    id: 13,
+    url: '/snap13.jpg',
+    caption: 'Sledging Offshore',
     location: 'Mayor Island',
-    author: '@mayor_boss'
+    author: '@mayor_boss',
   },
-  { 
-    id: 14, 
-    url: '/snap14.jpg', 
-    caption: 'Deep Drop Groper Double', 
+  {
+    id: 14,
+    url: '/snap14.jpg',
+    caption: 'Deep Drop Groper Double',
     location: 'Ranfurly Banks',
-    author: '@hapuku_master'
+    author: '@hapuku_master',
   },
-  { 
-    id: 15, 
-    url: '/snap15.jpg', 
-    caption: 'The Money Shot', 
+  {
+    id: 15,
+    url: '/snap15.jpg',
+    caption: 'The Money Shot',
     location: 'Poor Knights Islands',
-    author: '@gaff_master'
+    author: '@gaff_master',
   },
-  { 
-    id: 16, 
-    url: '/snap16.jpg', 
-    caption: 'Trophy Cape Kingfish', 
+  {
+    id: 16,
+    url: '/snap16.jpg',
+    caption: 'Trophy Cape Kingfish',
     location: 'Cape Karikari',
-    author: '@saltwater_elite'
+    author: '@saltwater_elite',
   },
-  { 
-    id: 17, 
-    url: '/snap17.jpg', 
-    caption: 'Sledging the Banks', 
+  {
+    id: 17,
+    url: '/snap17.jpg',
+    caption: 'Sledging the Banks',
     location: 'Ranfurly Banks',
-    author: '@banks_basher'
+    author: '@banks_basher',
   },
-  { 
-    id: 18, 
-    url: '/snap18.jpg', 
-    caption: 'Weigh-in Double', 
+  {
+    id: 18,
+    url: '/snap18.jpg',
+    caption: 'Weigh-in Double',
     location: 'White Island',
-    author: '@stussy_scales'
+    author: '@stussy_scales',
   },
 ];
 
@@ -141,12 +141,12 @@ export default function GalleryPage() {
 
   const handleNext = useCallback(() => {
     if (selectedIndex === null) return;
-    setSelectedIndex((prev) => (prev! + 1) % snaps.length);
+    setSelectedIndex((prev) => ((prev ?? 0) + 1) % snaps.length);
   }, [selectedIndex]);
 
   const handlePrev = useCallback(() => {
     if (selectedIndex === null) return;
-    setSelectedIndex((prev) => (prev! - 1 + snaps.length) % snaps.length);
+    setSelectedIndex((prev) => ((prev ?? 0) - 1 + snaps.length) % snaps.length);
   }, [selectedIndex]);
 
   const handleClose = useCallback(() => {
@@ -174,7 +174,9 @@ export default function GalleryPage() {
         <div className="max-w-4xl mb-24">
           <div className="inline-flex items-center gap-3 px-4 py-2 bg-primary/10 border border-primary/20 rounded-full mb-8">
             <Camera className="w-3 h-3 text-primary" />
-            <span className="text-primary font-black uppercase tracking-[0.3em] text-[10px]">Community Feed</span>
+            <span className="text-primary font-black uppercase tracking-[0.3em] text-[10px]">
+              Community Feed
+            </span>
           </div>
           <h1 className="text-6xl md:text-9xl font-black text-white uppercase tracking-tighter leading-[0.8] mb-10">
             Catch <br /> <span className="text-primary italic">Snaps</span>
@@ -187,10 +189,12 @@ export default function GalleryPage() {
         {/* Masonry-style Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           {snaps.map((snap, index) => (
-            <div 
+            <button
               key={snap.id}
-              className="group relative aspect-[4/5] bg-white/5 rounded-[3rem] overflow-hidden cursor-pointer shadow-2xl hover:shadow-primary/10 transition-all duration-700 hover:-translate-y-2 border border-white/5"
+              type="button"
+              className="group relative aspect-[4/5] bg-white/5 rounded-[3rem] overflow-hidden cursor-pointer shadow-2xl hover:shadow-primary/10 transition-all duration-700 hover:-translate-y-2 border border-white/5 text-left"
               onClick={() => setSelectedIndex(index)}
+              aria-label={`View ${snap.caption} from ${snap.location}`}
             >
               <Image
                 src={snap.url.startsWith('/') ? snap.url : getStorageUrl(snap.url)}
@@ -198,25 +202,36 @@ export default function GalleryPage() {
                 fill
                 className="object-cover transition-transform duration-1000 group-hover:scale-110 opacity-80 group-hover:opacity-100"
               />
-              
+
               {/* Overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-secondary/90 via-secondary/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col justify-end p-10">
                 <div className="flex items-center gap-2 mb-4">
-                   <MapPin className="w-4 h-4 text-primary" />
-                   <span className="text-primary font-black uppercase tracking-widest text-[10px]">{snap.location}</span>
+                  <MapPin className="w-4 h-4 text-primary" />
+                  <span className="text-primary font-black uppercase tracking-widest text-[10px]">
+                    {snap.location}
+                  </span>
                 </div>
-                <h3 className="text-2xl font-black text-white uppercase tracking-tight mb-2 italic">{snap.caption}</h3>
+                <h3 className="text-2xl font-black text-white uppercase tracking-tight mb-2 italic">
+                  {snap.caption}
+                </h3>
                 <p className="text-white/60 text-sm font-bold">{snap.author}</p>
-                
+
                 <div className="mt-8 pt-8 border-t border-white/10 flex items-center justify-between">
-                   <button className="flex items-center gap-2 text-white hover:text-primary transition-colors">
-                      <Maximize2 className="w-5 h-5" />
-                      <span className="text-[10px] font-black uppercase tracking-widest">Enlarge</span>
-                   </button>
-                   <Share2 className="w-5 h-5 text-white/40" />
+                  <button
+                    type="button"
+                    className="flex items-center gap-2 text-white hover:text-primary transition-colors"
+                    onClick={() => setSelectedIndex(index)}
+                    aria-label={`Enlarge ${snap.caption}`}
+                  >
+                    <Maximize2 className="w-5 h-5" />
+                    <span className="text-[10px] font-black uppercase tracking-widest">
+                      Enlarge
+                    </span>
+                  </button>
+                  <Share2 className="w-5 h-5 text-white/40" />
                 </div>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </div>
@@ -224,22 +239,34 @@ export default function GalleryPage() {
       {/* Lightbox Modal */}
       {selectedImage && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10">
-          <div 
+          <div
             className="absolute inset-0 bg-secondary/98 backdrop-blur-2xl"
+            role="button"
+            tabIndex={0}
             onClick={handleClose}
+            onKeyDown={(e) => { if (e.key === 'Escape' || e.key === 'Enter') handleClose(); }}
+            aria-label="Close gallery"
           />
-          
+
           {/* Navigation Arrows */}
-          <button 
-            onClick={(e) => { e.stopPropagation(); handlePrev(); }}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handlePrev();
+            }}
             className="absolute left-4 md:left-10 z-[110] w-14 h-14 bg-white/5 hover:bg-primary hover:text-secondary rounded-full flex items-center justify-center text-white backdrop-blur-md transition-all hidden md:flex"
             aria-label="Previous image"
           >
             <ChevronLeft className="w-6 h-6" />
           </button>
-          
-          <button 
-            onClick={(e) => { e.stopPropagation(); handleNext(); }}
+
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleNext();
+            }}
             className="absolute right-4 md:right-10 z-[110] w-14 h-14 bg-white/5 hover:bg-primary hover:text-secondary rounded-full flex items-center justify-center text-white backdrop-blur-md transition-all hidden md:flex"
             aria-label="Next image"
           >
@@ -251,12 +278,17 @@ export default function GalleryPage() {
               <div className="lg:col-span-3 relative bg-black flex items-center justify-center group/image">
                 <Image
                   key={selectedImage.url}
-                  src={selectedImage.url.startsWith('/') ? selectedImage.url : getStorageUrl(selectedImage.url)}
+                  src={
+                    selectedImage.url.startsWith('/')
+                      ? selectedImage.url
+                      : getStorageUrl(selectedImage.url)
+                  }
                   alt={selectedImage.caption}
                   fill
                   className="object-contain transition-opacity duration-500"
                 />
-                <button 
+                <button
+                  type="button"
                   className="absolute top-10 right-10 w-14 h-14 bg-white/10 hover:bg-primary hover:text-secondary rounded-full flex items-center justify-center text-white backdrop-blur-md transition-all z-20"
                   onClick={handleClose}
                   aria-label="Close gallery"
@@ -270,25 +302,32 @@ export default function GalleryPage() {
                     {selectedImage.author[1].toUpperCase()}
                   </div>
                   <div>
-                    <h4 className="text-white font-black uppercase tracking-widest text-sm">{selectedImage.author}</h4>
-                    <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest">Verified Angler</p>
+                    <h4 className="text-white font-black uppercase tracking-widest text-sm">
+                      {selectedImage.author}
+                    </h4>
+                    <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest">
+                      Verified Angler
+                    </p>
                   </div>
                 </div>
-                
+
                 <h3 className="text-4xl font-black text-white uppercase tracking-tighter leading-none mb-6 italic">
                   {selectedImage.caption}
                 </h3>
-                
+
                 <div className="flex items-center gap-3 mb-12">
                   <MapPin className="w-4 h-4 text-primary" />
-                  <span className="text-primary font-black uppercase tracking-widest text-[10px]">{selectedImage.location}</span>
+                  <span className="text-primary font-black uppercase tracking-widest text-[10px]">
+                    {selectedImage.location}
+                  </span>
                 </div>
 
-                <Link 
+                <Link
                   href="/products"
                   className="group flex items-center gap-4 text-white font-black uppercase tracking-[0.3em] text-[10px] hover:text-primary transition-all mt-auto"
                 >
-                  Shop the Setup <ChevronRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
+                  Shop the Setup{' '}
+                  <ChevronRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
                 </Link>
               </div>
             </div>

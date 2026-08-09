@@ -1,9 +1,9 @@
 'use server';
 
+import type { UserSettings } from '@/lib/store/settings';
 import { createServerClient } from '@/lib/supabase-server';
+import type { Json } from '@/types/supabase';
 import { revalidatePath } from 'next/cache';
-import { UserSettings } from '@/lib/store/settings';
-import { Json } from '@/types/supabase';
 
 /**
  * Server Action to update user settings.
@@ -11,16 +11,23 @@ import { Json } from '@/types/supabase';
  */
 export async function updateUserSettingsAction(settings: Partial<UserSettings>) {
   const supabase = await createServerClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
 
   if (authError || !user || !user.email) {
     return { error: 'Unauthorized or missing email' };
   }
 
   // Simple validation
-  const allowedKeys: (keyof UserSettings)[] = ['marketing_emails', 'order_updates', 'preferred_currency'];
+  const allowedKeys: (keyof UserSettings)[] = [
+    'marketing_emails',
+    'order_updates',
+    'preferred_currency',
+  ];
   const filteredSettings: Partial<UserSettings> = {};
-  
+
   for (const key of allowedKeys) {
     if (key in settings) {
       (filteredSettings as Record<string, unknown>)[key] = settings[key];
@@ -41,7 +48,7 @@ export async function updateUserSettingsAction(settings: Partial<UserSettings>) 
       .select('settings')
       .eq('email', user.email)
       .single();
-    
+
     if (!emailError) {
       profile = emailData;
       fetchError = null;
@@ -55,32 +62,34 @@ export async function updateUserSettingsAction(settings: Partial<UserSettings>) 
   }
 
   const updatedSettings = {
-    ...(profile?.settings as Record<string, unknown> || {}),
-    ...filteredSettings
+    ...((profile?.settings as Record<string, unknown>) || {}),
+    ...filteredSettings,
   };
 
-  const { error: upsertError } = await supabase
-    .from('profiles')
-    .upsert({ 
+  const { error: upsertError } = await supabase.from('profiles').upsert(
+    {
       user_id: user.id,
       email: user.email,
       settings: updatedSettings as Json,
-    }, {
-      onConflict: 'user_id'
-    });
+    },
+    {
+      onConflict: 'user_id',
+    }
+  );
 
   if (upsertError) {
     // Final fallback by email if user_id conflict occurs or fails
-    const { error: emailError } = await supabase
-      .from('profiles')
-      .upsert({
+    const { error: emailError } = await supabase.from('profiles').upsert(
+      {
         email: user.email,
         user_id: user.id,
         settings: updatedSettings,
-      }, {
-        onConflict: 'email'
-      });
-    
+      },
+      {
+        onConflict: 'email',
+      }
+    );
+
     if (emailError) {
       console.error('Upsert error in updateUserSettingsAction:', emailError);
       return { error: emailError.message };
@@ -89,6 +98,6 @@ export async function updateUserSettingsAction(settings: Partial<UserSettings>) 
 
   // Revalidate the entire app since settings can affect many pages (currency, etc)
   revalidatePath('/', 'layout');
-  
+
   return { success: true, settings: updatedSettings };
 }

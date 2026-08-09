@@ -5,14 +5,53 @@
 import { getStorageUrl } from './supabase';
 
 export const SPAM_KEYWORDS = [
-  'casino', 'slot', 'betting', 'gambling', 'poker', 'bingo', 'bonus', 'rtp',
-  'vavada', '1xbet', 'mostbet', 'pin-up', 'vulcan', 'mahjong', 'sweet bonanza',
-  'judi', 'genset', 'daftar', 'situs', 'gacor', 'olympus', 'sbobet',
-  'spaceman', 'pragmatic', 'xanax', 'steroid', 'kasyno',
-  'betsala', 'jeetcity', 'wazamba', 'moonwin', 'winspirit', 'loto',
-  'apuesta', 'hellspincassino', 'candyspinz', 'wildsino', 'f12bet',
-  'mangsatoto', '1winrussia', 'φρουτακια', 'лото клуб', 'vavada.az',
-  'stake casino', 'jeet city', '1xbet uz', 'apuesta-360',
+  'casino',
+  'slot',
+  'betting',
+  'gambling',
+  'poker',
+  'bingo',
+  'bonus',
+  'rtp',
+  'vavada',
+  '1xbet',
+  'mostbet',
+  'pin-up',
+  'vulcan',
+  'mahjong',
+  'sweet bonanza',
+  'judi',
+  'genset',
+  'daftar',
+  'situs',
+  'gacor',
+  'olympus',
+  'sbobet',
+  'spaceman',
+  'pragmatic',
+  'xanax',
+  'steroid',
+  'kasyno',
+  'betsala',
+  'jeetcity',
+  'wazamba',
+  'moonwin',
+  'winspirit',
+  'loto',
+  'apuesta',
+  'hellspincassino',
+  'candyspinz',
+  'wildsino',
+  'f12bet',
+  'mangsatoto',
+  '1winrussia',
+  'φρουτακια',
+  'лото клуб',
+  'vavada.az',
+  'stake casino',
+  'jeet city',
+  '1xbet uz',
+  'apuesta-360',
 ] as const;
 
 export const TRUSTED_DOMAINS = [
@@ -36,13 +75,14 @@ export const TRUSTED_DOMAINS = [
 export function isSpamContent(text: string): boolean {
   if (!text) return false;
   const lowerText = text.toLowerCase();
-  
+
   // Check for spam keywords
-  const hasSpamKeyword = SPAM_KEYWORDS.some(kw => lowerText.includes(kw));
-  
-  // Check for non-Latin characters (allowing standard punctuation/emoji if needed, but strict here)
-  const hasNonLatin = /[^\u0000-\u007F]/.test(text) && !lowerText.includes('catch-22');
-  
+  const hasSpamKeyword = SPAM_KEYWORDS.some((kw) => lowerText.includes(kw));
+
+  // Check for non-Latin characters (strict ASCII check)
+  // biome-ignore lint/suspicious/noControlCharactersInRegex: intentional ASCII range check
+  const hasNonLatin = /[^\x00-\x7F]/.test(text) && !lowerText.includes('catch-22');
+
   return hasSpamKeyword || hasNonLatin;
 }
 
@@ -66,7 +106,7 @@ export function sanitizeWPContent(html: string): string {
     );
 
     // 3. Remove untrusted external links (http/https links not matching trusted domains)
-    const trustedDomainsPattern = TRUSTED_DOMAINS.map(d =>
+    const trustedDomainsPattern = TRUSTED_DOMAINS.map((d) =>
       d.replace(/\./g, '\\.').replace(/-/g, '\\-')
     ).join('|');
     const untrustedLinkRegex = new RegExp(
@@ -93,46 +133,40 @@ export function sanitizeWPContent(html: string): string {
     clean = clean.replace(/\son[a-z]+\s*=\s*(?:"[^"]*"|'[^']*')/gi, '');
 
     // 7. Remove WordPress class names (wp-, elementor-, freshio-, woocommerce, yith-)
-    clean = clean.replace(
-      /\bclass\s*=\s*"([^"]*)"/gi,
-      (match, classValue: string) => {
-        const filtered = classValue
-          .split(/\s+/)
-          .filter(
-            (cls) =>
-              !cls.startsWith('wp-') &&
-              !cls.startsWith('elementor-') &&
-              !cls.startsWith('freshio-') &&
-              cls !== 'woocommerce' &&
-              !cls.startsWith('yith-')
-          )
-          .join(' ')
-          .trim();
-        return filtered ? `class="${filtered}"` : '';
-      }
-    );
-    clean = clean.replace(
-      /\bclass\s*=\s*'([^']*)'/gi,
-      (match, classValue: string) => {
-        const filtered = classValue
-          .split(/\s+/)
-          .filter(
-            (cls) =>
-              !cls.startsWith('wp-') &&
-              !cls.startsWith('elementor-') &&
-              !cls.startsWith('freshio-') &&
-              cls !== 'woocommerce' &&
-              !cls.startsWith('yith-')
-          )
-          .join(' ')
-          .trim();
-        return filtered ? `class="${filtered}"` : '';
-      }
-    );
+    clean = clean.replace(/\bclass\s*=\s*"([^"]*)"/gi, (_match, classValue: string) => {
+      const filtered = classValue
+        .split(/\s+/)
+        .filter(
+          (cls) =>
+            !cls.startsWith('wp-') &&
+            !cls.startsWith('elementor-') &&
+            !cls.startsWith('freshio-') &&
+            cls !== 'woocommerce' &&
+            !cls.startsWith('yith-')
+        )
+        .join(' ')
+        .trim();
+      return filtered ? `class="${filtered}"` : '';
+    });
+    clean = clean.replace(/\bclass\s*=\s*'([^']*)'/gi, (_match, classValue: string) => {
+      const filtered = classValue
+        .split(/\s+/)
+        .filter(
+          (cls) =>
+            !cls.startsWith('wp-') &&
+            !cls.startsWith('elementor-') &&
+            !cls.startsWith('freshio-') &&
+            cls !== 'woocommerce' &&
+            !cls.startsWith('yith-')
+        )
+        .join(' ')
+        .trim();
+      return filtered ? `class="${filtered}"` : '';
+    });
 
     // 8. Remove empty paragraphs
     clean = clean.replace(/<p>\s*<\/p>/g, '');
-    
+
     // 9. Transform embedded images to use Supabase Storage URLs
     // This finds <img src="..."> and ensures the src uses the storage utility
     clean = clean.replace(/<img[^>]+src=["']([^"']+)["'][^>]*>/gi, (match, src) => {

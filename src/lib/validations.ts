@@ -1,5 +1,5 @@
-import { z } from 'zod';
 import type { Database } from '@/types/supabase';
+import { z } from 'zod';
 
 type ProductRow = Database['public']['Tables']['products']['Row'];
 

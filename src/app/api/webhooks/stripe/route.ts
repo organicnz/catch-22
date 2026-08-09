@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
 import { createAdminClient } from '@/lib/supabase-server';
 import { headers } from 'next/headers';
+import { NextResponse } from 'next/server';
+import Stripe from 'stripe';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,7 +20,7 @@ function getStripe() {
 export async function POST(req: Request) {
   const stripe = getStripe();
   const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
-  
+
   const body = await req.text();
   const headersList = await headers();
   const sig = headersList.get('stripe-signature');
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
   console.log(`🔔 Stripe Webhook Received: ${event.type}`);
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session;
-    
+
     try {
       await handleCheckoutSessionCompleted(session, stripe);
     } catch (error: unknown) {
@@ -56,7 +56,7 @@ export async function POST(req: Request) {
 
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, stripe: Stripe) {
   const supabase = await createAdminClient();
-  
+
   // 1. Get line items with product details
   const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
     expand: ['data.price.product'],
@@ -64,9 +64,12 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, 
 
   // 2. Find or create the customer profile
   const userId = session.client_reference_id || session.metadata?.userId;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const email = (session as any).customer_details?.email || session.customer_email;
-  
+  const customerDetails = session.customer_details as {
+    email?: string;
+    address?: Record<string, string>;
+  } | null;
+  const email = customerDetails?.email || session.customer_email;
+
   let profileId: number | null = null;
 
   if (userId || email) {
@@ -76,7 +79,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, 
     } else {
       query.eq('email', email);
     }
-    
+
     const { data: profile } = await query.single();
     if (profile) {
       profileId = profile.id;
@@ -84,6 +87,10 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, 
   }
 
   // 3. Create the order
+  const collectedInfo = session.collected_information as {
+    shipping_details?: { address?: Record<string, string> };
+  } | null;
+
   const { data: order, error: orderError } = await supabase
     .from('orders')
     .insert({
@@ -92,10 +99,8 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, 
       currency: session.currency || 'nzd',
       total_amount: (session.amount_total || 0) / 100,
       stripe_session_id: session.id,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      billing_address: (session as any).customer_details?.address,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      shipping_address: (session.collected_information as any)?.shipping_details?.address,
+      billing_address: customerDetails?.address,
+      shipping_address: collectedInfo?.shipping_details?.address,
       payment_method: 'stripe',
       created_at: new Date().toISOString(),
     })
@@ -109,7 +114,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, 
     const product = item.price?.product as Stripe.Product;
     return {
       order_id: order.id,
-      product_id: product?.metadata?.id ? parseInt(product.metadata.id) : null,
+      product_id: product?.metadata?.id ? Number.parseInt(product.metadata.id) : null,
       product_name: product?.name || item.description,
       quantity: item.quantity || 1,
       total: (item.amount_total || 0) / 100,

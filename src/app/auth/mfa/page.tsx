@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase';
-import { ShieldCheck, Loader2, ShieldAlert } from 'lucide-react';
+import { Loader2, ShieldAlert, ShieldCheck } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function MfaChallengePage() {
   const [code, setCode] = useState('');
@@ -22,15 +22,14 @@ export default function MfaChallengePage() {
       }
 
       if (data.nextLevel === data.currentLevel) {
-        // Already at the required level
         router.push('/account');
       } else if (data.nextLevel === 'aal1') {
-        // No MFA setup, or already satisfied
         router.push('/account');
       }
       setChecking(false);
     }
     checkAal();
+    // supabase and router are stable refs — intentionally omitted to run once
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -46,14 +45,14 @@ export default function MfaChallengePage() {
       return;
     }
 
-    const totpFactor = factors.all.find(f => f.status === 'verified');
+    const totpFactor = factors.all.find((f) => f.status === 'verified');
     if (!totpFactor) {
       router.push('/account');
       return;
     }
 
     const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({
-      factorId: totpFactor.id
+      factorId: totpFactor.id,
     });
 
     if (challengeError) {
@@ -65,7 +64,7 @@ export default function MfaChallengePage() {
     const { error: verifyError } = await supabase.auth.mfa.verify({
       factorId: totpFactor.id,
       challengeId: challenge.id,
-      code
+      code,
     });
 
     if (verifyError) {
@@ -76,7 +75,12 @@ export default function MfaChallengePage() {
     }
   }
 
-  if (checking) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin text-primary" /></div>;
+  if (checking)
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="animate-spin text-primary" />
+      </div>
+    );
 
   return (
     <div className="min-h-[80vh] bg-white flex items-center justify-center px-4 py-16">
@@ -85,17 +89,24 @@ export default function MfaChallengePage() {
           <div className="p-4 bg-primary/10 text-primary rounded-2xl mb-4">
             <ShieldCheck size={32} />
           </div>
-          <h1 className="text-3xl font-black text-secondary uppercase tracking-tight mb-2">Security Check</h1>
-          <div className="h-1.5 w-16 bg-primary"></div>
+          <h1 className="text-3xl font-black text-secondary uppercase tracking-tight mb-2">
+            Security Check
+          </h1>
+          <div className="h-1.5 w-16 bg-primary" />
         </div>
-        
+
         <p className="text-slate-600 mb-10 font-medium leading-relaxed">
           Please enter the verification code from your authenticator app to continue.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="text-left">
-            <label htmlFor="code" className="block text-[10px] font-black text-secondary uppercase tracking-widest mb-2 ml-1">6-Digit Code</label>
+            <label
+              htmlFor="code"
+              className="block text-[10px] font-black text-secondary uppercase tracking-widest mb-2 ml-1"
+            >
+              6-Digit Code
+            </label>
             <input
               type="text"
               id="code"

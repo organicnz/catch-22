@@ -1,6 +1,6 @@
+import { SPAM_KEYWORDS, TRUSTED_DOMAINS, sanitizeWPContent } from '@/lib/sanitize';
 import fc from 'fast-check';
-import { describe, it, expect } from 'vitest';
-import { sanitizeWPContent, SPAM_KEYWORDS, TRUSTED_DOMAINS } from '@/lib/sanitize';
+import { describe, expect, it } from 'vitest';
 
 // ─── Property 1: Spam keyword removal is total ───────────────────────────────
 // Feature: assets-migration, Property 1: Spam keyword removal is total
@@ -8,8 +8,8 @@ import { sanitizeWPContent, SPAM_KEYWORDS, TRUSTED_DOMAINS } from '@/lib/sanitiz
 describe('Property 1: Spam keyword removal is total', () => {
   it('sanitizeWPContent removes every spam keyword from HTML output', () => {
     // Only use simple single-word keywords that the regex engine can handle reliably
-    const simpleKeywords = (SPAM_KEYWORDS as readonly string[]).filter(
-      (kw) => /^[a-zA-Z0-9]+$/.test(kw)
+    const simpleKeywords = (SPAM_KEYWORDS as readonly string[]).filter((kw) =>
+      /^[a-zA-Z0-9]+$/.test(kw)
     );
 
     fc.assert(
@@ -19,10 +19,7 @@ describe('Property 1: Spam keyword removal is total', () => {
         (keyword, surrounding) => {
           const html = `<p>${surrounding} ${keyword} ${surrounding}</p>`;
           const result = sanitizeWPContent(html);
-          const keywordRegex = new RegExp(
-            keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
-            'i'
-          );
+          const keywordRegex = new RegExp(keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
           expect(result).not.toMatch(keywordRegex);
         }
       ),
@@ -36,8 +33,8 @@ describe('Property 1: Spam keyword removal is total', () => {
 // Validates: Requirements 2.6, 11.3
 describe('Property 2: Spam element removal removes the entire containing element', () => {
   it('removes the entire <p>, <div>, or <a> element when it contains a spam keyword', () => {
-    const simpleKeywords = (SPAM_KEYWORDS as readonly string[]).filter(
-      (kw) => /^[a-zA-Z0-9]+$/.test(kw)
+    const simpleKeywords = (SPAM_KEYWORDS as readonly string[]).filter((kw) =>
+      /^[a-zA-Z0-9]+$/.test(kw)
     );
 
     fc.assert(
@@ -69,9 +66,11 @@ describe('Property 3: Trusted links are preserved, untrusted links are stripped'
     fc.assert(
       fc.property(
         fc.constantFrom(...(TRUSTED_DOMAINS as readonly string[])),
-        fc.string({ minLength: 1, maxLength: 30 }).filter(
-          (s) => !s.includes('<') && !s.includes('>') && !s.includes('"') && !s.includes("'")
-        ),
+        fc
+          .string({ minLength: 1, maxLength: 30 })
+          .filter(
+            (s) => !s.includes('<') && !s.includes('>') && !s.includes('"') && !s.includes("'")
+          ),
         (domain, safe) => {
           const html = `<a href="https://${domain}/path">${safe}</a>`;
           const result = sanitizeWPContent(html);
@@ -87,12 +86,17 @@ describe('Property 3: Trusted links are preserved, untrusted links are stripped'
 
     fc.assert(
       fc.property(
-        fc.string({ minLength: 3, maxLength: 20 }).filter(
-          (s) => /^[a-z0-9-]+$/.test(s) && !trustedSet.has(s) && !trustedSet.has(`${s}.example.com`)
-        ),
-        fc.string({ minLength: 1, maxLength: 30 }).filter(
-          (s) => !s.includes('<') && !s.includes('>') && !s.includes('"') && !s.includes("'")
-        ),
+        fc
+          .string({ minLength: 3, maxLength: 20 })
+          .filter(
+            (s) =>
+              /^[a-z0-9-]+$/.test(s) && !trustedSet.has(s) && !trustedSet.has(`${s}.example.com`)
+          ),
+        fc
+          .string({ minLength: 1, maxLength: 30 })
+          .filter(
+            (s) => !s.includes('<') && !s.includes('>') && !s.includes('"') && !s.includes("'")
+          ),
         (domain, safe) => {
           const untrustedHref = `https://${domain}.example.com/path`;
           const html = `<a href="${untrustedHref}">${safe}</a>`;
@@ -113,9 +117,11 @@ describe('Property 4: JavaScript event handlers are always removed', () => {
     fc.assert(
       fc.property(
         fc.constantFrom('onclick', 'onerror', 'onload', 'onmouseover', 'onfocus', 'onblur'),
-        fc.string({ maxLength: 30 }).filter(
-          (s) => !s.includes('<') && !s.includes('>') && !s.includes('"') && !s.includes("'")
-        ),
+        fc
+          .string({ maxLength: 30 })
+          .filter(
+            (s) => !s.includes('<') && !s.includes('>') && !s.includes('"') && !s.includes("'")
+          ),
         (handler, safe) => {
           const html = `<div ${handler}="alert('xss')">${safe}</div>`;
           const result = sanitizeWPContent(html);
@@ -141,9 +147,11 @@ describe('Property 5: WordPress class names are eliminated', () => {
           'woocommerce',
           'yith-wcwl-add-button'
         ),
-        fc.string({ maxLength: 30 }).filter(
-          (s) => !s.includes('<') && !s.includes('>') && !s.includes('"') && !s.includes("'")
-        ),
+        fc
+          .string({ maxLength: 30 })
+          .filter(
+            (s) => !s.includes('<') && !s.includes('>') && !s.includes('"') && !s.includes("'")
+          ),
         (wpClass, safe) => {
           const html = `<div class="${wpClass}">${safe}</div>`;
           const result = sanitizeWPContent(html);
@@ -167,13 +175,11 @@ describe('Property 6: Semantic structure is preserved through sanitization', () 
         fc.constantFrom('h1', 'h2', 'h3', 'p', 'ul', 'li'),
         fc.string({ minLength: 1, maxLength: 50 }).filter(
           (text) =>
-            (SPAM_KEYWORDS as readonly string[]).every(
-              (kw) => !text.toLowerCase().includes(kw)
-            ) &&
+            (SPAM_KEYWORDS as readonly string[]).every((kw) => !text.toLowerCase().includes(kw)) &&
             !text.includes('<') &&
             !text.includes('>') &&
             !text.includes('&') &&
-            text.trim().length > 0  // exclude whitespace-only strings (empty <p> removal)
+            text.trim().length > 0 // exclude whitespace-only strings (empty <p> removal)
         ),
         (tag, text) => {
           const html = `<${tag}>${text}</${tag}>`;

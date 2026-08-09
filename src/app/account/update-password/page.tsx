@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase';
+import { CheckCircle, Eye, EyeOff, Loader2, Lock, ShieldCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { Lock, Eye, EyeOff, CheckCircle, Loader2, ShieldCheck } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 export default function UpdatePasswordPage() {
   const [password, setPassword] = useState('');
@@ -73,11 +73,15 @@ export default function UpdatePasswordPage() {
           <div className="bg-emerald-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
             <CheckCircle className="w-10 h-10 text-emerald-600" strokeWidth={2.5} />
           </div>
-          <h1 className="text-2xl font-black text-secondary uppercase tracking-tight mb-3">Password Updated</h1>
+          <h1 className="text-2xl font-black text-secondary uppercase tracking-tight mb-3">
+            Password Updated
+          </h1>
           <p className="text-slate-500 font-medium mb-8 leading-relaxed">
-            Your password has been changed successfully. You can now sign in with your new credentials.
+            Your password has been changed successfully. You can now sign in with your new
+            credentials.
           </p>
           <button
+            type="button"
             onClick={() => router.push('/account')}
             className="w-full bg-secondary text-white font-black rounded-full py-5 hover:bg-primary transition-all uppercase tracking-[0.2em] text-sm shadow-xl shadow-secondary/10"
           >
@@ -95,7 +99,9 @@ export default function UpdatePasswordPage() {
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-3 px-5 py-2 bg-secondary/5 rounded-full mb-6 border border-secondary/5">
             <ShieldCheck className="w-3.5 h-3.5 text-secondary" />
-            <span className="text-secondary font-black uppercase tracking-[0.4em] text-[10px]">Secure Reset</span>
+            <span className="text-secondary font-black uppercase tracking-[0.4em] text-[10px]">
+              Secure Reset
+            </span>
           </div>
           <h1 className="text-4xl font-black text-secondary uppercase tracking-tighter leading-none mb-3">
             New <span className="text-primary italic">Password</span>
@@ -109,12 +115,19 @@ export default function UpdatePasswordPage() {
           <form onSubmit={handleSubmit} className="p-10 space-y-6">
             {/* New Password */}
             <div className="group">
-              <label className="block text-[10px] font-black text-secondary/40 uppercase tracking-[0.3em] ml-1 mb-3 group-focus-within:text-primary transition-colors">
+              <label
+                htmlFor="new-password"
+                className="block text-[10px] font-black text-secondary/40 uppercase tracking-[0.3em] ml-1 mb-3 group-focus-within:text-primary transition-colors"
+              >
                 New Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-primary transition-colors pointer-events-none" size={16} />
+                <Lock
+                  className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-primary transition-colors pointer-events-none"
+                  size={16}
+                />
                 <input
+                  id="new-password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -135,12 +148,19 @@ export default function UpdatePasswordPage() {
 
             {/* Confirm Password */}
             <div className="group">
-              <label className="block text-[10px] font-black text-secondary/40 uppercase tracking-[0.3em] ml-1 mb-3 group-focus-within:text-primary transition-colors">
+              <label
+                htmlFor="confirm-password"
+                className="block text-[10px] font-black text-secondary/40 uppercase tracking-[0.3em] ml-1 mb-3 group-focus-within:text-primary transition-colors"
+              >
                 Confirm Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-primary transition-colors pointer-events-none" size={16} />
+                <Lock
+                  className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-primary transition-colors pointer-events-none"
+                  size={16}
+                />
                 <input
+                  id="confirm-password"
                   type={showConfirm ? 'text' : 'password'}
                   value={confirm}
                   onChange={(e) => setConfirm(e.target.value)}
@@ -158,7 +178,9 @@ export default function UpdatePasswordPage() {
               </div>
               {/* Match indicator */}
               {confirm.length > 0 && (
-                <p className={`mt-2 ml-1 text-[10px] font-black uppercase tracking-widest ${password === confirm ? 'text-emerald-500' : 'text-rose-500'}`}>
+                <p
+                  className={`mt-2 ml-1 text-[10px] font-black uppercase tracking-widest ${password === confirm ? 'text-emerald-500' : 'text-rose-500'}`}
+                >
                   {password === confirm ? '✓ Passwords match' : '✗ Passwords do not match'}
                 </p>
               )}

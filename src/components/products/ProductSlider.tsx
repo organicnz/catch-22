@@ -1,7 +1,7 @@
 'use client';
 
-import { useRef, useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { ProductCard } from './ProductCard';
 
 interface ProductSliderProps {
@@ -13,24 +13,26 @@ export function ProductSlider({ products }: ProductSliderProps) {
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
 
-  const checkScroll = () => {
-    if (!scrollRef.current) return;
-    const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-    setShowLeftArrow(scrollLeft > 10);
-    setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
-  };
-
   useEffect(() => {
     const el = scrollRef.current;
-    if (el) {
-      el.addEventListener('scroll', checkScroll);
-      window.addEventListener('resize', checkScroll);
-      checkScroll();
-    }
+    if (!el) return;
+
+    const checkScroll = () => {
+      const { scrollLeft, scrollWidth, clientWidth } = el;
+      setShowLeftArrow(scrollLeft > 10);
+      setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
+    };
+
+    el.addEventListener('scroll', checkScroll);
+    window.addEventListener('resize', checkScroll);
+    checkScroll();
+
     return () => {
-      el?.removeEventListener('scroll', checkScroll);
+      el.removeEventListener('scroll', checkScroll);
       window.removeEventListener('resize', checkScroll);
     };
+    // re-check arrows when products list changes (DOM may resize)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [products]);
 
   const scroll = (direction: 'left' | 'right') => {
@@ -47,10 +49,13 @@ export function ProductSlider({ products }: ProductSliderProps) {
       {/* Navigation Arrows */}
       <div className="absolute top-1/2 -left-4 md:-left-8 -translate-y-1/2 z-20 transition-all duration-500 opacity-0 group-hover/slider:opacity-100 hidden md:block">
         <button
+          type="button"
           onClick={() => scroll('left')}
           disabled={!showLeftArrow}
           className={`p-4 rounded-full bg-white border border-slate-100 shadow-xl transition-all duration-300 ${
-            showLeftArrow ? 'hover:bg-primary hover:scale-110 text-secondary' : 'opacity-0 cursor-default'
+            showLeftArrow
+              ? 'hover:bg-primary hover:scale-110 text-secondary'
+              : 'opacity-0 cursor-default'
           }`}
           aria-label="Scroll left"
         >
@@ -60,10 +65,13 @@ export function ProductSlider({ products }: ProductSliderProps) {
 
       <div className="absolute top-1/2 -right-4 md:-right-8 -translate-y-1/2 z-20 transition-all duration-500 opacity-0 group-hover/slider:opacity-100 hidden md:block">
         <button
+          type="button"
           onClick={() => scroll('right')}
           disabled={!showRightArrow}
           className={`p-4 rounded-full bg-white border border-slate-100 shadow-xl transition-all duration-300 ${
-            showRightArrow ? 'hover:bg-primary hover:scale-110 text-secondary' : 'opacity-0 cursor-default'
+            showRightArrow
+              ? 'hover:bg-primary hover:scale-110 text-secondary'
+              : 'opacity-0 cursor-default'
           }`}
           aria-label="Scroll right"
         >
@@ -84,7 +92,7 @@ export function ProductSlider({ products }: ProductSliderProps) {
         ))}
       </div>
 
-      <style jsx global>{`
+      <style>{`
         .hide-scrollbar::-webkit-scrollbar {
           display: none;
         }

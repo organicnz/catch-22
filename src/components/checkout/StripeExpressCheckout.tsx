@@ -1,11 +1,8 @@
 'use client';
 
 import { useCartStore } from '@/lib/store/cart';
+import { Elements, ExpressCheckoutElement } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
-import {
-  Elements,
-  ExpressCheckoutElement,
-} from '@stripe/react-stripe-js';
 import type { StripeExpressCheckoutElementConfirmEvent } from '@stripe/stripe-js';
 import { useState } from 'react';
 
@@ -24,7 +21,7 @@ export function StripeExpressCheckout() {
 
   const onConfirm = async (event: StripeExpressCheckoutElementConfirmEvent) => {
     if (!event) return;
-    
+
     try {
       // Create a Checkout Session via Local API Route
       const response = await fetch('/api/checkout', {
@@ -33,11 +30,11 @@ export function StripeExpressCheckout() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          items: items.map((item) => ({ 
-            id: item.id, 
-            quantity: item.quantity, 
-            name: item.name, 
-            price: item.price 
+          items: items.map((item) => ({
+            id: item.id,
+            quantity: item.quantity,
+            name: item.name,
+            price: item.price,
           })),
         }),
       });
@@ -62,22 +59,22 @@ export function StripeExpressCheckout() {
           {errorMessage}
         </div>
       )}
-      <Elements 
-        stripe={stripePromise} 
-        options={{ 
-          mode: 'payment', 
-          amount: Math.round(amount * 100) > 0 ? Math.round(amount * 100) : 100, 
+      <Elements
+        stripe={stripePromise}
+        options={{
+          mode: 'payment',
+          amount: Math.round(amount * 100) > 0 ? Math.round(amount * 100) : 100,
           currency: 'nzd',
-          locale: 'en'
+          locale: 'en',
         }}
       >
-        <ExpressCheckoutElement 
+        <ExpressCheckoutElement
           onConfirm={onConfirm}
           options={{
             buttonType: {
               applePay: 'buy',
-              googlePay: 'buy'
-            }
+              googlePay: 'buy',
+            },
           }}
         />
       </Elements>

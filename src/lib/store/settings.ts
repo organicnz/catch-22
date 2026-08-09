@@ -1,6 +1,6 @@
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 import { createClient } from '@/lib/supabase';
+import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
 import { updateUserSettingsAction } from '../actions/settings';
 
 export interface UserSettings {
@@ -44,9 +44,11 @@ export const useSettingsStore = create<SettingsState>()(
       fetchSettings: async () => {
         set({ isLoading: true, error: null });
         const supabase = createClient();
-        
+
         try {
-          const { data: { user } } = await supabase.auth.getUser();
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
           if (!user) return;
 
           const { data, error } = await supabase
@@ -62,14 +64,24 @@ export const useSettingsStore = create<SettingsState>()(
               .select('settings')
               .eq('email', user.email)
               .single();
-            
+
             if (emailError) {
               if (emailError.code !== 'PGRST116') throw emailError;
             } else if (emailData?.settings) {
-              set({ settings: { ...DEFAULT_SETTINGS, ...(emailData.settings as Record<string, unknown> || {}) } });
+              set({
+                settings: {
+                  ...DEFAULT_SETTINGS,
+                  ...((emailData.settings as Record<string, unknown>) || {}),
+                },
+              });
             }
           } else if (data?.settings) {
-            set({ settings: { ...DEFAULT_SETTINGS, ...(data.settings as Record<string, unknown> || {}) } });
+            set({
+              settings: {
+                ...DEFAULT_SETTINGS,
+                ...((data.settings as Record<string, unknown>) || {}),
+              },
+            });
           }
         } catch (err: unknown) {
           set({ error: (err as Error).message });
@@ -81,7 +93,7 @@ export const useSettingsStore = create<SettingsState>()(
       updateSettings: async (newSettings: Partial<UserSettings>) => {
         const previousSettings = get().settings;
         const updatedSettings = { ...previousSettings, ...newSettings };
-        
+
         // Optimistic update
         set({ settings: updatedSettings, error: null });
 

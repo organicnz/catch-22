@@ -1,8 +1,8 @@
 'use client';
 
-import { Heart } from 'lucide-react';
 import { useWishlistStore } from '@/lib/store/wishlist';
-import { useState, useEffect } from 'react';
+import { Heart } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface WishlistButtonProps {
   product: {
@@ -28,7 +28,7 @@ export function WishlistButton({ product, showText = false }: WishlistButtonProp
   const toggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (active) {
       removeItem(product.id);
     } else {
@@ -40,20 +40,25 @@ export function WishlistButton({ product, showText = false }: WishlistButtonProp
 
   return (
     <button
+      type="button"
       onClick={toggleWishlist}
       className={`flex items-center justify-center gap-2 transition-all ${
-        showText 
-          ? 'w-full py-4 rounded-full border-2 font-black uppercase tracking-widest text-xs' 
+        showText
+          ? 'w-full py-4 rounded-full border-2 font-black uppercase tracking-widest text-xs'
           : 'p-2 rounded-full shadow-md'
       } ${
-        active 
-          ? 'bg-rose-50 border-rose-200 text-rose-500' 
+        active
+          ? 'bg-rose-50 border-rose-200 text-rose-500'
           : 'bg-white border-slate-100 text-slate-400 hover:text-rose-500'
       }`}
-      title={active ? "Remove from Wishlist" : "Add to Wishlist"}
+      title={active ? 'Remove from Wishlist' : 'Add to Wishlist'}
     >
-      <Heart size={showText ? 16 : 20} fill={active ? "currentColor" : "none"} strokeWidth={active ? 0 : 2.5} />
-      {showText && (active ? "In Wishlist" : "Add to Wishlist")}
+      <Heart
+        size={showText ? 16 : 20}
+        fill={active ? 'currentColor' : 'none'}
+        strokeWidth={active ? 0 : 2.5}
+      />
+      {showText && (active ? 'In Wishlist' : 'Add to Wishlist')}
     </button>
   );
 }

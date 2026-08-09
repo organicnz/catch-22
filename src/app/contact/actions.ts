@@ -26,16 +26,16 @@ export async function submitContact(formData: FormData) {
 
   // 3. Spam keyword check for content
   const spamKeywords = ['casino', 'slot', 'judi', 'togel', 'crypto', 'loan'];
-  if (spamKeywords.some(kw => message.toLowerCase().includes(kw))) {
+  if (spamKeywords.some((kw) => message.toLowerCase().includes(kw))) {
     return { error: 'Message flagged as potential spam. Please revise.' };
   }
 
   const supabase = await createServerClient();
-  
+
   const { error } = await supabase.from('contact_submissions').insert({
     name,
     email,
-    message
+    message,
   });
 
   if (error) {

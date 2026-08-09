@@ -1,6 +1,6 @@
-import { createServerClient } from '@/lib/supabase-server'
-import { cookies } from 'next/headers'
-import { unstable_cache } from 'next/cache'
+import { createServerClient } from '@/lib/supabase-server';
+import { unstable_cache } from 'next/cache';
+import { cookies } from 'next/headers';
 
 export interface UserSettings {
   marketing_emails: boolean;
@@ -35,7 +35,7 @@ export async function getUserSettings(email: string): Promise<UserSettings> {
           return DEFAULT_SETTINGS;
         }
 
-        return { ...DEFAULT_SETTINGS, ...(data.settings as Record<string, unknown> || {}) };
+        return { ...DEFAULT_SETTINGS, ...((data.settings as Record<string, unknown>) || {}) };
       } catch (err) {
         console.error('Error fetching settings from DB:', err);
         return DEFAULT_SETTINGS;
@@ -50,10 +50,9 @@ export async function getUserSettings(email: string): Promise<UserSettings> {
 
   // Merge with cookie-based settings for immediate SSR sync
   const preferredCurrency = cookieStore.get('preferred_currency')?.value;
-  
+
   return {
     ...cachedSettings,
     preferred_currency: preferredCurrency || cachedSettings.preferred_currency,
   };
 }
-

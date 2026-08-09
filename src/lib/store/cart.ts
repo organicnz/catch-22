@@ -38,16 +38,14 @@ export const useCartStore = create<CartState>()(
           set({ items: [...items, item] });
         }
       },
-      removeItem: (id) =>
-        set({ items: get().items.filter((i) => i.id !== id) }),
+      removeItem: (id) => set({ items: get().items.filter((i) => i.id !== id) }),
       updateQuantity: (id, quantity) =>
         set({
           items: get().items.map((i) => (i.id === id ? { ...i, quantity } : i)),
         }),
       clearCart: () => set({ items: [] }),
       totalItems: () => get().items.reduce((total, item) => total + item.quantity, 0),
-      totalPrice: () =>
-        get().items.reduce((total, item) => total + item.price * item.quantity, 0),
+      totalPrice: () => get().items.reduce((total, item) => total + item.price * item.quantity, 0),
     }),
     {
       name: 'catch-22-cart',

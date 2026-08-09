@@ -1,7 +1,7 @@
+import { getStripeShippingOptions } from '@/config/shipping';
+import { createServerClient } from '@/lib/supabase-server';
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { createServerClient } from '@/lib/supabase-server';
-import { getStripeShippingOptions } from '@/config/shipping';
 
 const STRIPE_API_VERSION = '2026-04-22.dahlia' as const;
 
@@ -30,8 +30,17 @@ export async function POST(req: Request) {
       if (!item.id || typeof item.id !== 'number') {
         return NextResponse.json({ error: 'Invalid item: id must be a number' }, { status: 400 });
       }
-      if (!item.quantity || typeof item.quantity !== 'number' || item.quantity < 1 || item.quantity > 999 || !Number.isInteger(item.quantity)) {
-        return NextResponse.json({ error: 'Invalid item: quantity must be an integer between 1 and 999' }, { status: 400 });
+      if (
+        !item.quantity ||
+        typeof item.quantity !== 'number' ||
+        item.quantity < 1 ||
+        item.quantity > 999 ||
+        !Number.isInteger(item.quantity)
+      ) {
+        return NextResponse.json(
+          { error: 'Invalid item: quantity must be an integer between 1 and 999' },
+          { status: 400 }
+        );
       }
     }
 
@@ -40,10 +49,12 @@ export async function POST(req: Request) {
     }
 
     const supabase = await createServerClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     // Fetch product details from Supabase to ensure price integrity
-    const productIds = items.map(item => item.id);
+    const productIds = items.map((item) => item.id);
     const { data: dbProducts, error: dbError } = await supabase
       .from('products')
       .select('id, name, price, slug')
@@ -55,7 +66,7 @@ export async function POST(req: Request) {
     }
 
     // Map database products for easy lookup
-    const productMap = new Map(dbProducts.map(p => [p.id, p]));
+    const productMap = new Map(dbProducts.map((p) => [p.id, p]));
 
     // Validate all requested products exist before building line items
     for (const item of items) {
@@ -65,8 +76,9 @@ export async function POST(req: Request) {
     }
 
     // Build line items for Stripe
-    const lineItems = items.map(item => {
-      const dbProduct = productMap.get(item.id)!;
+    const lineItems = items.map((item) => {
+      const dbProduct = productMap.get(item.id);
+      if (!dbProduct) throw new Error(`Product not found: ${item.id}`);
 
       return {
         price_data: {
