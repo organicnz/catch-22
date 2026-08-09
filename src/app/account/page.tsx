@@ -13,13 +13,10 @@ export const metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function AccountPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ tab?: string }>;
+export default async function AccountPage(props: {
+  searchParams: Promise<Record<string, string>>;
 }) {
   const supabase = await createServerClient();
-
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
@@ -30,42 +27,37 @@ export default async function AccountPage({
   }
 
   // Profile via admin client (bypasses RLS)
-  let profile: { id: number; first_name: string | null; last_name: string | null; user_id: string | null; is_admin: boolean } | null = null;
+  let profile: { id: number; user_id: string | null; is_admin: boolean } | null = null;
   try {
-    const adminClient = await createAdminClient();
-    const { data } = await adminClient
+    const ac = await createAdminClient();
+    const { data } = await ac
       .from('profiles')
-      .select('id, first_name, last_name, user_id, is_admin')
+      .select('id, user_id, is_admin')
       .or(`email.eq.${user.email},user_id.eq.${user.id}`)
       .single();
     profile = data;
-
     if (profile && !profile.user_id) {
-      await adminClient.from('profiles').update({ user_id: user.id }).eq('id', profile.id);
+      await ac.from('profiles').update({ user_id: user.id }).eq('id', profile.id);
     }
   } catch (e) {
-    console.error('[Account] Admin client error:', e);
+    console.error('[Account] profile fetch error:', e);
   }
 
   const isAdmin = profile?.is_admin === true;
 
-  // Resolve active tab
-  const { tab } = await searchParams;
-  const defaultTab = isAdmin ? 'admin' : 'orders';
-  const activeTab = tab ?? defaultTab;
+  // Active tab from URL
+  const sp = await props.searchParams;
+  const activeTab = sp.tab ?? (isAdmin ? 'admin' : 'orders');
 
-  // Fetch data in parallel based on what tab needs
+  // Fetch data
   const [allOrdersResult, myOrdersResult] = await Promise.all([
     isAdmin
       ? createAdminClient().then((ac) =>
           ac.from('orders')
-            .select(`
-              id, created_at, status, total_amount, currency,
-              payment_method, stripe_session_id,
-              shipping_address, billing_address,
+            .select(`id, created_at, status, total_amount, currency, payment_method,
+              stripe_session_id, shipping_address, billing_address,
               order_items ( id, product_name, quantity, total ),
-              profiles ( first_name, last_name, email )
-            `)
+              profiles ( first_name, last_name, email )`)
             .order('created_at', { ascending: false })
             .limit(200)
         )
@@ -83,26 +75,22 @@ export default async function AccountPage({
   const myOrders  = (myOrdersResult.data  ?? []) as MyOrder[];
   const processing = allOrders.filter((o) => o.status === 'processing').length;
 
-  // Tab definitions (serialisable — no functions/JSX)
   const tabs = [
     ...(isAdmin ? [{ id: 'admin', label: 'All Orders', badge: processing }] : []),
     { id: 'orders',   label: isAdmin ? 'My Orders' : 'Orders' },
     { id: 'settings', label: 'Settings' },
   ];
 
-  // Render the active panel server-side
-  let panelContent: React.ReactNode;
+  let panel: React.ReactNode;
   if (activeTab === 'admin' && isAdmin) {
-    panelContent = <AdminOrdersPanel orders={allOrders} />;
+    panel = <AdminOrdersPanel orders={allOrders} />;
   } else if (activeTab === 'settings') {
-    panelContent = (
+    panel = (
       <div className="max-w-2xl space-y-12">
         <UserSettings />
         <MfaSettings />
         <div className="pt-8 border-t border-slate-100">
-          <h3 className="text-sm font-black text-secondary uppercase tracking-widest mb-1">
-            Session Control
-          </h3>
+          <h3 className="text-sm font-black text-secondary uppercase tracking-widest mb-1">Session Control</h3>
           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-6">
             Signed in as <span className="text-secondary">{user.email}</span>
           </p>
@@ -111,7 +99,7 @@ export default async function AccountPage({
       </div>
     );
   } else {
-    panelContent = <MyOrdersPanel orders={myOrders} />;
+    panel = <MyOrdersPanel orders={myOrders} />;
   }
 
   return (
@@ -123,9 +111,8 @@ export default async function AccountPage({
           </h1>
           <div className="h-1.5 w-24 bg-primary mt-3" />
         </div>
-
         <AccountTabShell tabs={tabs} activeTab={activeTab}>
-          {panelContent}
+          {panel}
         </AccountTabShell>
       </div>
     </div>
