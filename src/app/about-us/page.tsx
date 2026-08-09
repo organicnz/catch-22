@@ -12,8 +12,8 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <div className="bg-white min-h-screen">
-      {/* Hero Section */}
-      <div className="relative h-[400px] flex items-center overflow-hidden">
+      {/* Hero Section — full bleed, overlaps navbar intentionally */}
+      <div className="relative h-[400px] pt-28 flex items-end pb-16 overflow-hidden">
         <Image
           src={getStorageUrl('site/about-hero.jpg')}
           alt="Fishing in New Zealand"
