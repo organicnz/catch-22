@@ -1,4 +1,4 @@
-import { AccountTabs, type TabDef, type PanelMap } from '@/components/account/AccountTabs';
+import { AccountTabShell } from '@/components/account/AccountTabShell';
 import { AdminOrdersPanel } from '@/components/account/AdminOrdersPanel';
 import { MyOrdersPanel } from '@/components/account/MyOrdersPanel';
 import { MfaSettings } from '@/components/account/MfaSettings';
@@ -6,7 +6,6 @@ import { UserSettings } from '@/components/account/UserSettings';
 import { LogoutButton } from '@/components/account/LogoutButton';
 import { createAdminClient, createServerClient } from '@/lib/supabase-server';
 import type { AdminOrder, MyOrder } from '@/types/orders';
-import { Package, Settings, ShoppingBag } from 'lucide-react';
 import { redirect } from 'next/navigation';
 
 export const metadata = {
@@ -14,7 +13,11 @@ export const metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function AccountPage() {
+export default async function AccountPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>;
+}) {
   const supabase = await createServerClient();
 
   const { data: { user } } = await supabase.auth.getUser();
@@ -26,7 +29,7 @@ export default async function AccountPage() {
     redirect('/auth/mfa');
   }
 
-  // Profile — admin client bypasses RLS so is_admin is always readable
+  // Profile via admin client (bypasses RLS)
   let profile: { id: number; first_name: string | null; last_name: string | null; user_id: string | null; is_admin: boolean } | null = null;
   try {
     const adminClient = await createAdminClient();
@@ -37,30 +40,35 @@ export default async function AccountPage() {
       .single();
     profile = data;
 
-    // Backfill user_id on legacy profiles so future queries use the faster index
     if (profile && !profile.user_id) {
       await adminClient.from('profiles').update({ user_id: user.id }).eq('id', profile.id);
     }
   } catch (e) {
-    console.error('[Account] Admin client error — SUPABASE_SECRET_KEY may not be set in Vercel env vars:', e);
+    console.error('[Account] Admin client error:', e);
   }
 
   const isAdmin = profile?.is_admin === true;
 
-  // Parallel data fetch — only fetch allOrders when admin
+  // Resolve active tab
+  const { tab } = await searchParams;
+  const defaultTab = isAdmin ? 'admin' : 'orders';
+  const activeTab = tab ?? defaultTab;
+
+  // Fetch data in parallel based on what tab needs
   const [allOrdersResult, myOrdersResult] = await Promise.all([
     isAdmin
-      ? createAdminClient().then(ac => ac
-          .from('orders')
-          .select(`
-            id, created_at, status, total_amount, currency,
-            payment_method, stripe_session_id,
-            shipping_address, billing_address,
-            order_items ( id, product_name, quantity, total ),
-            profiles ( first_name, last_name, email )
-          `)
-          .order('created_at', { ascending: false })
-          .limit(200))
+      ? createAdminClient().then((ac) =>
+          ac.from('orders')
+            .select(`
+              id, created_at, status, total_amount, currency,
+              payment_method, stripe_session_id,
+              shipping_address, billing_address,
+              order_items ( id, product_name, quantity, total ),
+              profiles ( first_name, last_name, email )
+            `)
+            .order('created_at', { ascending: false })
+            .limit(200)
+        )
       : Promise.resolve({ data: [] as AdminOrder[] }),
     profile
       ? supabase
@@ -75,20 +83,19 @@ export default async function AccountPage() {
   const myOrders  = (myOrdersResult.data  ?? []) as MyOrder[];
   const processing = allOrders.filter((o) => o.status === 'processing').length;
 
-  // Build tab list — admins get "All Orders" first
-  const tabs: TabDef[] = [
-    ...(isAdmin
-      ? [{ id: 'admin', label: 'All Orders', icon: Package, badge: processing }]
-      : []),
-    { id: 'orders',   label: isAdmin ? 'My Orders' : 'Orders', icon: ShoppingBag },
-    { id: 'settings', label: 'Settings', icon: Settings },
+  // Tab definitions (serialisable — no functions/JSX)
+  const tabs = [
+    ...(isAdmin ? [{ id: 'admin', label: 'All Orders', badge: processing }] : []),
+    { id: 'orders',   label: isAdmin ? 'My Orders' : 'Orders' },
+    { id: 'settings', label: 'Settings' },
   ];
 
-  // Panel render functions — only the active one is called
-  const panels: PanelMap = {
-    admin:    () => <AdminOrdersPanel orders={allOrders} />,
-    orders:   () => <MyOrdersPanel orders={myOrders} />,
-    settings: () => (
+  // Render the active panel server-side
+  let panelContent: React.ReactNode;
+  if (activeTab === 'admin' && isAdmin) {
+    panelContent = <AdminOrdersPanel orders={allOrders} />;
+  } else if (activeTab === 'settings') {
+    panelContent = (
       <div className="max-w-2xl space-y-12">
         <UserSettings />
         <MfaSettings />
@@ -102,8 +109,10 @@ export default async function AccountPage() {
           <LogoutButton />
         </div>
       </div>
-    ),
-  };
+    );
+  } else {
+    panelContent = <MyOrdersPanel orders={myOrders} />;
+  }
 
   return (
     <div className="bg-white min-h-screen pt-28 pb-16">
@@ -115,11 +124,9 @@ export default async function AccountPage() {
           <div className="h-1.5 w-24 bg-primary mt-3" />
         </div>
 
-        <AccountTabs
-          tabs={tabs}
-          panels={panels}
-          defaultTab={tabs[0].id}
-        />
+        <AccountTabShell tabs={tabs} activeTab={activeTab}>
+          {panelContent}
+        </AccountTabShell>
       </div>
     </div>
   );
