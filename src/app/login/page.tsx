@@ -1,19 +1,29 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase';
-import { Shield, Globe, Code, ArrowRight, Loader2, Lock, Fingerprint, Eye, EyeOff } from 'lucide-react';
+import {
+  ArrowRight,
+  Code,
+  Eye,
+  EyeOff,
+  Fingerprint,
+  Globe,
+  Loader2,
+  Lock,
+  Shield,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [authMethod, setAuthMethod] = useState<'otp' | 'password'>('otp');
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  
+
   const supabase = createClient();
   const router = useRouter();
 
@@ -48,7 +58,10 @@ export default function LoginPage() {
             },
           });
           if (error) throw error;
-          setMessage({ type: 'success', text: '✅ Account created! Please check your email to verify.' });
+          setMessage({
+            type: 'success',
+            text: '✅ Account created! Please check your email to verify.',
+          });
         } else {
           const { error } = await supabase.auth.signInWithPassword({
             email,
@@ -89,12 +102,12 @@ export default function LoginPage() {
       setMessage({ type: 'error', text: '❌ Please enter your email address first.' });
       return;
     }
-    
+
     setLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/auth/callback?next=/account/update-password`,
     });
-    
+
     if (error) {
       setMessage({ type: 'error', text: `❌ ${error.message}` });
     } else {
@@ -110,15 +123,17 @@ export default function LoginPage() {
         <div className="text-center mb-12 animate-in fade-in slide-in-from-top-8 duration-700">
           <div className="inline-flex items-center gap-3 px-6 py-2.5 bg-secondary/5 rounded-full mb-8 border border-secondary/5">
             <Shield className="w-3.5 h-3.5 text-secondary" />
-            <span className="text-secondary font-black uppercase tracking-[0.4em] text-[10px]">Secure Gateway</span>
+            <span className="text-secondary font-black uppercase tracking-[0.4em] text-[10px]">
+              Secure Gateway
+            </span>
           </div>
           <h1 className="text-6xl md:text-8xl font-black text-secondary uppercase tracking-tighter leading-none mb-6">
-            {isSignUp ? 'Join' : 'Welcome'} <br /> 
+            {isSignUp ? 'Join' : 'Welcome'} <br />
             <span className="text-primary italic">{isSignUp ? 'The Crew' : 'Back'}</span>
           </h1>
           <p className="text-slate-400 font-bold uppercase tracking-[0.15em] text-[10px] max-w-sm mx-auto">
-            {isSignUp 
-              ? 'Join the elite community of explorers' 
+            {isSignUp
+              ? 'Join the elite community of explorers'
               : 'Authorized access for returning personnel only'}
           </p>
         </div>
@@ -126,18 +141,27 @@ export default function LoginPage() {
         <div className="bg-white border border-slate-100 rounded-[4rem] shadow-[0_40px_100px_-20px_rgba(15,23,42,0.1)] overflow-hidden animate-in fade-in zoom-in-95 duration-1000 delay-200">
           {/* Method Tabs */}
           <div className="flex p-3 bg-slate-50/50">
-            <button 
-              onClick={() => { setAuthMethod('otp'); setIsSignUp(false); }}
+            <button
+              type="button"
+              onClick={() => {
+                setAuthMethod('otp');
+                setIsSignUp(false);
+              }}
               className={`flex-1 py-5 text-[10px] font-black uppercase tracking-[0.3em] transition-all rounded-[2rem] flex items-center justify-center gap-3 ${
-                authMethod === 'otp' ? 'bg-secondary text-white shadow-xl shadow-secondary/20' : 'text-slate-400 hover:text-secondary'
+                authMethod === 'otp'
+                  ? 'bg-secondary text-white shadow-xl shadow-secondary/20'
+                  : 'text-slate-400 hover:text-secondary'
               }`}
             >
               <Fingerprint size={16} /> Magic Link
             </button>
-            <button 
+            <button
+              type="button"
               onClick={() => setAuthMethod('password')}
               className={`flex-1 py-5 text-[10px] font-black uppercase tracking-[0.3em] transition-all rounded-[2rem] flex items-center justify-center gap-3 ${
-                authMethod === 'password' ? 'bg-secondary text-white shadow-xl shadow-secondary/20' : 'text-slate-400 hover:text-secondary'
+                authMethod === 'password'
+                  ? 'bg-secondary text-white shadow-xl shadow-secondary/20'
+                  : 'text-slate-400 hover:text-secondary'
               }`}
             >
               <Lock size={16} /> Password
@@ -148,8 +172,14 @@ export default function LoginPage() {
             <form onSubmit={handleAuth} className="space-y-8">
               <div className="space-y-6">
                 <div className="group">
-                  <label className="block text-[10px] font-black text-secondary/40 uppercase tracking-[0.3em] ml-1 mb-3 group-focus-within:text-primary transition-colors">Credential Email</label>
+                  <label
+                    htmlFor="login-email"
+                    className="block text-[10px] font-black text-secondary/40 uppercase tracking-[0.3em] ml-1 mb-3 group-focus-within:text-primary transition-colors"
+                  >
+                    Credential Email
+                  </label>
                   <input
+                    id="login-email"
                     type="email"
                     placeholder="OPERATOR@CATCH22.CO"
                     value={email}
@@ -162,9 +192,14 @@ export default function LoginPage() {
                 {authMethod === 'password' && (
                   <div className="group animate-in slide-in-from-top-4 duration-500">
                     <div className="flex justify-between items-center ml-1 mb-3">
-                      <label className="block text-[10px] font-black text-secondary/40 uppercase tracking-[0.3em] group-focus-within:text-primary transition-colors">Access Key</label>
+                      <label
+                        htmlFor="login-password"
+                        className="block text-[10px] font-black text-secondary/40 uppercase tracking-[0.3em] group-focus-within:text-primary transition-colors"
+                      >
+                        Access Key
+                      </label>
                       {!isSignUp && (
-                        <button 
+                        <button
                           type="button"
                           onClick={handleResetPassword}
                           className="text-[9px] font-black text-primary uppercase tracking-widest hover:text-secondary transition-colors"
@@ -175,7 +210,8 @@ export default function LoginPage() {
                     </div>
                     <div className="relative">
                       <input
-                        type={showPassword ? "text" : "password"}
+                        id="login-password"
+                        type={showPassword ? 'text' : 'password'}
                         placeholder="••••••••••••"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
@@ -199,19 +235,34 @@ export default function LoginPage() {
                 disabled={loading}
                 className="w-full bg-secondary text-white font-black rounded-full py-6 hover:bg-primary hover:text-secondary transition-all uppercase tracking-[0.4em] text-xs shadow-2xl shadow-secondary/20 flex items-center justify-center gap-4 group disabled:opacity-50 active:scale-[0.98]"
               >
-                {loading ? <Loader2 className="animate-spin" size={20} /> : (
+                {loading ? (
+                  <Loader2 className="animate-spin" size={20} />
+                ) : (
                   <>
-                    <span>{authMethod === 'otp' ? 'Initialize Link' : (isSignUp ? 'Generate Account' : 'Authenticate')}</span>
-                    <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform duration-500" />
+                    <span>
+                      {authMethod === 'otp'
+                        ? 'Initialize Link'
+                        : isSignUp
+                          ? 'Generate Account'
+                          : 'Authenticate'}
+                    </span>
+                    <ArrowRight
+                      size={20}
+                      className="group-hover:translate-x-2 transition-transform duration-500"
+                    />
                   </>
                 )}
               </button>
             </form>
 
             {message && (
-              <div className={`mt-10 p-6 rounded-[2rem] border text-[10px] font-black uppercase tracking-[0.2em] text-center animate-in zoom-in-95 duration-500 ${
-                message.type === 'success' ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 'bg-rose-50 border-rose-100 text-rose-600'
-              }`}>
+              <div
+                className={`mt-10 p-6 rounded-[2rem] border text-[10px] font-black uppercase tracking-[0.2em] text-center animate-in zoom-in-95 duration-500 ${
+                  message.type === 'success'
+                    ? 'bg-emerald-50 border-emerald-100 text-emerald-600'
+                    : 'bg-rose-50 border-rose-100 text-rose-600'
+                }`}
+              >
                 {message.text}
               </div>
             )}
@@ -219,19 +270,23 @@ export default function LoginPage() {
             {/* OAuth Section */}
             <div className="mt-16">
               <div className="flex items-center gap-6 mb-10">
-                <div className="h-px bg-slate-100 flex-1"></div>
-                <span className="text-[10px] font-black text-slate-300 uppercase tracking-[0.4em]">Satellite Access</span>
-                <div className="h-px bg-slate-100 flex-1"></div>
+                <div className="h-px bg-slate-100 flex-1" />
+                <span className="text-[10px] font-black text-slate-300 uppercase tracking-[0.4em]">
+                  Satellite Access
+                </span>
+                <div className="h-px bg-slate-100 flex-1" />
               </div>
 
               <div className="grid grid-cols-2 gap-5">
-                <button 
+                <button
+                  type="button"
                   onClick={() => handleOAuth('google')}
                   className="flex items-center justify-center gap-4 py-5 bg-white border border-slate-100 rounded-3xl hover:border-primary hover:bg-slate-50 transition-all text-[10px] font-black text-secondary uppercase tracking-[0.2em] group shadow-sm active:scale-[0.98]"
                 >
                   <Globe size={18} className="group-hover:text-primary transition-colors" /> Google
                 </button>
-                <button 
+                <button
+                  type="button"
                   onClick={() => handleOAuth('github')}
                   className="flex items-center justify-center gap-4 py-5 bg-white border border-slate-100 rounded-3xl hover:border-primary hover:bg-slate-50 transition-all text-[10px] font-black text-secondary uppercase tracking-[0.2em] group shadow-sm active:scale-[0.98]"
                 >
@@ -243,26 +298,31 @@ export default function LoginPage() {
 
           {/* Footer Action */}
           <div className="bg-slate-50/80 p-10 text-center border-t border-slate-100/50">
-             <button 
+            <button
+              type="button"
               onClick={() => setIsSignUp(!isSignUp)}
               className="group text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] hover:text-secondary transition-all flex items-center justify-center gap-3 mx-auto"
-             >
-               {isSignUp ? 'Existing Personnel? Sign In' : "New Recruit? Join The Crew"}
-               <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-             </button>
+            >
+              {isSignUp ? 'Existing Personnel? Sign In' : 'New Recruit? Join The Crew'}
+              <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+            </button>
           </div>
         </div>
 
         {/* Security Badges */}
         <div className="mt-16 flex items-center justify-center gap-8 opacity-30">
-           <div className="flex items-center gap-3">
-              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-secondary">Encryption Active</span>
-           </div>
-           <div className="flex items-center gap-3">
-              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-secondary">Supabase v2 Vault</span>
-           </div>
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+            <span className="text-[9px] font-black uppercase tracking-[0.3em] text-secondary">
+              Encryption Active
+            </span>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+            <span className="text-[9px] font-black uppercase tracking-[0.3em] text-secondary">
+              Supabase v2 Vault
+            </span>
+          </div>
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 'use client';
 
+import { type UserSettings, useSettingsStore } from '@/lib/store/settings';
 import { useEffect, useRef } from 'react';
-import { useSettingsStore, UserSettings } from '@/lib/store/settings';
 
 export function SettingsHydrator({ settings }: { settings: UserSettings | null }) {
   const initialize = useSettingsStore((state) => state.initialize);

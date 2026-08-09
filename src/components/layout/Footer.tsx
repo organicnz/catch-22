@@ -1,6 +1,6 @@
-import Link from 'next/link';
-import Image from 'next/image';
 import { getStorageUrl } from '@/lib/supabase';
+import Image from 'next/image';
+import Link from 'next/link';
 
 export function Footer() {
   return (
@@ -9,48 +9,118 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           <div className="col-span-1 md:col-span-1">
             <Link href="/" className="inline-block">
-              <Image 
-                src={getStorageUrl('site/logo.png')} 
-                alt="Catch-22" 
-                width={212} 
-                height={150} 
-                className="h-20 w-auto" 
+              <Image
+                src={getStorageUrl('site/logo.png')}
+                alt="Catch-22"
+                width={212}
+                height={150}
+                className="h-20 w-auto"
               />
             </Link>
             <p className="mt-6 text-sm text-slate-300 leading-relaxed">
-              Catch-22 is dedicated to providing premium fishing gear that performs in the elements. We believe in quality, durability, and giving back to the ocean.
+              Catch-22 is dedicated to providing premium fishing gear that performs in the elements.
+              We believe in quality, durability, and giving back to the ocean.
             </p>
           </div>
-          
+
           <div className="col-span-1 md:col-span-2">
-            <h3 className="text-primary text-sm font-black uppercase tracking-widest mb-6">Navigation</h3>
+            <h3 className="text-primary text-sm font-black uppercase tracking-widest mb-6">
+              Navigation
+            </h3>
             <ul className="grid grid-cols-2 gap-4 text-sm font-bold">
-              <li><Link href="/" className="hover:text-primary transition-colors uppercase tracking-wider">Home</Link></li>
-              <li><Link href="/products" className="hover:text-primary transition-colors uppercase tracking-wider">Shop</Link></li>
-              <li><Link href="/gallery" className="hover:text-primary transition-colors uppercase tracking-wider">Snaps</Link></li>
-              <li><Link href="/partners" className="hover:text-primary transition-colors uppercase tracking-wider">Visit Our Partners</Link></li>
-              <li><Link href="/faqs" className="hover:text-primary transition-colors uppercase tracking-wider">FAQs</Link></li>
-              <li><Link href="/contact" className="hover:text-primary transition-colors uppercase tracking-wider">Contact</Link></li>
+              <li>
+                <Link
+                  href="/"
+                  className="hover:text-primary transition-colors uppercase tracking-wider"
+                >
+                  Home
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/products"
+                  className="hover:text-primary transition-colors uppercase tracking-wider"
+                >
+                  Shop
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/gallery"
+                  className="hover:text-primary transition-colors uppercase tracking-wider"
+                >
+                  Snaps
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/partners"
+                  className="hover:text-primary transition-colors uppercase tracking-wider"
+                >
+                  Visit Our Partners
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/faqs"
+                  className="hover:text-primary transition-colors uppercase tracking-wider"
+                >
+                  FAQs
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/contact"
+                  className="hover:text-primary transition-colors uppercase tracking-wider"
+                >
+                  Contact
+                </Link>
+              </li>
             </ul>
           </div>
 
           <div>
-            <h3 className="text-primary text-sm font-black uppercase tracking-widest mb-6">Legal</h3>
+            <h3 className="text-primary text-sm font-black uppercase tracking-widest mb-6">
+              Legal
+            </h3>
             <ul className="space-y-4 text-sm font-bold">
-              <li><Link href="/terms-and-conditions" className="hover:text-primary transition-colors uppercase tracking-wider">Terms of Service</Link></li>
-              <li><Link href="/privacy-policy" className="hover:text-primary transition-colors uppercase tracking-wider">Privacy Policy</Link></li>
-              <li><Link href="/shipping-returns" className="hover:text-primary transition-colors uppercase tracking-wider">Shipping & Returns</Link></li>
+              <li>
+                <Link
+                  href="/terms-and-conditions"
+                  className="hover:text-primary transition-colors uppercase tracking-wider"
+                >
+                  Terms of Service
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/privacy-policy"
+                  className="hover:text-primary transition-colors uppercase tracking-wider"
+                >
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/shipping-returns"
+                  className="hover:text-primary transition-colors uppercase tracking-wider"
+                >
+                  Shipping & Returns
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
-        
+
         <div className="mt-16 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-xs text-slate-400 font-bold uppercase tracking-widest">
             &copy; {new Date().getFullYear()} Catch-22.co.nz. Never Out of a Catch.
           </div>
           <div className="flex gap-6">
-             {/* Placeholder for social icons */}
-             <span className="text-xs text-slate-500 font-bold uppercase tracking-widest">Follow our catch</span>
+            {/* Placeholder for social icons */}
+            <span className="text-xs text-slate-500 font-bold uppercase tracking-widest">
+              Follow our catch
+            </span>
           </div>
         </div>
       </div>

@@ -2,10 +2,10 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #0F172A;
-  --primary: #D1FF00;
+  --foreground: #0f172a;
+  --primary: #d1ff00;
   --primary-dark: #b8d600;
-  --secondary: #0F172A;
+  --secondary: #0f172a;
   --accent: #dfb178;
 }
 
@@ -27,20 +27,37 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-outfit), sans-serif;
   }
 }
 
 @layer utilities {
   @keyframes fade-in {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
-  
+
   @keyframes scale-up {
-    from { transform: scale(0.95); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
+    from {
+      transform: scale(0.95);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
   }
 
   .animate-fade-in {

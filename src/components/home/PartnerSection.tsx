@@ -1,5 +1,5 @@
-import Image from 'next/image';
 import { getStorageUrl } from '@/lib/supabase';
+import Image from 'next/image';
 
 const partners = [
   { name: 'Sea Cleaners', logo: getStorageUrl('site/partner-seacleaners.jpg') },
@@ -15,29 +15,27 @@ export function PartnerSection() {
     <section className="py-20 bg-slate-50 overflow-hidden">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-sm font-black uppercase tracking-[0.3em] text-slate-400 mb-4 italic">Trusted By <span className="text-primary not-italic">Experts</span></h2>
-          <div className="h-px w-20 bg-primary mx-auto"></div>
+          <h2 className="text-sm font-black uppercase tracking-[0.3em] text-slate-400 mb-4 italic">
+            Trusted By <span className="text-primary not-italic">Experts</span>
+          </h2>
+          <div className="h-px w-20 bg-primary mx-auto" />
         </div>
-        
+
         <div className="flex flex-wrap justify-center items-center gap-12 md:gap-20 opacity-60">
           {partners.map((partner) => (
-            <div 
+            <div
               key={partner.name}
               className="relative w-32 h-16 grayscale hover:grayscale-0 transition-all duration-500 hover:opacity-100"
             >
-              <Image
-                src={partner.logo}
-                alt={partner.name}
-                fill
-                className="object-contain"
-              />
+              <Image src={partner.logo} alt={partner.name} fill className="object-contain" />
             </div>
           ))}
         </div>
-        
+
         <div className="mt-20 text-center">
           <p className="text-slate-400 text-xs font-bold uppercase tracking-widest max-w-2xl mx-auto">
-            We collaborate with industry leaders to ensure our gear meets the highest standards of performance and reliability.
+            We collaborate with industry leaders to ensure our gear meets the highest standards of
+            performance and reliability.
           </p>
         </div>
       </div>

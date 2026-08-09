@@ -27,7 +27,7 @@
  */
 
 import fc from 'fast-check';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
@@ -61,8 +61,7 @@ const mockUpsert = vi.fn((payload: Record<string, unknown>) => {
     return Promise.resolve({
       data: null,
       error: {
-        message:
-          "Could not find the 'updated_at' column of 'profiles' in the schema cache.",
+        message: "Could not find the 'updated_at' column of 'profiles' in the schema cache.",
       },
     });
   }
@@ -129,47 +128,44 @@ describe('Property 1: Bug Condition — upsert payload includes updated_at', () 
     setupProfileFetch();
   });
 
-  it(
-    'updateUserSettingsAction returns success for any valid settings input (FAILS on unfixed code)',
-    async () => {
-      /**
-       * On UNFIXED code: the upsert payload always contains `updated_at`, so the
-       * mock returns the PostgREST error and the action returns
-       * `{ error: "Could not find the 'updated_at' column..." }`.
-       * The assertion `result.success === true` therefore FAILS — which is the
-       * expected outcome for this exploration test.
-       *
-       * After the fix: `updated_at` is absent from the payload, the mock returns
-       * `{ error: null }`, and the action returns `{ success: true, settings: {...} }`.
-       */
-      await fc.assert(
-        fc.asyncProperty(
-          fc.record({
-            preferred_currency: fc.constantFrom('NZD', 'AUD', 'USD'),
-            marketing_emails: fc.boolean(),
-            order_updates: fc.boolean(),
-          }),
-          async (input) => {
-            // Reset mocks for each generated input
-            vi.clearAllMocks();
-            capturedUpsertPayload = {};
-            setupAuthenticatedUser();
-            setupProfileFetch();
+  it('updateUserSettingsAction returns success for any valid settings input (FAILS on unfixed code)', async () => {
+    /**
+     * On UNFIXED code: the upsert payload always contains `updated_at`, so the
+     * mock returns the PostgREST error and the action returns
+     * `{ error: "Could not find the 'updated_at' column..." }`.
+     * The assertion `result.success === true` therefore FAILS — which is the
+     * expected outcome for this exploration test.
+     *
+     * After the fix: `updated_at` is absent from the payload, the mock returns
+     * `{ error: null }`, and the action returns `{ success: true, settings: {...} }`.
+     */
+    await fc.assert(
+      fc.asyncProperty(
+        fc.record({
+          preferred_currency: fc.constantFrom('NZD', 'AUD', 'USD'),
+          marketing_emails: fc.boolean(),
+          order_updates: fc.boolean(),
+        }),
+        async (input) => {
+          // Reset mocks for each generated input
+          vi.clearAllMocks();
+          capturedUpsertPayload = {};
+          setupAuthenticatedUser();
+          setupProfileFetch();
 
-            const result = await updateUserSettingsAction(input);
+          const result = await updateUserSettingsAction(input);
 
-            const mergedSettings = {
-              ...EXISTING_PROFILE_SETTINGS,
-              ...input,
-            };
+          const mergedSettings = {
+            ...EXISTING_PROFILE_SETTINGS,
+            ...input,
+          };
 
-            expect(result).toEqual({ success: true, settings: mergedSettings });
-          }
-        ),
-        { numRuns: 50 }
-      );
-    }
-  );
+          expect(result).toEqual({ success: true, settings: mergedSettings });
+        }
+      ),
+      { numRuns: 50 }
+    );
+  });
 });
 
 // ─── Property 2: Preservation ─────────────────────────────────────────────────
@@ -200,93 +196,85 @@ describe('Property 2: Preservation — existing action behaviour is unchanged', 
   });
 
   // ── b) Key filtering (PBT) ───────────────────────────────────────────────────
-  it(
-    'never includes unknown keys in the upsert settings payload (PBT)',
-    async () => {
-      /**
-       * **Validates: Requirements 3.4**
-       *
-       * Generates inputs that include an extra `unknownKey` field alongside
-       * valid settings keys. Asserts the captured upsert payload's `settings`
-       * field never contains `unknownKey`.
-       */
-      await fc.assert(
-        fc.asyncProperty(
-          fc.record({
-            preferred_currency: fc.constantFrom('NZD', 'AUD', 'USD'),
-            marketing_emails: fc.boolean(),
-            order_updates: fc.boolean(),
-            unknownKey: fc.string(),
-          }),
-          async (input) => {
-            vi.clearAllMocks();
-            capturedUpsertPayload = {};
-            upsertShouldSucceed = true;
-            upsertErrorOverride = null;
-            setupAuthenticatedUser();
-            setupProfileFetch();
+  it('never includes unknown keys in the upsert settings payload (PBT)', async () => {
+    /**
+     * **Validates: Requirements 3.4**
+     *
+     * Generates inputs that include an extra `unknownKey` field alongside
+     * valid settings keys. Asserts the captured upsert payload's `settings`
+     * field never contains `unknownKey`.
+     */
+    await fc.assert(
+      fc.asyncProperty(
+        fc.record({
+          preferred_currency: fc.constantFrom('NZD', 'AUD', 'USD'),
+          marketing_emails: fc.boolean(),
+          order_updates: fc.boolean(),
+          unknownKey: fc.string(),
+        }),
+        async (input) => {
+          vi.clearAllMocks();
+          capturedUpsertPayload = {};
+          upsertShouldSucceed = true;
+          upsertErrorOverride = null;
+          setupAuthenticatedUser();
+          setupProfileFetch();
 
-            // Pass the full input (including unknownKey) to the action
-            await updateUserSettingsAction(
-              input as Parameters<typeof updateUserSettingsAction>[0]
-            );
+          // Pass the full input (including unknownKey) to the action
+          await updateUserSettingsAction(input as Parameters<typeof updateUserSettingsAction>[0]);
 
-            // The settings written to the DB must not contain unknownKey
-            const writtenSettings = capturedUpsertPayload.settings as Record<string, unknown>;
-            expect(writtenSettings).not.toHaveProperty('unknownKey');
-          }
-        ),
-        { numRuns: 50 }
-      );
-    }
-  );
+          // The settings written to the DB must not contain unknownKey
+          const writtenSettings = capturedUpsertPayload.settings as Record<string, unknown>;
+          expect(writtenSettings).not.toHaveProperty('unknownKey');
+        }
+      ),
+      { numRuns: 50 }
+    );
+  });
 
   // ── c) Settings merge (PBT) ──────────────────────────────────────────────────
-  it(
-    'merges partial updates with existing profile settings (PBT)',
-    async () => {
-      /**
-       * **Validates: Requirements 3.1**
-       *
-       * Generates arbitrary existing profile settings and arbitrary partial
-       * updates. Asserts the upsert payload's `settings` field contains the
-       * merged result: existing values preserved, updated value overwritten.
-       */
-      await fc.assert(
-        fc.asyncProperty(
-          fc.record({
-            marketing_emails: fc.boolean(),
-            order_updates: fc.boolean(),
-            preferred_currency: fc.constantFrom('NZD', 'AUD', 'USD'),
-          }),
-          fc.record({
-            preferred_currency: fc.constantFrom('NZD', 'AUD', 'USD'),
-          }),
-          async (existingSettings, partialUpdate) => {
-            vi.clearAllMocks();
-            capturedUpsertPayload = {};
-            upsertShouldSucceed = true;
-            upsertErrorOverride = null;
-            setupAuthenticatedUser();
+  it('merges partial updates with existing profile settings (PBT)', async () => {
+    /**
+     * **Validates: Requirements 3.1**
+     *
+     * Generates arbitrary existing profile settings and arbitrary partial
+     * updates. Asserts the upsert payload's `settings` field contains the
+     * merged result: existing values preserved, updated value overwritten.
+     */
+    await fc.assert(
+      fc.asyncProperty(
+        fc.record({
+          marketing_emails: fc.boolean(),
+          order_updates: fc.boolean(),
+          preferred_currency: fc.constantFrom('NZD', 'AUD', 'USD'),
+        }),
+        fc.record({
+          preferred_currency: fc.constantFrom('NZD', 'AUD', 'USD'),
+        }),
+        async (existingSettings, partialUpdate) => {
+          vi.clearAllMocks();
+          capturedUpsertPayload = {};
+          upsertShouldSucceed = true;
+          upsertErrorOverride = null;
+          setupAuthenticatedUser();
 
-            // Override profile fetch to return the generated existing settings
-            mockSingle.mockResolvedValue({
-              data: { settings: existingSettings },
-              error: null,
-            });
+          // Override profile fetch to return the generated existing settings
+          mockSingle.mockResolvedValue({
+            data: { settings: existingSettings },
+            error: null,
+          });
 
-            await updateUserSettingsAction(partialUpdate);
+          await updateUserSettingsAction(partialUpdate);
 
-            const writtenSettings = capturedUpsertPayload.settings as Record<string, unknown>;
-            const expectedSettings = { ...existingSettings, ...partialUpdate };
+          const writtenSettings = capturedUpsertPayload.settings as Record<string, unknown>;
+          const expectedSettings = { ...existingSettings, ...partialUpdate };
 
-            expect(writtenSettings).toEqual(expectedSettings);
-          }
-        ),
-        { numRuns: 50 }
-      );
-    }
-  );
+          expect(writtenSettings).toEqual(expectedSettings);
+        }
+      ),
+      { numRuns: 50 }
+    );
+  });
 
   // ── d) Cache revalidation ────────────────────────────────────────────────────
   it('calls revalidatePath("/", "layout") exactly once on successful upsert', async () => {

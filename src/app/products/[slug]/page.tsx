@@ -1,21 +1,23 @@
+import { AddToCartButton } from '@/components/checkout/AddToCartButton';
+import { ProductSlider } from '@/components/products/ProductSlider';
+import { WishlistButton } from '@/components/products/WishlistButton';
+import { sanitizeWPContent } from '@/lib/sanitize';
 import { getStorageUrl } from '@/lib/supabase';
 import { createPublicClient } from '@/lib/supabase-server';
-import { Json } from '@/types/supabase';
+import type { Json } from '@/types/supabase';
+import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { AddToCartButton } from '@/components/checkout/AddToCartButton';
-import { WishlistButton } from '@/components/products/WishlistButton';
-import { Metadata } from 'next';
-import { ProductSlider } from '@/components/products/ProductSlider';
-import { sanitizeWPContent } from '@/lib/sanitize';
 
 export const revalidate = 60;
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: { params: { slug: string } }): Promise<Metadata> {
   const slug = (await params).slug;
   const supabase = createPublicClient();
-  
+
   const { data: product } = await supabase
     .from('products')
     .select('name, short_description, description, image_url')
@@ -27,8 +29,12 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 
   const rawDescription = product.short_description || product.description || '';
-  const cleanDescription = rawDescription.replace(/<[^>]*>?/gm, '').replace(/\s+/g, ' ').trim();
-  const description = cleanDescription.length > 150 ? cleanDescription.substring(0, 147) + '...' : cleanDescription;
+  const cleanDescription = rawDescription
+    .replace(/<[^>]*>?/gm, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const description =
+    cleanDescription.length > 150 ? `${cleanDescription.substring(0, 147)}...` : cleanDescription;
 
   return {
     title: `${product.name} | Catch-22 Gear`,
@@ -44,7 +50,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 export default async function ProductDetails({ params }: { params: { slug: string } }) {
   const supabase = createPublicClient();
   const slug = (await params).slug;
-  
+
   const { data: product, error } = await supabase
     .from('products')
     .select(`
@@ -73,7 +79,8 @@ export default async function ProductDetails({ params }: { params: { slug: strin
   }
 
   let relatedProducts: RelatedProduct[] = [];
-  const categoryIds = (product.product_categories as { category_id: number }[])?.map((pc) => pc.category_id) || [];
+  const categoryIds =
+    (product.product_categories as { category_id: number }[])?.map((pc) => pc.category_id) || [];
 
   if (categoryIds.length > 0) {
     const { data: related } = await supabase
@@ -86,7 +93,7 @@ export default async function ProductDetails({ params }: { params: { slug: strin
       .neq('id', product.id)
       .eq('stock_status', 'instock')
       .limit(4);
-      
+
     // Filter duplicates locally if the query returns multiple due to multiple categories
     if (related) {
       const uniqueIds = new Set();
@@ -117,81 +124,132 @@ export default async function ProductDetails({ params }: { params: { slug: strin
                 />
               ) : (
                 <div className="bg-slate-100 flex items-center justify-center h-full rounded-3xl">
-                  <span className="text-slate-300 font-black uppercase text-xs tracking-widest">No Image</span>
+                  <span className="text-slate-300 font-black uppercase text-xs tracking-widest">
+                    No Image
+                  </span>
                 </div>
               )}
             </div>
-            
+
             {/* Gallery placeholder if more images existed */}
-            {product.gallery_urls && Array.isArray(product.gallery_urls) && product.gallery_urls.length > 0 && (
-              <div className="mt-4 grid grid-cols-4 gap-4">
-                 {(product.gallery_urls as string[]).slice(0, 4).map((url: string, index: number) => (
-                    <div key={index} className="aspect-square relative rounded-xl overflow-hidden bg-slate-50 border border-slate-100">
-                      <Image src={getStorageUrl(url)} alt={`${product.name} gallery ${index}`} fill className="object-cover" />
-                    </div>
-                 ))}
-              </div>
-            )}
+            {product.gallery_urls &&
+              Array.isArray(product.gallery_urls) &&
+              product.gallery_urls.length > 0 && (
+                <div className="mt-4 grid grid-cols-4 gap-4">
+                  {(product.gallery_urls as string[])
+                    .slice(0, 4)
+                    .map((url: string) => (
+                      <div
+                        key={url}
+                        className="aspect-square relative rounded-xl overflow-hidden bg-slate-50 border border-slate-100"
+                      >
+                        <Image
+                          src={getStorageUrl(url)}
+                          alt={`${product.name} gallery ${index}`}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    ))}
+                </div>
+              )}
           </div>
-          
+
           <div className="mt-10 px-4 sm:px-0 sm:mt-16 lg:mt-0 flex flex-col">
             <div className="mb-6">
-               <nav className="flex mb-4" aria-label="Breadcrumb">
-                 <ol className="flex items-center space-x-2 text-xs font-bold uppercase tracking-widest text-slate-400">
-                   <li><Link href="/products" className="hover:text-primary transition-colors">Gear</Link></li>
-                   <li><span className="mx-1">/</span></li>
-                   <li className="text-primary truncate">{product.name}</li>
-                 </ol>
-               </nav>
-               <h1 className="text-4xl font-black tracking-tight text-secondary uppercase leading-tight mb-4">{product.name}</h1>
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-3">
-                    <p className="text-3xl font-black text-primary">${product.price.toFixed(2)}</p>
-                    {product.sale_price && product.regular_price && (product.regular_price as number) > product.price && (
-                      <p className="text-lg font-bold text-slate-400 line-through decoration-primary/40 decoration-2">${(product.regular_price as number).toFixed(2)}</p>
+              <nav className="flex mb-4" aria-label="Breadcrumb">
+                <ol className="flex items-center space-x-2 text-xs font-bold uppercase tracking-widest text-slate-400">
+                  <li>
+                    <Link href="/products" className="hover:text-primary transition-colors">
+                      Gear
+                    </Link>
+                  </li>
+                  <li>
+                    <span className="mx-1">/</span>
+                  </li>
+                  <li className="text-primary truncate">{product.name}</li>
+                </ol>
+              </nav>
+              <h1 className="text-4xl font-black tracking-tight text-secondary uppercase leading-tight mb-4">
+                {product.name}
+              </h1>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
+                  <p className="text-3xl font-black text-primary">${product.price.toFixed(2)}</p>
+                  {product.sale_price &&
+                    product.regular_price &&
+                    (product.regular_price as number) > product.price && (
+                      <p className="text-lg font-bold text-slate-400 line-through decoration-primary/40 decoration-2">
+                        ${(product.regular_price as number).toFixed(2)}
+                      </p>
                     )}
-                  </div>
-                   {product.stock_status === 'instock' ? (
-                     <span className="bg-emerald-50 text-emerald-600 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter border border-emerald-100">In Stock</span>
-                   ) : (
-                     <span className="bg-rose-50 text-rose-600 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter border border-rose-100">Out of Stock</span>
-                   )}
                 </div>
+                {product.stock_status === 'instock' ? (
+                  <span className="bg-emerald-50 text-emerald-600 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter border border-emerald-100">
+                    In Stock
+                  </span>
+                ) : (
+                  <span className="bg-rose-50 text-rose-600 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter border border-rose-100">
+                    Out of Stock
+                  </span>
+                )}
+              </div>
             </div>
-            
+
             <div className="prose prose-slate max-w-none">
-              <h3 className="text-sm font-black text-secondary uppercase tracking-widest mb-4 border-b border-slate-100 pb-2">Description</h3>
+              <h3 className="text-sm font-black text-secondary uppercase tracking-widest mb-4 border-b border-slate-100 pb-2">
+                Description
+              </h3>
               <div
                 className="text-base text-slate-600 leading-relaxed space-y-4"
-                dangerouslySetInnerHTML={{ __html: sanitizeWPContent(product.description || product.short_description || '') }}
+                dangerouslySetInnerHTML={{
+                  __html: sanitizeWPContent(product.description || product.short_description || ''),
+                }}
               />
             </div>
-            
+
             <div className="mt-10 pt-10 border-t border-slate-100 flex flex-col gap-4">
-              <AddToCartButton 
+              <AddToCartButton
                 product={{
                   ...product,
-                  stock_status: product.stock_status || 'instock'
-                }} 
-                variations={(product.product_variations as unknown as { id: number; price: number | null; attributes: Json | null; stock_status: string | null }[])?.map(v => ({
-                  id: v.id,
-                  price: v.price || 0,
-                  attributes: (v.attributes as Record<string, string>) || {},
-                  stock_status: v.stock_status
-                })) || []} 
+                  stock_status: product.stock_status || 'instock',
+                }}
+                variations={
+                  (
+                    product.product_variations as unknown as {
+                      id: number;
+                      price: number | null;
+                      attributes: Json | null;
+                      stock_status: string | null;
+                    }[]
+                  )?.map((v) => ({
+                    id: v.id,
+                    price: v.price || 0,
+                    attributes: (v.attributes as Record<string, string>) || {},
+                    stock_status: v.stock_status,
+                  })) || []
+                }
               />
               <WishlistButton product={product} showText={true} />
             </div>
 
             <div className="mt-8 grid grid-cols-2 gap-4">
-               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col items-center text-center">
-                  <span className="text-[10px] font-black text-secondary uppercase tracking-widest mb-1">Shipping</span>
-                  <span className="text-xs text-slate-500 font-bold uppercase tracking-tight">NZ Wide Delivery</span>
-               </div>
-               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col items-center text-center">
-                  <span className="text-[10px] font-black text-secondary uppercase tracking-widest mb-1">Charity</span>
-                  <span className="text-xs text-slate-500 font-bold uppercase tracking-tight">2.5% to Sea Cleaners</span>
-               </div>
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col items-center text-center">
+                <span className="text-[10px] font-black text-secondary uppercase tracking-widest mb-1">
+                  Shipping
+                </span>
+                <span className="text-xs text-slate-500 font-bold uppercase tracking-tight">
+                  NZ Wide Delivery
+                </span>
+              </div>
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col items-center text-center">
+                <span className="text-[10px] font-black text-secondary uppercase tracking-widest mb-1">
+                  Charity
+                </span>
+                <span className="text-xs text-slate-500 font-bold uppercase tracking-tight">
+                  2.5% to Sea Cleaners
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -200,8 +258,10 @@ export default async function ProductDetails({ params }: { params: { slug: strin
         {relatedProducts.length > 0 && (
           <div className="mt-32 pb-16 border-t border-slate-100 pt-24">
             <div className="flex flex-col items-center mb-16">
-              <h2 className="text-4xl font-black tracking-tighter text-secondary uppercase">You might also like</h2>
-              <div className="h-2 w-24 bg-primary mt-4 rounded-full"></div>
+              <h2 className="text-4xl font-black tracking-tighter text-secondary uppercase">
+                You might also like
+              </h2>
+              <div className="h-2 w-24 bg-primary mt-4 rounded-full" />
             </div>
             <ProductSlider products={relatedProducts} />
           </div>

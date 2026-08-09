@@ -5,11 +5,11 @@ const envSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
   SUPABASE_SECRET_KEY: z.string().min(1).optional(),
-  
+
   // Stripe
   STRIPE_SECRET_KEY: z.string().min(1),
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().min(1).optional(), // Optional for now — checkout will fail without it
-  
+
   // App
   NEXT_PUBLIC_SITE_URL: z.string().url().default('https://catch-22.co.nz'),
 });
