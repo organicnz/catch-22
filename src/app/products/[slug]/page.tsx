@@ -143,7 +143,7 @@ export default async function ProductDetails({ params }: { params: { slug: strin
                     >
                       <Image
                         src={getStorageUrl(url)}
-                        alt={`${product.name} gallery ${index}`}
+                        alt={`${product.name} gallery image`}
                         fill
                         className="object-cover"
                       />

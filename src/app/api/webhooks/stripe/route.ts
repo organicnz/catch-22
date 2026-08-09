@@ -76,7 +76,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, 
     const query = supabase.from('profiles').select('id');
     if (userId) {
       query.eq('user_id', userId);
-    } else {
+    } else if (email) {
       query.eq('email', email);
     }
 
