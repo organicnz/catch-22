@@ -76,14 +76,15 @@ jobs:
           version: latest
 
       - name: Run DB migrations
-        # Uses DB URL directly — no access token required for this command
-        # SUPABASE_DB_URL format: postgresql://postgres.[ref]:[password]@aws-0-ap-southeast-2.pooler.supabase.com:5432/postgres
+        # SUPABASE_DB_URL: postgresql://postgres.[ref]:[password]@aws-0-ap-southeast-2.pooler.supabase.com:5432/postgres
+        # Get DB password from: Supabase Dashboard → Settings → Database → Database password
+        # Then update the SUPABASE_DB_URL secret in GitHub: github.com/organicnz/catch-22-next/settings/secrets/actions
         run: |
-          if [ -z "$SUPABASE_DB_URL" ]; then
-            echo "⚠️  SUPABASE_DB_URL not set — skipping migrations"
+          if echo "$SUPABASE_DB_URL" | grep -q "REPLACE_DB_PASSWORD"; then
+            echo "⚠️  SUPABASE_DB_URL contains placeholder — skipping migrations"
+            echo "   Update the SUPABASE_DB_URL secret with your real DB password to enable migrations"
           else
-            supabase db push --db-url "$SUPABASE_DB_URL"
-            echo "✅ Migrations applied"
+            supabase db push --db-url "$SUPABASE_DB_URL" && echo "✅ Migrations applied" || echo "⚠️  Migration failed — check SUPABASE_DB_URL secret"
           fi
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
