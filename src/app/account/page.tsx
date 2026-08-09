@@ -130,7 +130,7 @@ export default async function AccountPage() {
                   <ul className="divide-y divide-slate-50">
                     {order.order_items.map((item) => (
                       <li
-                        key={item.product_name ?? item}
+                        key={item.product_name ?? String(Math.random())}
                         className="py-4 flex justify-between items-center group"
                       >
                         <div className="flex items-center gap-4">
