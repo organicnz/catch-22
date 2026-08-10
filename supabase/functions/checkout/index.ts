@@ -30,7 +30,7 @@ app.use(
   }),
 )
 
-app.post('/', async (c) => {
+app.post('*', async (c) => {
   const body = await c.req.json<{
     items: { id: number; name: string; price: number; quantity: number }[]
     promoCode?: string

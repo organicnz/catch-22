@@ -97,11 +97,13 @@ export default async function AdminPage() {
     }
   };
 
-  const formatAddress = (addr: ShippingAddress | null) => {
+  const formatAddress = (addr: ShippingAddress | Record<string, string> | null) => {
     if (!addr) return 'No address';
-    return [addr.line1, addr.line2, addr.city, addr.postal_code, addr.country]
-      .filter(Boolean)
-      .join(', ');
+    const a = addr as Record<string, string>;
+    const line1 = a.line1 ?? a.address_1;
+    const line2 = a.line2 ?? a.address_2;
+    const postal = a.postal_code ?? a.postcode;
+    return [line1, line2, a.city, postal, a.country].filter(Boolean).join(', ');
   };
 
   return (
