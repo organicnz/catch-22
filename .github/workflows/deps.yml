@@ -56,7 +56,12 @@ jobs:
             for (const c of checks) {
               const m = c.range?.match(/>=?\s*(\d+)\.(\d+)\.(\d+)/);
               if (!m) {
-                console.log(`✅ ${c.name} ${c.cur.join('.')} (engines: ${c.range ?? 'unset'})`);
+                if (c.range) {
+                  console.log(`❌ ${c.name} engines range unparseable: ${c.range}`);
+                  failed = true;
+                } else {
+                  console.log(`✅ ${c.name} ${c.cur.join('.')} (engines: unset)`);
+                }
                 continue;
               }
               const min = [Number(m[1]), Number(m[2]), Number(m[3])];
