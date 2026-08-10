@@ -65,6 +65,8 @@ jobs:
     needs: [lint, test]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     timeout-minutes: 20
+    permissions:
+      contents: read
 
     steps:
       - uses: actions/checkout@v5
@@ -143,9 +145,48 @@ jobs:
             echo "$REMAINING"
             exit 1
           fi
-          echo "✅ Migrations applied and verified"
 
-      # ── 2. Edge functions: deploy each with retry ───────────────────────────
+          echo "── Verifying full ledger sync (local ↔ remote) ──"
+          SYNC=$(supabase migration list --linked 2>&1)
+          echo "$SYNC"
+          BAD=$(echo "$SYNC" | awk -F'|' '
+            $2 ~ /[0-9]{14}/ && $3 ~ /[0-9]{14}/ {
+              gsub(/[` ]/, "", $2); gsub(/[` ]/, "", $3)
+              if ($2 != $3) print "  local:" $2 "  remote:" $3
+            }')
+          if [ -n "$BAD" ]; then
+            echo "::error::Migration ledger is NOT fully in sync (SQL editor drift or manual repair):"
+            echo "$BAD"
+            echo "::error::Resolve locally with: bun x supabase@latest migration repair --status reverted <versions> --linked"
+            exit 1
+          fi
+          echo "✅ Migrations applied and ledger 100% in sync"
+
+      # ── 2. Edge functions: pre-flight secrets + deploy each with retry ─────
+      # Every function validates its required env vars at boot (and the boot
+      # probes below would catch a missing one), but failing *before* deploy is
+      # cheaper and the error is clearer. `supabase secrets list` is token-only.
+      - name: Verify function secrets are provisioned
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: |
+          REQUIRED="STRIPE_SECRET_KEY STRIPE_WEBHOOK_SECRET SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY SUPABASE_ANON_KEY"
+          SECRETS=$(supabase secrets list --project-ref "$PROJECT_REF" | awk '{print $1}')
+          MISSING=""
+          for s in $REQUIRED; do
+            if ! echo "$SECRETS" | grep -qx "$s"; then
+              MISSING="$MISSING $s"
+            fi
+          done
+          if [ -n "$MISSING" ]; then
+            echo "::error::Function secrets missing from the Vault:$MISSING"
+            echo "::error::Add them with: supabase secrets set <NAME>=<value> --project-ref $PROJECT_REF"
+            echo "::error::Functions fail at boot without them — deploy aborted before shipping."
+            exit 1
+          fi
+          echo "✅ Required function secrets present in Vault"
+
       # CLI-based deploy: bundles relative imports (e.g. checkout's
       # src/config/shipping.ts) and preserves function env from the Vault.
       # The raw Management API body deploy does NOT bundle — functions boot
@@ -228,6 +269,30 @@ jobs:
             done
           done
           echo "✅ Both functions booted"
+
+      # ── 4. Deployment summary — a durable record on every run ──────────────
+      - name: Publish deployment summary
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: |
+          echo "## ☁️ Supabase deployment" > "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Commit:** \`${{ github.sha }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Edge functions" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          curl -s "https://api.supabase.com/v1/projects/$PROJECT_REF/functions" \
+            -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+            | python3 -c "import json,sys; [print(f\"{f['slug']}: {f['status']} v{f['version']}\") for f in json.load(sys.stdin)]" \
+            >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Migration ledger" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          supabase migration list --linked >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          echo "✅ Summary published"
 
   # Vercel deployment is handled automatically by Vercel's GitHub integration.
   # Push to main → Vercel detects and deploys. No workflow step needed.
