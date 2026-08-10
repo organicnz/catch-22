@@ -199,6 +199,7 @@ export type Database = {
           payment_method: string | null
           shipping_address: Json | null
           status: string | null
+          stripe_payment_intent_id: string | null
           stripe_session_id: string | null
           total_amount: number | null
           wp_id: number | null
@@ -212,6 +213,7 @@ export type Database = {
           payment_method?: string | null
           shipping_address?: Json | null
           status?: string | null
+          stripe_payment_intent_id?: string | null
           stripe_session_id?: string | null
           total_amount?: number | null
           wp_id?: number | null
@@ -225,6 +227,7 @@ export type Database = {
           payment_method?: string | null
           shipping_address?: Json | null
           status?: string | null
+          stripe_payment_intent_id?: string | null
           stripe_session_id?: string | null
           total_amount?: number | null
           wp_id?: number | null
