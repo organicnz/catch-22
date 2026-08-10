@@ -24,7 +24,7 @@ function supabaseAdmin() {
 // ---------------------------------------------------------------------------
 const app = new Hono()
 
-app.post('/', async (c) => {
+app.post('*', async (c) => {
   const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET')
   if (!webhookSecret) {
     console.error('STRIPE_WEBHOOK_SECRET is not set')
@@ -148,9 +148,17 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 async function resolveCustomerId(
   supabase: ReturnType<typeof createClient>,
   session: Stripe.Checkout.Session,
-): Promise<string | null> {
+): Promise<number | null> {
   const userId = session.metadata?.userId
-  if (userId && userId !== 'guest') return userId
+  if (userId && userId !== 'guest') {
+    const { data } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    if (data) return data.id as number
+  }
 
   const email = session.customer_details?.email
   if (!email) return null
@@ -161,7 +169,7 @@ async function resolveCustomerId(
     .eq('email', email)
     .maybeSingle()
 
-  return data?.id ?? null
+  return (data?.id as number | undefined) ?? null
 }
 
 async function insertOrderItems(
