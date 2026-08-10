@@ -74,7 +74,7 @@ jobs:
           version: latest
 
       - name: Run DB migrations
-        # SUPABASE_DB_URL: postgresql://postgres.[ref]:[password]@aws-0-ap-southeast-2.pooler.supabase.com:5432/postgres
+        # SUPABASE_DB_URL: postgresql://postgres.<ref>:<pw>@<host>.pooler.supabase.com:5432/postgres
         # Get DB password from: Supabase Dashboard → Settings → Database → Database password
         # Then update the SUPABASE_DB_URL secret in GitHub: github.com/organicnz/catch-22-next/settings/secrets/actions
         run: |
@@ -82,38 +82,22 @@ jobs:
             echo "⚠️  SUPABASE_DB_URL contains placeholder — skipping migrations"
             echo "   Update the SUPABASE_DB_URL secret with your real DB password to enable migrations"
           else
-            supabase db push --db-url "$SUPABASE_DB_URL" && echo "✅ Migrations applied" || echo "⚠️  Migration failed — check SUPABASE_DB_URL secret"
+            supabase db push --db-url "$SUPABASE_DB_URL"
           fi
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
 
-      - name: Deploy edge functions via Management API
+      - name: Deploy edge functions
+        # CLI-based deploy: bundles relative imports (e.g. checkout's
+        # src/config/shipping.ts) and preserves function env from the Vault.
+        # The raw Management API body deploy does NOT bundle — functions boot
+        # with BOOT_ERROR — so we must use the CLI here.
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
         run: |
-          deploy_function() {
-            local slug=$1
-            local file=$2
-            local body
-            body=$(python3 -c "import json,sys; print(json.dumps(open('$file').read()))")
-            HTTP=$(curl -s -o /dev/null -w "%{http_code}" -X PATCH \
-              "https://api.supabase.com/v1/projects/$PROJECT_REF/functions/$slug" \
-              -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
-              -H "Content-Type: application/json" \
-              -d "{\"verify_jwt\":false,\"body\":$body}")
-            if [ "$HTTP" = "404" ]; then
-              curl -sf -X POST \
-                "https://api.supabase.com/v1/projects/$PROJECT_REF/functions" \
-                -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
-                -H "Content-Type: application/json" \
-                -d "{\"slug\":\"$slug\",\"name\":\"$slug\",\"verify_jwt\":false,\"body\":$body}"
-            fi
-            echo "✅ $slug deployed (HTTP $HTTP)"
-          }
-
-          deploy_function "checkout" "supabase/functions/checkout/index.ts"
-          deploy_function "webhook"  "supabase/functions/webhook/index.ts"
+          supabase functions deploy webhook checkout --project-ref "$PROJECT_REF"
+          echo "✅ Edge functions deployed via CLI"
 
   # Vercel deployment is handled automatically by Vercel's GitHub integration.
   # Push to main → Vercel detects and deploys. No workflow step needed.
