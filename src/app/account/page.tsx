@@ -1,9 +1,9 @@
 import { AccountTabShell } from '@/components/account/AccountTabShell';
 import { AdminOrdersPanel } from '@/components/account/AdminOrdersPanel';
-import { MyOrdersPanel } from '@/components/account/MyOrdersPanel';
-import { MfaSettings } from '@/components/account/MfaSettings';
-import { UserSettings } from '@/components/account/UserSettings';
 import { LogoutButton } from '@/components/account/LogoutButton';
+import { MfaSettings } from '@/components/account/MfaSettings';
+import { MyOrdersPanel } from '@/components/account/MyOrdersPanel';
+import { UserSettings } from '@/components/account/UserSettings';
 import { createAdminClient, createServerClient } from '@/lib/supabase-server';
 import type { AdminOrder, MyOrder } from '@/types/orders';
 import { redirect } from 'next/navigation';
@@ -17,7 +17,9 @@ export default async function AccountPage(props: {
   searchParams: Promise<Record<string, string>>;
 }) {
   const supabase = await createServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
   // MFA gate
@@ -53,7 +55,8 @@ export default async function AccountPage(props: {
   const [allOrdersResult, myOrdersResult] = await Promise.all([
     isAdmin
       ? createAdminClient().then((ac) =>
-          ac.from('orders')
+          ac
+            .from('orders')
             .select(`id, created_at, status, total_amount, currency, payment_method,
               stripe_session_id, shipping_address, billing_address,
               order_items ( id, product_name, quantity, total ),
@@ -65,19 +68,21 @@ export default async function AccountPage(props: {
     profile
       ? supabase
           .from('orders')
-          .select('id, created_at, status, total_amount, order_items(product_name, quantity, total)')
+          .select(
+            'id, created_at, status, total_amount, order_items(product_name, quantity, total)'
+          )
           .eq('customer_id', profile.id)
           .order('created_at', { ascending: false })
       : Promise.resolve({ data: [] as MyOrder[] }),
   ]);
 
   const allOrders = (allOrdersResult.data ?? []) as AdminOrder[];
-  const myOrders  = (myOrdersResult.data  ?? []) as MyOrder[];
+  const myOrders = (myOrdersResult.data ?? []) as MyOrder[];
   const processing = allOrders.filter((o) => o.status === 'processing').length;
 
   const tabs = [
     ...(isAdmin ? [{ id: 'admin', label: 'All Orders', badge: processing }] : []),
-    { id: 'orders',   label: isAdmin ? 'My Orders' : 'Orders' },
+    { id: 'orders', label: isAdmin ? 'My Orders' : 'Orders' },
     { id: 'settings', label: 'Settings' },
   ];
 
@@ -90,7 +95,9 @@ export default async function AccountPage(props: {
         <UserSettings />
         <MfaSettings />
         <div className="pt-8 border-t border-slate-100">
-          <h3 className="text-sm font-black text-secondary uppercase tracking-widest mb-1">Session Control</h3>
+          <h3 className="text-sm font-black text-secondary uppercase tracking-widest mb-1">
+            Session Control
+          </h3>
           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-6">
             Signed in as <span className="text-secondary">{user.email}</span>
           </p>

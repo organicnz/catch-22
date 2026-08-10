@@ -1,8 +1,8 @@
 'use client';
 
+import type { LucideIcon } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useTransition } from 'react';
-import type { LucideIcon } from 'lucide-react';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -42,7 +42,7 @@ function TabsInner({ tabs, panels, defaultTab }: TabsProps) {
         router.push(`?${params.toString()}`, { scroll: false });
       });
     },
-    [router, searchParams],
+    [router, searchParams]
   );
 
   return (
@@ -68,7 +68,7 @@ function TabsInner({ tabs, panels, defaultTab }: TabsProps) {
               onClick={() => setTab(tab.id)}
               onKeyDown={(e) => {
                 if (e.key === 'ArrowRight') setTab(tabs[(idx + 1) % tabs.length].id);
-                if (e.key === 'ArrowLeft')  setTab(tabs[(idx - 1 + tabs.length) % tabs.length].id);
+                if (e.key === 'ArrowLeft') setTab(tabs[(idx - 1 + tabs.length) % tabs.length].id);
               }}
               className={[
                 'relative flex items-center gap-2 px-5 py-4',
@@ -100,7 +100,6 @@ function TabsInner({ tabs, panels, defaultTab }: TabsProps) {
         role="tabpanel"
         id={`panel-${activeId}`}
         aria-labelledby={`tab-${activeId}`}
-        tabIndex={0}
         className="outline-none"
       >
         {renderPanel?.()}
