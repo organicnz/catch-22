@@ -52,6 +52,15 @@ app.post('*', async (c) => {
     case 'checkout.session.completed':
       await handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session)
       break
+    case 'checkout.session.expired':
+      await handleSessionFailed(event.data.object as Stripe.Checkout.Session)
+      break
+    case 'payment_intent.payment_failed':
+      await handlePaymentFailed(event.data.object as Stripe.PaymentIntent)
+      break
+    case 'charge.refunded':
+      await handleChargeRefunded(event.data.object as Stripe.Charge)
+      break
     default:
       console.log(`Unhandled event type: ${event.type}`)
   }
@@ -95,9 +104,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
   const lineItems = lineItemsResult.data
 
-  const shippingAddress = (session as Stripe.Checkout.Session & {
-    shipping_details?: { address?: Record<string, unknown> }
-  }).shipping_details?.address ?? {}
+  const [billing, shipping] = buildAddresses(session)
 
   // Insert order
   const { data: order, error: orderError } = await supabase
@@ -105,12 +112,16 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     .insert({
       customer_id: customerId,
       stripe_session_id: session.id,
+      stripe_payment_intent_id: typeof session.payment_intent === 'string'
+        ? session.payment_intent
+        : (session.payment_intent?.id ?? null),
       status: 'processing',
       total_amount: (session.amount_total ?? 0) / 100,
       currency: session.currency?.toUpperCase() ?? 'NZD',
       payment_method: 'stripe',
-      billing_address: session.customer_details?.address ?? {},
-      shipping_address: shippingAddress,
+      billing_address: billing,
+      shipping_address: shipping,
+      created_at: new Date(session.created * 1000).toISOString(),
     })
     .select('id')
     .single()
@@ -145,6 +156,119 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+async function findOrderBySession(
+  supabase: ReturnType<typeof createClient>,
+  sessionId: string,
+) {
+  const { data, error } = await supabase
+    .from('orders')
+    .select('id, status')
+    .eq('stripe_session_id', sessionId)
+    .maybeSingle()
+
+  if (error) {
+    console.error('Order lookup failed:', error.message)
+    return null
+  }
+  return data
+}
+
+async function setOrderStatus(
+  supabase: ReturnType<typeof createClient>,
+  orderId: number,
+  status: string,
+  reason: string,
+) {
+  const { error } = await supabase.from('orders').update({ status }).eq('id', orderId)
+  if (error) {
+    console.error(`Failed to set order #${orderId} to '${status}':`, error.message)
+  } else {
+    console.log(`🔄 Order #${orderId} -> ${status} (${reason})`)
+  }
+}
+
+// Split "First Last" into first_name/last_name, preserving the legacy shape
+function splitName(fullName: string | null | undefined) {
+  const parts = (fullName ?? '').trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return { first_name: null, last_name: null }
+  return { first_name: parts[0], last_name: parts.slice(1).join(' ') || null }
+}
+
+// Merge Stripe customer/shipping details into the WooCommerce-style address
+// payload so guest orders carry email, name and phone for fulfillment
+function buildAddresses(session: Stripe.Checkout.Session) {
+  const cust = session.customer_details
+  const ship = session.shipping_details
+  const custName = splitName(cust?.name ?? ship?.name)
+  const shipName = splitName(ship?.name)
+
+  const billing = {
+    ...(cust?.address ?? {}),
+    ...custName,
+    ...(cust?.phone ? { phone: cust.phone } : {}),
+    ...(cust?.email ? { email: cust.email } : {}),
+  }
+  const shipping = {
+    ...(ship?.address ?? {}),
+    ...shipName,
+    ...(cust?.email && !cust?.name && !ship?.name ? { email: cust.email } : {}),
+  }
+
+  return [billing, shipping] as const
+}
+
+// ---------------------------------------------------------------------------
+// Session expired / payment failed — the order was never paid
+// ---------------------------------------------------------------------------
+async function handleSessionFailed(session: Stripe.Checkout.Session) {
+  const supabase = supabaseAdmin()
+  const order = await findOrderBySession(supabase, session.id)
+  if (!order) return
+  if (order.status === 'refunded' || order.status === 'completed') return
+  await setOrderStatus(supabase, order.id, 'cancelled', 'checkout.session.expired')
+}
+
+async function findOrderByPaymentIntent(
+  supabase: ReturnType<typeof createClient>,
+  paymentIntentId: string,
+) {
+  const { data, error } = await supabase
+    .from('orders')
+    .select('id, status')
+    .eq('stripe_payment_intent_id', paymentIntentId)
+    .maybeSingle()
+
+  if (error) {
+    console.error('Order lookup failed:', error.message)
+    return null
+  }
+  return data
+}
+
+async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
+  const supabase = supabaseAdmin()
+  const order = await findOrderByPaymentIntent(supabase, paymentIntent.id)
+  if (!order) return
+  if (order.status === 'refunded' || order.status === 'completed') return
+  await setOrderStatus(supabase, order.id, 'cancelled', 'payment_intent.payment_failed')
+}
+
+async function handleChargeRefunded(charge: Stripe.Charge) {
+  const supabase = supabaseAdmin()
+  const paymentIntentId = typeof charge.payment_intent === 'string'
+    ? charge.payment_intent
+    : (charge.payment_intent?.id ?? null)
+  if (!paymentIntentId) {
+    console.error('Refunded charge has no payment intent — skipping')
+    return
+  }
+  const order = await findOrderByPaymentIntent(supabase, paymentIntentId)
+  if (!order) return
+  // Only downgrade from paid states
+  if (order.status === 'cancelled') return
+  await setOrderStatus(supabase, order.id, 'refunded', 'charge.refunded')
+}
+
 async function resolveCustomerId(
   supabase: ReturnType<typeof createClient>,
   session: Stripe.Checkout.Session,

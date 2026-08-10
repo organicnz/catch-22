@@ -1,10 +1,5 @@
 import { OrderStatusSelect } from '@/components/admin/OrderStatusSelect';
-import {
-  type AdminOrder,
-  formatAddress,
-  formatDate,
-  formatNZD,
-} from '@/types/orders';
+import { type AdminOrder, formatAddress, formatDate, formatNZD } from '@/types/orders';
 import { ExternalLink, MapPin, Package, ShoppingBag, TrendingUp, User } from 'lucide-react';
 
 // ---------------------------------------------------------------------------
@@ -22,7 +17,9 @@ function StatCard({
   return (
     <div className="bg-secondary rounded-3xl p-6">
       <Icon size={16} className="text-primary mb-3" aria-hidden="true" />
-      <p className="text-[10px] text-white/40 font-black uppercase tracking-[0.2em] mb-1">{label}</p>
+      <p className="text-[10px] text-white/40 font-black uppercase tracking-[0.2em] mb-1">
+        {label}
+      </p>
       <p className="text-2xl font-black text-white">{value}</p>
     </div>
   );
@@ -33,10 +30,12 @@ function StatCard({
 // ---------------------------------------------------------------------------
 function OrderCard({ order }: { order: AdminOrder }) {
   const cust = order.profiles;
-  const name =
-    cust
-      ? [cust.first_name, cust.last_name].filter(Boolean).join(' ') || cust.email
-      : 'Guest';
+  const billing = (order.billing_address ?? {}) as Record<string, string>;
+  const addrName = [billing.first_name, billing.last_name].filter(Boolean).join(' ');
+  const name = cust
+    ? [cust.first_name, cust.last_name].filter(Boolean).join(' ') || cust.email
+    : addrName || 'Guest';
+  const email = cust?.email ?? billing.email ?? null;
   const stripeUrl = order.stripe_session_id
     ? `https://dashboard.stripe.com/payments/${order.stripe_session_id}`
     : null;
@@ -50,34 +49,41 @@ function OrderCard({ order }: { order: AdminOrder }) {
       <div className="bg-slate-50 px-6 py-5 border-b border-slate-100 grid grid-cols-2 md:grid-cols-5 gap-4 items-start">
         {/* Order # */}
         <div>
-          <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black mb-1">Order</p>
+          <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black mb-1">
+            Order
+          </p>
           <p className="text-sm text-secondary font-black">#{order.id}</p>
           <time
             dateTime={order.created_at ?? ''}
             className="text-[10px] text-slate-400 mt-0.5 block"
           >
             {formatDate(order.created_at, {
-              day: 'numeric', month: 'short', year: 'numeric',
-              hour: '2-digit', minute: '2-digit',
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
             })}
           </time>
         </div>
 
         {/* Customer */}
         <div>
-          <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black mb-1">Customer</p>
+          <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black mb-1">
+            Customer
+          </p>
           <div className="flex items-center gap-1.5">
             <User size={11} className="text-slate-400 shrink-0" aria-hidden="true" />
             <p className="text-sm text-secondary font-black truncate">{name}</p>
           </div>
-          {cust?.email && (
-            <p className="text-[10px] text-slate-400 mt-0.5 truncate">{cust.email}</p>
-          )}
+          {email && <p className="text-[10px] text-slate-400 mt-0.5 truncate">{email}</p>}
         </div>
 
         {/* Ship to */}
         <div>
-          <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black mb-1">Ship To</p>
+          <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black mb-1">
+            Ship To
+          </p>
           <div className="flex items-start gap-1.5">
             <MapPin size={11} className="text-slate-400 shrink-0 mt-0.5" aria-hidden="true" />
             <address className="text-[11px] text-slate-600 font-bold leading-tight not-italic">
@@ -88,7 +94,9 @@ function OrderCard({ order }: { order: AdminOrder }) {
 
         {/* Total */}
         <div>
-          <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black mb-1">Total</p>
+          <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black mb-1">
+            Total
+          </p>
           <p className="text-lg text-primary font-black">
             {formatNZD(order.total_amount)}
             <span className="text-[10px] text-slate-400 font-bold ml-1">
@@ -99,10 +107,7 @@ function OrderCard({ order }: { order: AdminOrder }) {
 
         {/* Actions */}
         <div className="flex flex-col gap-2 items-end">
-          <OrderStatusSelect
-            orderId={order.id}
-            currentStatus={order.status ?? 'processing'}
-          />
+          <OrderStatusSelect orderId={order.id} currentStatus={order.status ?? 'processing'} />
           {stripeUrl && (
             <a
               href={stripeUrl}
@@ -160,23 +165,23 @@ export function AdminOrdersPanel({ orders }: { orders: AdminOrder[] }) {
     <section aria-label="All orders">
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-        <StatCard label="Total Orders" value={orders.length}         icon={ShoppingBag} />
-        <StatCard label="Processing"   value={processing}            icon={Package} />
-        <StatCard label="Completed"    value={completed}             icon={TrendingUp} />
-        <StatCard label="Revenue"      value={formatNZD(totalRevenue)} icon={TrendingUp} />
+        <StatCard label="Total Orders" value={orders.length} icon={ShoppingBag} />
+        <StatCard label="Processing" value={processing} icon={Package} />
+        <StatCard label="Completed" value={completed} icon={TrendingUp} />
+        <StatCard label="Revenue" value={formatNZD(totalRevenue)} icon={TrendingUp} />
       </div>
 
       {/* Orders */}
       {orders.length === 0 ? (
         <EmptyState message="No orders yet." />
       ) : (
-        <div className="space-y-6" role="list">
+        <ul className="space-y-6">
           {orders.map((order) => (
-            <div key={order.id} role="listitem">
+            <li key={order.id} className="space-y-6">
               <OrderCard order={order} />
-            </div>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
     </section>
   );
