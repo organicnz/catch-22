@@ -21,6 +21,8 @@ jobs:
     name: Dependency Audit & Compatibility
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v5
 
@@ -82,6 +84,19 @@ jobs:
           }
           echo "✅ No high/critical vulnerabilities in production deps"
 
+      # ── 2b. Critical anywhere (prod OR dev tooling) blocks the run ─────────
+      # Moderate/high issues in dev-only tooling are informational, but a
+      # critical advisory anywhere is a hard failure.
+      - name: Gate critical vulnerabilities (all dependencies)
+        run: |
+          if bun audit --audit-level=critical >/tmp/audit-critical.log 2>&1; then
+            echo "✅ No critical vulnerabilities in any dependency"
+          else
+            echo "::error::Critical vulnerability found in a dependency."
+            cat /tmp/audit-critical.log
+            exit 1
+          fi
+
       # ── 3. Drift report (non-blocking, informational) ──────────────────────
       # Outdated packages are surfaced in the job summary, never silently.
       - name: Report outdated packages
@@ -104,3 +119,14 @@ jobs:
             bun audit 2>&1 || true
           } >> "$GITHUB_STEP_SUMMARY"
           echo "Report written to job summary"
+
+      # ── 5. Project health on the latest runtime ────────────────────────────
+      # The nightly cron runs on bun/node `latest`, which push-based CI alone
+      # never exercises when nothing is committed. Type-check + full test
+      # suite prove the pinned deps still build and pass on a newer toolchain
+      # (the engines check above covers the version floors).
+      - name: Type-check on latest runtime
+        run: bunx tsc --noEmit
+
+      - name: Run test suite on latest runtime
+        run: bun test
