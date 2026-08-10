@@ -5,32 +5,59 @@ import Stripe from 'npm:stripe@17'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
 // ---------------------------------------------------------------------------
+// Boot-time environment validation — fail fast instead of crashing mid-request
+// ---------------------------------------------------------------------------
+const REQUIRED_ENV: [string, string | undefined][] = [
+  ['STRIPE_SECRET_KEY', Deno.env.get('STRIPE_SECRET_KEY')],
+  ['STRIPE_WEBHOOK_SECRET', Deno.env.get('STRIPE_WEBHOOK_SECRET')],
+  ['SUPABASE_URL', Deno.env.get('SUPABASE_URL')],
+  ['SUPABASE_SERVICE_ROLE_KEY', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')],
+]
+
+for (const [name, value] of REQUIRED_ENV) {
+  if (!value) {
+    throw new Error(`Webhook function is missing required environment variable: ${name}`)
+  }
+}
+
+const STRIPE_SECRET_KEY = REQUIRED_ENV[0][1]!
+const STRIPE_WEBHOOK_SECRET = REQUIRED_ENV[1][1]!
+const SUPABASE_URL = REQUIRED_ENV[2][1]!
+const SUPABASE_SERVICE_ROLE_KEY = REQUIRED_ENV[3][1]!
+
+// ---------------------------------------------------------------------------
 // Stripe client — module-level, reused across invocations
 // ---------------------------------------------------------------------------
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, {
+const stripe = new Stripe(STRIPE_SECRET_KEY, {
   // @ts-ignore — acacia is a valid API version
   apiVersion: '2025-02-24.acacia',
 })
 
 function supabaseAdmin() {
-  return createClient(
-    Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
-  )
+  return createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 }
+
+// PostgreSQL unique-violation error code (used for race-safe idempotency)
+const PG_UNIQUE_VIOLATION = '23505'
+
+type Logger = (message: string) => void
 
 // ---------------------------------------------------------------------------
 // Hono app
 // ---------------------------------------------------------------------------
 const app = new Hono()
 
-app.post('*', async (c) => {
-  const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET')
-  if (!webhookSecret) {
-    console.error('STRIPE_WEBHOOK_SECRET is not set')
-    throw new HTTPException(500, { message: 'Webhook secret not configured' })
+// NOTE: the Supabase gateway only forwards POST to this function and the
+// runtime passes the full prefixed path — match any path ending in /health so
+// uptime monitors can ping it regardless of the deployment slug.
+app.use('*', async (c, next) => {
+  if (c.req.method === 'POST' && c.req.path.endsWith('/health')) {
+    return c.json({ ok: true, service: 'webhook', ts: Date.now() })
   }
+  await next()
+})
 
+app.post('*', async (c) => {
   const body = await c.req.text()
   const signature = c.req.header('stripe-signature')
   if (!signature) {
@@ -39,33 +66,43 @@ app.post('*', async (c) => {
 
   let event: Stripe.Event
   try {
-    event = await stripe.webhooks.constructEventAsync(body, signature, webhookSecret)
+    event = await stripe.webhooks.constructEventAsync(body, signature, STRIPE_WEBHOOK_SECRET)
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error'
     console.error(`Webhook signature verification failed: ${message}`)
-    throw new HTTPException(400, { message: `Webhook Error: ${message}` })
+    throw new HTTPException(400, { message: 'Webhook Error: invalid signature' })
   }
 
-  console.log(`🔔 Stripe event received: ${event.type} (${event.id})`)
+  const log: Logger = (message) =>
+    console.log(`[webhook:${event.id}] ${message}`)
 
-  switch (event.type) {
-    case 'checkout.session.completed':
-      await handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session)
-      break
-    case 'checkout.session.expired':
-      await handleSessionFailed(event.data.object as Stripe.Checkout.Session)
-      break
-    case 'payment_intent.payment_failed':
-      await handlePaymentFailed(event.data.object as Stripe.PaymentIntent)
-      break
-    case 'charge.refunded':
-      await handleChargeRefunded(event.data.object as Stripe.Charge)
-      break
-    default:
-      console.log(`Unhandled event type: ${event.type}`)
+  log(`Event received: ${event.type}`)
+
+  try {
+    switch (event.type) {
+      case 'checkout.session.completed':
+        await handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session, log)
+        break
+      case 'checkout.session.expired':
+        await handleSessionFailed(event.data.object as Stripe.Checkout.Session, log)
+        break
+      case 'payment_intent.payment_failed':
+        await handlePaymentFailed(event.data.object as Stripe.PaymentIntent, log)
+        break
+      case 'charge.refunded':
+        await handleChargeRefunded(event.data.object as Stripe.Charge, log)
+        break
+      default:
+        // Stripe expects a 2xx for unhandled events so it doesn't retry them
+        log(`Unhandled event type — acknowledging`)
+    }
+  } catch (err: unknown) {
+    // Any failure here returns a 500 so Stripe retries the event (3 days backoff)
+    console.error(`[webhook:${event.id}] Processing failed:`, err)
+    throw new HTTPException(500, { message: 'Event processing failed — will retry' })
   }
 
-  return c.json({ received: true })
+  return c.json({ received: true, id: event.id })
 })
 
 app.onError((err, c) => {
@@ -79,12 +116,62 @@ app.onError((err, c) => {
 Deno.serve(app.fetch)
 
 // ---------------------------------------------------------------------------
-// checkout.session.completed handler
+// checkout.session.completed handler — idempotent, retry-safe fulfillment
 // ---------------------------------------------------------------------------
-async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
+async function handleCheckoutCompleted(
+  session: Stripe.Checkout.Session,
+  log: Logger,
+) {
+  // Only fulfill real, paid, one-off purchases. Anything else is acknowledged
+  // and ignored so we never create orders for failed or refunded payments.
+  if (session.mode !== 'payment' || session.payment_status !== 'paid') {
+    log(
+      `Skipping fulfillment — mode=${session.mode} payment_status=${session.payment_status}`,
+    )
+    return
+  }
+
+  if (!session.amount_total || session.amount_total <= 0) {
+    log(`Skipping fulfillment — invalid amount_total=${session.amount_total}`)
+    return
+  }
+
   const supabase = supabaseAdmin()
 
-  // Idempotency — skip if this session was already processed
+  // 1. Order row — insert or reuse (handles webhook retries AND concurrent
+  //    deliveries of the same event via the unique session index).
+  const orderId = await ensureOrder(supabase, session, log)
+
+  // 2. Order items — backfilled if missing so a partially-failed earlier
+  //    attempt converges to a complete order on retry.
+  await ensureOrderItems(supabase, orderId, session, log)
+
+  // 3. Link the Stripe customer id back to the profile when we can.
+  if (session.customer) {
+    await updateStripeCustomerId(supabase, session, log)
+  }
+
+  // 4. Fire the admin notification email (non-blocking — never fail the event).
+  stripe.checkout.sessions
+    .listLineItems(session.id, { limit: 100 })
+    .then((items) =>
+      sendAdminNotification(session, items.data, orderId).catch((err) =>
+        console.error(`[webhook:${session.id}] Email notification failed:`, err)
+      )
+    )
+    .catch((err) =>
+      console.error(`[webhook:${session.id}] Line item fetch for email failed:`, err)
+    )
+}
+
+// ---------------------------------------------------------------------------
+// Fulfillment primitives
+// ---------------------------------------------------------------------------
+async function ensureOrder(
+  supabase: ReturnType<typeof createClient>,
+  session: Stripe.Checkout.Session,
+  log: Logger,
+): Promise<number> {
   const { data: existing } = await supabase
     .from('orders')
     .select('id')
@@ -92,21 +179,13 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     .maybeSingle()
 
   if (existing) {
-    console.log(`Order already exists for session ${session.id} — skipping`)
-    return
+    log(`Order #${existing.id} already exists — reusing`)
+    return existing.id as number
   }
 
-  // Resolve customer profile + fetch line items in parallel
-  const [lineItemsResult, customerId] = await Promise.all([
-    stripe.checkout.sessions.listLineItems(session.id, { limit: 100 }),
-    resolveCustomerId(supabase, session),
-  ])
-
-  const lineItems = lineItemsResult.data
-
+  const customerId = await resolveCustomerId(supabase, session)
   const [billing, shipping] = buildAddresses(session)
 
-  // Insert order
   const { data: order, error: orderError } = await supabase
     .from('orders')
     .insert({
@@ -126,39 +205,147 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     .select('id')
     .single()
 
-  if (orderError) {
-    console.error('Error inserting order:', orderError.message)
-    throw new HTTPException(500, { message: 'Database fulfillment failed' })
+  if (!orderError) {
+    log(`Created order #${order.id}`)
+    return order.id as number
   }
 
-  console.log(`✅ Order #${order.id} created for session ${session.id}`)
+  // A concurrent delivery may have won the race — the unique index on
+  // stripe_session_id turns that into a clean, recoverable state.
+  if (
+    (orderError as { code?: string }).code === PG_UNIQUE_VIOLATION ||
+    /duplicate key/i.test(orderError.message)
+  ) {
+    const { data: raced } = await supabase
+      .from('orders')
+      .select('id')
+      .eq('stripe_session_id', session.id)
+      .maybeSingle()
 
-  // Insert order items + decrement stock in parallel
-  await Promise.all([
-    insertOrderItems(supabase, order.id, lineItems),
-    decrementStock(supabase, lineItems),
-  ])
-
-  // Update stripe_customer_id on profile if available
-  if (customerId && session.customer) {
-    await supabase
-      .from('profiles')
-      .update({ stripe_customer_id: session.customer as string })
-      .eq('id', customerId)
+    if (raced) {
+      log(`Race detected — reusing concurrently created order #${raced.id}`)
+      return raced.id as number
+    }
   }
 
-  // Fire notification email (non-blocking — don't throw on failure)
-  sendAdminNotification(session, lineItems, order.id).catch((err) =>
-    console.error('Email notification failed:', err)
-  )
+  // Real failure — throw so Stripe retries the event
+  console.error(`[webhook:${session.id}] Order insert failed:`, orderError.message)
+  throw new Error(`Order insert failed: ${orderError.message}`)
+}
+
+async function ensureOrderItems(
+  supabase: ReturnType<typeof createClient>,
+  orderId: number,
+  session: Stripe.Checkout.Session,
+  log: Logger,
+) {
+  const { count, error: countError } = await supabase
+    .from('order_items')
+    .select('id', { count: 'exact', head: true })
+    .eq('order_id', orderId)
+
+  if (countError) {
+    throw new Error(`Order item count failed: ${countError.message}`)
+  }
+  if (count && count > 0) {
+    log(`Order #${orderId} already has ${count} items — skipping`)
+    return
+  }
+
+  const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
+    limit: 100,
+  })
+
+  const rows = lineItems.data.map((item) => ({
+    order_id: orderId,
+    product_name: item.description ?? 'Unknown item',
+    quantity: item.quantity ?? 1,
+    total: (item.amount_total ?? 0) / 100,
+  }))
+
+  const { error } = await supabase.from('order_items').insert(rows)
+  if (error) {
+    console.error(`[webhook:${session.id}] Order items insert failed:`, error.message)
+    throw new Error(`Order items insert failed: ${error.message}`)
+  }
+  log(`Inserted ${rows.length} items for order #${orderId}`)
+}
+
+async function updateStripeCustomerId(
+  supabase: ReturnType<typeof createClient>,
+  session: Stripe.Checkout.Session,
+  log: Logger,
+) {
+  const customerId = await resolveCustomerId(supabase, session)
+  if (!customerId || typeof session.customer !== 'string') return
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ stripe_customer_id: session.customer })
+    .eq('id', customerId)
+
+  if (error) log(`Failed to link Stripe customer to profile: ${error.message}`)
+  else log(`Linked Stripe customer ${session.customer} to profile ${customerId}`)
 }
 
 // ---------------------------------------------------------------------------
-// Helpers
+// Status transitions — session expired / payment failed / refunded
 // ---------------------------------------------------------------------------
+async function handleSessionFailed(
+  session: Stripe.Checkout.Session,
+  log: Logger,
+) {
+  const supabase = supabaseAdmin()
+  const order = await findOrderBySession(supabase, session.id, log)
+  if (!order) return
+  if (order.status === 'refunded' || order.status === 'completed') return
+  await setOrderStatus(supabase, order.id, 'cancelled', 'checkout.session.expired', log)
+}
+
+async function handlePaymentFailed(
+  paymentIntent: Stripe.PaymentIntent,
+  log: Logger,
+) {
+  const supabase = supabaseAdmin()
+  const order = await findOrderByPaymentIntent(supabase, paymentIntent.id, log)
+  if (!order) return
+  if (order.status === 'refunded' || order.status === 'completed') return
+  await setOrderStatus(supabase, order.id, 'cancelled', 'payment_intent.payment_failed', log)
+}
+
+async function handleChargeRefunded(
+  charge: Stripe.Charge,
+  log: Logger,
+) {
+  const supabase = supabaseAdmin()
+
+  // `charge.refunded` fires for PARTIAL refunds too — only downgrade the order
+  // when the charge is actually fully refunded.
+  if (!(charge.refunded && charge.amount_refunded >= charge.amount)) {
+    log(
+      `Partial refund (${charge.amount_refunded}/${charge.amount}) — order stays as-is`,
+    )
+    return
+  }
+
+  const paymentIntentId = typeof charge.payment_intent === 'string'
+    ? charge.payment_intent
+    : (charge.payment_intent?.id ?? null)
+  if (!paymentIntentId) {
+    log('Refunded charge has no payment intent — skipping')
+    return
+  }
+
+  const order = await findOrderByPaymentIntent(supabase, paymentIntentId, log)
+  if (!order) return
+  if (order.status === 'cancelled') return
+  await setOrderStatus(supabase, order.id, 'refunded', 'charge.refunded', log)
+}
+
 async function findOrderBySession(
   supabase: ReturnType<typeof createClient>,
   sessionId: string,
+  log: Logger,
 ) {
   const { data, error } = await supabase
     .from('orders')
@@ -167,7 +354,25 @@ async function findOrderBySession(
     .maybeSingle()
 
   if (error) {
-    console.error('Order lookup failed:', error.message)
+    log(`Order lookup failed: ${error.message}`)
+    return null
+  }
+  return data
+}
+
+async function findOrderByPaymentIntent(
+  supabase: ReturnType<typeof createClient>,
+  paymentIntentId: string,
+  log: Logger,
+) {
+  const { data, error } = await supabase
+    .from('orders')
+    .select('id, status')
+    .eq('stripe_payment_intent_id', paymentIntentId)
+    .maybeSingle()
+
+  if (error) {
+    log(`Order lookup failed: ${error.message}`)
     return null
   }
   return data
@@ -178,13 +383,48 @@ async function setOrderStatus(
   orderId: number,
   status: string,
   reason: string,
+  log: Logger,
 ) {
   const { error } = await supabase.from('orders').update({ status }).eq('id', orderId)
   if (error) {
-    console.error(`Failed to set order #${orderId} to '${status}':`, error.message)
+    log(`Failed to set order #${orderId} to '${status}': ${error.message}`)
   } else {
-    console.log(`🔄 Order #${orderId} -> ${status} (${reason})`)
+    log(`Order #${orderId} -> ${status} (${reason})`)
   }
+}
+
+// ---------------------------------------------------------------------------
+// Customer resolution + address shaping
+// ---------------------------------------------------------------------------
+async function resolveCustomerId(
+  supabase: ReturnType<typeof createClient>,
+  session: Stripe.Checkout.Session,
+): Promise<number | null> {
+  const userId = session.metadata?.userId
+  if (userId && userId !== 'guest') {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    // DB failures must surface so the event retries rather than silently
+    // creating a guest order for a registered customer.
+    if (error) throw new Error(`Profile lookup by user_id failed: ${error.message}`)
+    if (data) return data.id as number
+  }
+
+  const email = session.customer_details?.email
+  if (!email) return null
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('email', email)
+    .maybeSingle()
+
+  if (error) throw new Error(`Profile lookup by email failed: ${error.message}`)
+  return (data?.id as number | undefined) ?? null
 }
 
 // Split "First Last" into first_name/last_name, preserving the legacy shape
@@ -218,126 +458,6 @@ function buildAddresses(session: Stripe.Checkout.Session) {
 }
 
 // ---------------------------------------------------------------------------
-// Session expired / payment failed — the order was never paid
-// ---------------------------------------------------------------------------
-async function handleSessionFailed(session: Stripe.Checkout.Session) {
-  const supabase = supabaseAdmin()
-  const order = await findOrderBySession(supabase, session.id)
-  if (!order) return
-  if (order.status === 'refunded' || order.status === 'completed') return
-  await setOrderStatus(supabase, order.id, 'cancelled', 'checkout.session.expired')
-}
-
-async function findOrderByPaymentIntent(
-  supabase: ReturnType<typeof createClient>,
-  paymentIntentId: string,
-) {
-  const { data, error } = await supabase
-    .from('orders')
-    .select('id, status')
-    .eq('stripe_payment_intent_id', paymentIntentId)
-    .maybeSingle()
-
-  if (error) {
-    console.error('Order lookup failed:', error.message)
-    return null
-  }
-  return data
-}
-
-async function handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
-  const supabase = supabaseAdmin()
-  const order = await findOrderByPaymentIntent(supabase, paymentIntent.id)
-  if (!order) return
-  if (order.status === 'refunded' || order.status === 'completed') return
-  await setOrderStatus(supabase, order.id, 'cancelled', 'payment_intent.payment_failed')
-}
-
-async function handleChargeRefunded(charge: Stripe.Charge) {
-  const supabase = supabaseAdmin()
-  const paymentIntentId = typeof charge.payment_intent === 'string'
-    ? charge.payment_intent
-    : (charge.payment_intent?.id ?? null)
-  if (!paymentIntentId) {
-    console.error('Refunded charge has no payment intent — skipping')
-    return
-  }
-  const order = await findOrderByPaymentIntent(supabase, paymentIntentId)
-  if (!order) return
-  // Only downgrade from paid states
-  if (order.status === 'cancelled') return
-  await setOrderStatus(supabase, order.id, 'refunded', 'charge.refunded')
-}
-
-async function resolveCustomerId(
-  supabase: ReturnType<typeof createClient>,
-  session: Stripe.Checkout.Session,
-): Promise<number | null> {
-  const userId = session.metadata?.userId
-  if (userId && userId !== 'guest') {
-    const { data } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('user_id', userId)
-      .maybeSingle()
-
-    if (data) return data.id as number
-  }
-
-  const email = session.customer_details?.email
-  if (!email) return null
-
-  const { data } = await supabase
-    .from('profiles')
-    .select('id')
-    .eq('email', email)
-    .maybeSingle()
-
-  return (data?.id as number | undefined) ?? null
-}
-
-async function insertOrderItems(
-  supabase: ReturnType<typeof createClient>,
-  orderId: number,
-  lineItems: Stripe.LineItem[],
-) {
-  const rows = lineItems.map((item) => ({
-    order_id: orderId,
-    product_name: item.description ?? 'Unknown item',
-    quantity: item.quantity ?? 1,
-    total: (item.amount_total ?? 0) / 100,
-  }))
-
-  const { error } = await supabase.from('order_items').insert(rows)
-  if (error) console.error('Error inserting order items:', error.message)
-}
-
-async function decrementStock(
-  supabase: ReturnType<typeof createClient>,
-  lineItems: Stripe.LineItem[],
-) {
-  await Promise.all(
-    lineItems.map(async (item) => {
-      if (!item.price?.id) return
-
-      const { data: product } = await supabase
-        .from('products')
-        .select('id')
-        .eq('stripe_price_id', item.price.id)
-        .maybeSingle()
-
-      if (!product) return
-
-      await supabase.rpc('decrement_stock', {
-        p_id: product.id,
-        decrement_by: item.quantity ?? 1,
-      })
-      console.log(`📦 Stock decremented for product ${product.id}`)
-    }),
-  )
-}
-
-// ---------------------------------------------------------------------------
 // Admin order notification email via Resend
 // ---------------------------------------------------------------------------
 async function sendAdminNotification(
@@ -347,7 +467,7 @@ async function sendAdminNotification(
 ) {
   const resendKey = Deno.env.get('RESEND_API_KEY')
   if (!resendKey) {
-    console.warn('RESEND_API_KEY not set — skipping order notification email')
+    console.warn(`[webhook:${session.id}] RESEND_API_KEY not set — skipping order notification email`)
     return
   }
 
@@ -461,8 +581,8 @@ async function sendAdminNotification(
 
   if (!res.ok) {
     const err = await res.text()
-    console.error('Failed to send order notification email:', err)
+    console.error(`[webhook:${session.id}] Failed to send order notification email:`, err)
   } else {
-    console.log(`📧 Order notification sent to ${adminEmail} for order ${orderLabel}`)
+    console.log(`[webhook:${session.id}] Order notification sent to ${adminEmail} for order ${orderLabel}`)
   }
 }
