@@ -305,3 +305,97 @@ describe('Property 2: Preservation — existing action behaviour is unchanged', 
     expect(result).toEqual({ error: 'Some other DB error' });
   });
 });
+
+// ─── Property 3: Email fallback path ─────────────────────────────────────────
+// Validates lines 46-54, 59 in settings.ts:
+// When the user_id lookup returns PGRST116 (no rows), the action falls back
+// to fetching the profile by email. This covers legacy profiles that were
+// created before the user_id column was added.
+describe('Property 3: Email fallback — profile lookup by email when user_id miss', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    capturedUpsertPayload = {};
+    upsertShouldSucceed = true;
+    upsertErrorOverride = null;
+    setupAuthenticatedUser();
+  });
+
+  it('falls back to email lookup when user_id fetch returns PGRST116', async () => {
+    // First call (by user_id) → PGRST116 (not found)
+    // Second call (by email) → returns existing settings
+    mockSingle
+      .mockResolvedValueOnce({
+        data: null,
+        error: { code: 'PGRST116', message: 'Row not found' },
+      })
+      .mockResolvedValueOnce({
+        data: { settings: EXISTING_PROFILE_SETTINGS },
+        error: null,
+      });
+
+    const result = await updateUserSettingsAction({ preferred_currency: 'AUD' });
+
+    // Action should succeed using email-fetched settings as base
+    expect(result).toMatchObject({ success: true });
+    const writtenSettings = capturedUpsertPayload.settings as Record<string, unknown>;
+    expect(writtenSettings.preferred_currency).toBe('AUD');
+  });
+
+  it('proceeds with empty settings when both user_id and email lookups miss', async () => {
+    // Both lookups return PGRST116 — upsert with only the new partial settings
+    mockSingle.mockResolvedValue({
+      data: null,
+      error: { code: 'PGRST116', message: 'Row not found' },
+    });
+
+    const result = await updateUserSettingsAction({ preferred_currency: 'USD' });
+
+    expect(result).toMatchObject({ success: true });
+    const writtenSettings = capturedUpsertPayload.settings as Record<string, unknown>;
+    expect(writtenSettings.preferred_currency).toBe('USD');
+  });
+
+  it('proceeds when a non-PGRST116 fetch error occurs (resilient path)', async () => {
+    // A non-row-not-found error (e.g. network timeout) — action still attempts upsert
+    mockSingle.mockResolvedValue({
+      data: null,
+      error: { code: '08006', message: 'Connection failure' },
+    });
+
+    const result = await updateUserSettingsAction({ preferred_currency: 'AUD' });
+
+    // Should still succeed — the upsert proceeds with just the new settings
+    expect(result).toMatchObject({ success: true });
+  });
+});
+
+// ─── Property 4: Email-fallback upsert error path (settings.ts line 93) ──────
+// When the primary upsert (by user_id) fails AND the email-fallback upsert
+// also fails, the action returns { error: emailError.message }.
+describe('Property 4: Email-fallback upsert error path', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    capturedUpsertPayload = {};
+    upsertShouldSucceed = false;
+    upsertErrorOverride = null;
+    setupAuthenticatedUser();
+    setupProfileFetch();
+  });
+
+  it('returns error from email-fallback upsert when both upserts fail', async () => {
+    // First upsert (user_id conflict) → error triggers fallback
+    // Second upsert (email conflict) → also fails
+    let callCount = 0;
+    mockUpsert.mockImplementation(() => {
+      callCount++;
+      if (callCount === 1) {
+        return Promise.resolve({ data: null, error: { message: 'user_id upsert failed' } });
+      }
+      return Promise.resolve({ data: null, error: { message: 'email upsert also failed' } });
+    });
+
+    const result = await updateUserSettingsAction({ preferred_currency: 'AUD' });
+
+    expect(result).toEqual({ error: 'email upsert also failed' });
+  });
+});

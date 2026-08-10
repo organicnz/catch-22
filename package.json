@@ -3,18 +3,20 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "prepare": "lefthook install",
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "biome lint --write . && oxlint .",
-    "lint:check": "biome lint . && oxlint .",
-    "format": "biome format --write .",
-    "format:check": "biome format .",
-    "check": "biome check --write .",
-    "check:ci": "biome ci .",
+    "lint": "biome lint --write ./src && oxlint ./src",
+    "lint:check": "biome lint ./src && oxlint ./src",
+    "format": "biome format --write ./src",
+    "format:check": "biome format ./src",
+    "check": "biome check --write ./src",
+    "check:ci": "biome ci ./src",
     "test": "bun vitest --run",
     "test:watch": "bun vitest",
-    "types:generate": "bun supabase gen types typescript --project-id wcoaqlglwxwceqktpckt > src/types/supabase.ts"
+    "test:coverage": "bun vitest run --coverage",
+    "types:generate": "bun x supabase@latest gen types typescript --project-id wcoaqlglwxwceqktpckt > /tmp/supabase-types.ts && mv /tmp/supabase-types.ts src/types/supabase.ts"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
@@ -53,13 +55,12 @@
     "@vitest/coverage-v8": "^4.1.5",
     "fast-check": "^4.7.0",
     "jsdom": "^29.1.1",
+    "lefthook": "1.11.13",
     "oxlint": "0.16.6",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vercel": "^52.0.0",
     "vitest": "^4.1.5"
   },
-  "trustedDependencies": [
-    "unrs-resolver"
-  ]
+  "trustedDependencies": ["unrs-resolver"]
 }
