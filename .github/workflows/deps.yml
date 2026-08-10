@@ -1,0 +1,102 @@
+name: Dependencies
+
+# Dependency health: drift report + security gates + runtime compatibility.
+# Runs nightly, on any change to the dependency manifest, and on demand.
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'package.json'
+      - 'bun.lock'
+  workflow_dispatch:
+
+concurrency:
+  group: deps-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    name: Dependency Audit & Compatibility
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies (frozen lockfile)
+        run: bun install --frozen-lockfile
+
+      # ── 1. Runtime compatibility ────────────────────────────────────────────
+      # Fail if the runner's Node/Bun no longer satisfies package.json engines
+      # (e.g. the pinned Next.js version raises its minimum Node requirement).
+      - name: Check runtime compatibility
+        run: |
+          REQUIRE_NODE=$(node -e "console.log(require('./package.json').engines?.node ?? '')")
+          REQUIRE_BUN=$(node -e "console.log(require('./package.json').engines?.bun ?? '')")
+          RUNNER_NODE="node $(node --version)"
+          RUNNER_BUN="bun $(bun --version)"
+          echo "$RUNNER_NODE | engines.node: ${REQUIRE_NODE:-unset}"
+          echo "$RUNNER_BUN | engines.bun: ${REQUIRE_BUN:-unset}"
+          node - <<'EOF'
+            const semver = (v) => v.replace(/^[v=^~]/, '').split('.').map(Number);
+            const pkg = require('./package.json');
+            const okRange = (current, range) => {
+              if (!range) return { ok: true };
+              const m = range.match(/(?:>=\s*)?(\d+)\.(\d+)\.(\d+)/);
+              if (!m) return { ok: true };
+              const cur = semver(current), min = [Number(m[1]), Number(m[2]), Number(m[3])];
+              const cmp = (a, b) => (a[0]-b[0]) || (a[1]-b[1]) || (a[2]-b[2]);
+              return { ok: cmp(cur, min) >= 0, min: min.join('.') };
+            };
+            const node = semver(process.version);
+            const bunMajor = Number(require('child_process').execSync('bun --version').toString().trim().split('.')[0]);
+            const checks = [
+              { name: 'node', cur: process.version, range: pkg.engines?.node, get: (r) => okRange(process.version, r) },
+              { name: 'bun', cur: `${bunMajor}.0.0`, range: pkg.engines?.bun, get: (r) => okRange(`${bunMajor}.0.0`, r) },
+            ];
+            let failed = false;
+            for (const c of checks) {
+              const r = okRange(c.cur, c.range);
+              console.log(`${r.ok ? '✅' : '❌'} ${c.name} ${c.cur} ${r.ok ? 'satisfies' : 'does NOT satisfy'} engines: ${c.range ?? 'unset'}`);
+              if (!r.ok) failed = true;
+            }
+            process.exit(failed ? 1 : 0);
+          EOF
+
+      # ── 2. Security gate — production dependencies ─────────────────────────
+      # High/critical vulnerabilities in runtime deps block the pipeline.
+      - name: Audit production dependencies
+        run: |
+          bun audit --production --audit-level=high 2>&1 | tee /tmp/audit-prod.log || {
+            echo "::error::High/critical vulnerabilities in production dependencies."
+            exit 1
+          }
+          echo "✅ No high/critical vulnerabilities in production deps"
+
+      # ── 3. Drift report (non-blocking, informational) ──────────────────────
+      # Outdated packages are surfaced in the job summary, never silently.
+      - name: Report outdated packages
+        continue-on-error: true
+        run: |
+          {
+            echo "## 📦 Outdated packages"
+            echo ""
+            bun outdated 2>&1 || true
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "Report written to job summary"
+
+      # ── 4. Full audit report (incl. dev tooling, informational) ───────────
+      - name: Report full audit (dev tooling included)
+        continue-on-error: true
+        run: |
+          {
+            echo "## 🛡 Full audit (production + dev tooling)"
+            echo ""
+            bun audit 2>&1 || true
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "Report written to job summary"
