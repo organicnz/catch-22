@@ -44,26 +44,25 @@ jobs:
           echo "$RUNNER_BUN | engines.bun: ${REQUIRE_BUN:-unset}"
           node - <<'EOF'
             const semver = (v) => v.replace(/^[v=^~]/, '').split('.').map(Number);
+            const cmp = (a, b) => (a[0]-b[0]) || (a[1]-b[1]) || (a[2]-b[2]);
             const pkg = require('./package.json');
-            const okRange = (current, range) => {
-              if (!range) return { ok: true };
-              const m = range.match(/(?:>=\s*)?(\d+)\.(\d+)\.(\d+)/);
-              if (!m) return { ok: true };
-              const cur = semver(current), min = [Number(m[1]), Number(m[2]), Number(m[3])];
-              const cmp = (a, b) => (a[0]-b[0]) || (a[1]-b[1]) || (a[2]-b[2]);
-              return { ok: cmp(cur, min) >= 0, min: min.join('.') };
-            };
-            const node = semver(process.version);
-            const bunMajor = Number(require('child_process').execSync('bun --version').toString().trim().split('.')[0]);
+            const nodeCur = semver(process.version);
+            const bunCur = semver(require('child_process').execSync('bun --version').toString().trim());
             const checks = [
-              { name: 'node', cur: process.version, range: pkg.engines?.node, get: (r) => okRange(process.version, r) },
-              { name: 'bun', cur: `${bunMajor}.0.0`, range: pkg.engines?.bun, get: (r) => okRange(`${bunMajor}.0.0`, r) },
+              { name: 'node', cur: nodeCur, range: pkg.engines?.node },
+              { name: 'bun', cur: bunCur, range: pkg.engines?.bun },
             ];
             let failed = false;
             for (const c of checks) {
-              const r = okRange(c.cur, c.range);
-              console.log(`${r.ok ? '✅' : '❌'} ${c.name} ${c.cur} ${r.ok ? 'satisfies' : 'does NOT satisfy'} engines: ${c.range ?? 'unset'}`);
-              if (!r.ok) failed = true;
+              const m = c.range?.match(/>=?\s*(\d+)\.(\d+)\.(\d+)/);
+              if (!m) {
+                console.log(`✅ ${c.name} ${c.cur.join('.')} (engines: ${c.range ?? 'unset'})`);
+                continue;
+              }
+              const min = [Number(m[1]), Number(m[2]), Number(m[3])];
+              const ok = cmp(c.cur, min) >= 0;
+              console.log(`${ok ? '✅' : '❌'} ${c.name} ${c.cur.join('.')} ${ok ? 'satisfies' : 'does NOT satisfy'} engines: ${c.range}`);
+              if (!ok) failed = true;
             }
             process.exit(failed ? 1 : 0);
           EOF
