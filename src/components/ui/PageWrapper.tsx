@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 interface PageWrapperProps {
   children: ReactNode;
@@ -12,21 +12,15 @@ interface PageWrapperProps {
  * and provides standard bottom padding. Use on every top-level page.
  */
 export function PageWrapper({ children, className = '', bg = 'white' }: PageWrapperProps) {
-  const bgClass =
-    bg === 'white' ? 'bg-white' : bg === 'dark' ? 'bg-secondary' : '';
+  const bgClass = bg === 'white' ? 'bg-white' : bg === 'dark' ? 'bg-secondary' : '';
 
-  return (
-    <div className={`${bgClass} min-h-screen pt-28 pb-16 ${className}`}>
-      {children}
-    </div>
-  );
+  return <div className={`${bgClass} min-h-screen pt-28 pb-16 ${className}`}>{children}</div>;
 }
 
 /** Standard max-width content container */
-export function PageContainer({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return (
-    <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${className}`}>
-      {children}
-    </div>
-  );
+export function PageContainer({
+  children,
+  className = '',
+}: { children: ReactNode; className?: string }) {
+  return <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${className}`}>{children}</div>;
 }

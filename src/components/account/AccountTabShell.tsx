@@ -1,8 +1,8 @@
 'use client';
 
+import { Package, Settings, ShoppingBag } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useTransition, type ReactNode } from 'react';
-import { Package, ShoppingBag, Settings } from 'lucide-react';
+import { type ReactNode, useTransition } from 'react';
 
 interface Tab {
   id: string;
@@ -11,8 +11,8 @@ interface Tab {
 }
 
 const ICONS: Record<string, React.ElementType> = {
-  admin:    Package,
-  orders:   ShoppingBag,
+  admin: Package,
+  orders: ShoppingBag,
   settings: Settings,
 };
 
@@ -55,7 +55,7 @@ export function AccountTabShell({ tabs, activeTab, children }: Props) {
               onClick={() => setTab(tab.id)}
               onKeyDown={(e) => {
                 if (e.key === 'ArrowRight') setTab(tabs[(idx + 1) % tabs.length].id);
-                if (e.key === 'ArrowLeft')  setTab(tabs[(idx - 1 + tabs.length) % tabs.length].id);
+                if (e.key === 'ArrowLeft') setTab(tabs[(idx - 1 + tabs.length) % tabs.length].id);
               }}
               className={[
                 'relative flex items-center gap-2 px-5 py-4',
@@ -87,7 +87,6 @@ export function AccountTabShell({ tabs, activeTab, children }: Props) {
         role="tabpanel"
         id={`panel-${activeTab}`}
         aria-labelledby={`tab-${activeTab}`}
-        tabIndex={0}
         className="outline-none"
       >
         {children}

@@ -23,19 +23,28 @@ export function MyOrdersPanel({ orders }: { orders: MyOrder[] }) {
             {/* Header */}
             <div className="bg-slate-50 px-6 py-5 border-b border-slate-100 grid grid-cols-2 md:grid-cols-4 gap-6 items-start">
               <div>
-                <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black mb-1">Order Placed</p>
-                <time dateTime={order.created_at ?? ''} className="text-sm text-secondary font-black">
+                <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black mb-1">
+                  Order Placed
+                </p>
+                <time
+                  dateTime={order.created_at ?? ''}
+                  className="text-sm text-secondary font-black"
+                >
                   {formatDate(order.created_at)}
                 </time>
               </div>
               <div>
-                <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black mb-1">Total</p>
+                <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black mb-1">
+                  Total
+                </p>
                 <p className="text-sm text-primary font-black tabular-nums">
                   {formatNZD(order.total_amount)}
                 </p>
               </div>
               <div>
-                <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black mb-1">Status</p>
+                <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black mb-1">
+                  Status
+                </p>
                 <span
                   className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${statusStyle(order.status)}`}
                 >
