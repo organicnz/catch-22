@@ -47,8 +47,8 @@ async function registerWebhook() {
       enabled_events: [
         'checkout.session.completed',
         'checkout.session.expired',
-        'payment_intent.succeeded',
         'payment_intent.payment_failed',
+        'charge.refunded',
       ],
       description: 'Main Webhook for Catch-22 Order Fulfillment',
     });
