@@ -493,6 +493,91 @@ pre-commit:
           # Warn only — directory may be an intentional scaffold
         fi
 
+    # ── 17b. Edge function import scope ─────────────────────────────────────
+    # Supabase edge functions are bundled by the CLI at deploy time. Only
+    # jsr:/npm: specifiers and the shared src/config/ module are bundled
+    # correctly. Importing app code (src/lib, src/components…) from a function
+    # breaks the bundle (this caused BOOT_ERROR on earlier deployments).
+    edge-import-scope:
+      priority: 17.5
+      glob: "supabase/functions/**/*.ts"
+      run: |
+        VIOLATIONS=""
+        for f in {staged_files}; do
+          [ -f "$f" ] || continue
+          while IFS= read -r line; do
+            # Match import targets: from '...' or import '...'
+            target=$(echo "$line" | sed -nE "s/.*from[[:space:]]+['\"]([^'\"]+)['\"].*/\1/p; s/^[[:space:]]*import[[:space:]]+['\"]([^'\"]+)['\"].*/\1/p" | head -1)
+            [ -z "$target" ] && continue
+            case "$target" in
+              jsr:*|npm:*) continue ;;
+              ./*|../*)
+                case "$target" in
+                  *src/config/*) continue ;;
+                  *) VIOLATIONS="$VIOLATIONS\n  $f → $target" ;;
+                esac
+                ;;
+              *) continue ;;
+            esac
+          done < <(grep -nE "from ['\"]|import ['\"]" "$f" 2>/dev/null || true)
+        done
+        if [ -n "$VIOLATIONS" ]; then
+          echo ""
+          echo "✖  Edge function imports app code outside supabase/functions + src/config:"
+          printf "$VIOLATIONS"
+          echo ""
+          echo ""
+          echo "   Only jsr:/npm: specifiers and the shared src/config/ module"
+          echo "   are bundled reliably by the CLI. Move shared logic into src/config/"
+          echo "   or supabase/functions/_shared/ and import from there."
+          echo ""
+          exit 1
+        fi
+
+    # ── 17c. Merge conflict markers ─────────────────────────────────────────
+    # A leftover conflict marker compiles fine in most grammars but ships
+    # broken code. Fail the commit if any staged file contains one.
+    no-conflict-markers:
+      priority: 17.6
+      run: |
+        FOUND=$(grep -rn "^<<<<<<< \|^=======$\|^>>>>>>> " {staged_files} 2>/dev/null || true)
+        if [ -n "$FOUND" ]; then
+          echo ""
+          echo "✖  Merge conflict markers in staged files:"
+          echo "$FOUND"
+          echo ""
+          echo "   Resolve the conflict first (git mergetool), then re-stage."
+          echo ""
+          exit 1
+        fi
+
+    # ── 17d. Workflow YAML sanity ───────────────────────────────────────────
+    # A malformed .github/workflows/*.yml silently disables a pipeline
+    # (GitHub drops invalid workflow files). Parse-check any staged workflow
+    # so a broken pipeline never ships.
+    workflow-yaml:
+      priority: 17.7
+      glob: ".github/workflows/*.{yml,yaml}"
+      run: |
+        ERRORS=""
+        for f in {staged_files}; do
+          [ -f "$f" ] || continue
+          if ! ruby -e 'require "yaml"; YAML.load_file(ARGV[0]); puts "ok"' "$f" >/dev/null 2>&1; then
+            ERRORS="$ERRORS\n  $f (invalid YAML)"
+          fi
+        done
+        if [ -n "$ERRORS" ]; then
+          echo ""
+          echo "✖  Invalid YAML in workflow file(s):"
+          printf "$ERRORS"
+          echo ""
+          echo ""
+          echo "   GitHub silently ignores broken workflow files — a malformed"
+          echo "   deploy.yml would disable CI without anyone noticing."
+          echo ""
+          exit 1
+        fi
+
     # ── 17. Biome – format + lint staged files ────────────────────────────────
     biome-check:
       priority: 17
@@ -633,6 +718,32 @@ pre-push:
     lint-ci:
       priority: 5
       run: bun run lint:check
+
+    # oxlint already runs via lint:check above; kept separate for fast
+    # iteration on the React/hooks/Next rule set.
+    # Just-in-time migration dry-run — mirrors the CI token-only flow:
+    # supabase link + db push --linked --dry-run. Skips silently when the
+    # local machine has no link state / token (CI covers it there).
+    migration-dryrun:
+      priority: 5.5
+      glob: "supabase/migrations/*.sql"
+      run: |
+        if [ ! -f "supabase/.temp/linked-project.json" ]; then
+          echo "ℹ️   No linked Supabase project — skipping migration dry-run."
+          exit 0
+        fi
+        if ! grep -q "^SUPABASE_ACCESS_TOKEN=.\{5,\}" .env.local 2>/dev/null; then
+          echo "ℹ️   SUPABASE_ACCESS_TOKEN not configured — skipping migration dry-run."
+          exit 0
+        fi
+        echo "🗄️   Migrations changed — dry-running local → remote diff..."
+        bun x supabase@latest db push --linked --dry-run --yes 2>&1 && \
+          echo "✔   Migration dry-run passed." || {
+            echo ""
+            echo "✖  Migration dry-run failed (see output above)."
+            echo "   Fix before pushing — CI will fail otherwise."
+            exit 1
+          }
 
     tests:
       priority: 6
