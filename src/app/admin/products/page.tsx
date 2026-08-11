@@ -1,3 +1,8 @@
+import {
+  BulkStockBar,
+  BulkStockProvider,
+  ProductCheckbox,
+} from '@/components/admin/BulkStockActions';
 import { ProductEditor } from '@/components/admin/ProductEditor';
 import { requireAdmin } from '@/lib/admin-auth';
 import { getStorageUrl } from '@/lib/supabase';
@@ -107,7 +112,6 @@ export default async function AdminProductsPage({
           />
         </form>
       </div>
-
       <div className="space-y-3">
         {filtered.length === 0 ? (
           <div className="bg-slate-50 p-16 rounded-3xl border border-dashed border-slate-200 text-center">
@@ -116,78 +120,82 @@ export default async function AdminProductsPage({
             </p>
           </div>
         ) : (
-          filtered.map((p) => {
-            const onSale = p.regular_price !== null && Number(p.regular_price) > Number(p.price);
-            return (
-              <div
-                key={p.id}
-                className="bg-white border border-slate-100 rounded-3xl overflow-hidden shadow-sm"
-              >
-                <div className="px-8 py-5 flex flex-wrap items-center gap-6">
-                  {p.image_url ? (
-                    <Image
-                      src={getStorageUrl(p.image_url)}
-                      alt={p.name}
-                      width={56}
-                      height={56}
-                      className="w-14 h-14 rounded-2xl object-cover bg-slate-100 shrink-0"
-                    />
-                  ) : (
-                    <div className="w-14 h-14 rounded-2xl bg-slate-100 shrink-0" />
-                  )}
+          <BulkStockProvider>
+            <BulkStockBar productIds={filtered.map((p) => p.id)} />
+            {filtered.map((p) => {
+              const onSale = p.regular_price !== null && Number(p.regular_price) > Number(p.price);
+              return (
+                <div
+                  key={p.id}
+                  className="bg-white border border-slate-100 rounded-3xl overflow-hidden shadow-sm"
+                >
+                  <div className="px-8 py-5 flex flex-wrap items-center gap-6">
+                    <ProductCheckbox productId={p.id} />
+                    {p.image_url ? (
+                      <Image
+                        src={getStorageUrl(p.image_url)}
+                        alt={p.name}
+                        width={56}
+                        height={56}
+                        className="w-14 h-14 rounded-2xl object-cover bg-slate-100 shrink-0"
+                      />
+                    ) : (
+                      <div className="w-14 h-14 rounded-2xl bg-slate-100 shrink-0" />
+                    )}
 
-                  <div className="flex-1 min-w-64">
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <p className="text-sm font-black text-secondary uppercase tracking-wider">
-                        {p.name}
+                    <div className="flex-1 min-w-64">
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <p className="text-sm font-black text-secondary uppercase tracking-wider">
+                          {p.name}
+                        </p>
+                        <span
+                          className={`text-[10px] font-black uppercase tracking-widest rounded-full px-2.5 py-1 ${
+                            stockBadge[p.stock_status || ''] || 'bg-slate-100 text-slate-500'
+                          }`}
+                        >
+                          {stockLabel[p.stock_status || ''] || p.stock_status || 'unknown'}
+                        </span>
+                        {onSale && (
+                          <span className="text-[10px] font-black uppercase tracking-widest rounded-full px-2.5 py-1 bg-primary text-secondary">
+                            On sale
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight mt-1">
+                        {p.categories
+                          .flatMap((c) => c.categories ?? [])
+                          .map((c) => c.name)
+                          .filter(Boolean)
+                          .join(' · ') || 'Uncategorised'}{' '}
+                        · #{p.id}
                       </p>
-                      <span
-                        className={`text-[10px] font-black uppercase tracking-widest rounded-full px-2.5 py-1 ${
-                          stockBadge[p.stock_status || ''] || 'bg-slate-100 text-slate-500'
-                        }`}
-                      >
-                        {stockLabel[p.stock_status || ''] || p.stock_status || 'unknown'}
-                      </span>
-                      {onSale && (
-                        <span className="text-[10px] font-black uppercase tracking-widest rounded-full px-2.5 py-1 bg-primary text-secondary">
-                          On sale
-                        </span>
-                      )}
                     </div>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight mt-1">
-                      {p.categories
-                        .flatMap((c) => c.categories ?? [])
-                        .map((c) => c.name)
-                        .filter(Boolean)
-                        .join(' · ') || 'Uncategorised'}{' '}
-                      · #{p.id}
-                    </p>
-                  </div>
 
-                  <div className="text-right shrink-0">
-                    <p className="text-lg text-primary font-black">
-                      ${Number(p.price).toFixed(2)}
-                      {onSale && (
-                        <span className="text-[10px] text-slate-400 font-bold ml-1 line-through">
-                          ${Number(p.regular_price).toFixed(2)}
-                        </span>
-                      )}
-                    </p>
-                  </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-lg text-primary font-black">
+                        ${Number(p.price).toFixed(2)}
+                        {onSale && (
+                          <span className="text-[10px] text-slate-400 font-bold ml-1 line-through">
+                            ${Number(p.regular_price).toFixed(2)}
+                          </span>
+                        )}
+                      </p>
+                    </div>
 
-                  <ProductEditor
-                    product={{
-                      id: p.id,
-                      name: p.name,
-                      price: p.price,
-                      regular_price: p.regular_price,
-                      stock_status: p.stock_status,
-                    }}
-                  />
+                    <ProductEditor
+                      product={{
+                        id: p.id,
+                        name: p.name,
+                        price: p.price,
+                        regular_price: p.regular_price,
+                        stock_status: p.stock_status,
+                      }}
+                    />
+                  </div>
                 </div>
-              </div>
-            );
-          })
+              );
+            })}
+          </BulkStockProvider>
         )}
       </div>
     </div>
