@@ -86,6 +86,7 @@ export async function updateProduct(payload: {
   regular_price?: number | null;
   stock_status?: string;
   short_description?: string;
+  description?: string;
 }) {
   const { id, ...fields } = payload;
   if (fields.price !== undefined && (!Number.isFinite(fields.price) || fields.price < 0)) {
@@ -95,6 +96,12 @@ export async function updateProduct(payload: {
     if (!Number.isFinite(fields.regular_price) || fields.regular_price < 0) {
       throw new Error('Compare-at price must be a non-negative number');
     }
+  }
+  if (fields.short_description !== undefined && fields.short_description.length > 2000) {
+    throw new Error('Short description is too long (max 2000 chars)');
+  }
+  if (fields.description !== undefined && fields.description.length > 50000) {
+    throw new Error('Description is too long (max 50000 chars)');
   }
   if (fields.stock_status !== undefined && !VALID_STOCK.includes(fields.stock_status)) {
     throw new Error('Invalid stock status');

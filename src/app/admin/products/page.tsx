@@ -145,9 +145,12 @@ export default async function AdminProductsPage({
 
                     <div className="flex-1 min-w-64">
                       <div className="flex items-center gap-3 flex-wrap">
-                        <p className="text-sm font-black text-secondary uppercase tracking-wider">
+                        <Link
+                          href={`/admin/products/${p.id}`}
+                          className="text-sm font-black text-secondary uppercase tracking-wider hover:text-primary transition-colors"
+                        >
                           {p.name}
-                        </p>
+                        </Link>
                         <span
                           className={`text-[10px] font-black uppercase tracking-widest rounded-full px-2.5 py-1 ${
                             stockBadge[p.stock_status || ''] || 'bg-slate-100 text-slate-500'
