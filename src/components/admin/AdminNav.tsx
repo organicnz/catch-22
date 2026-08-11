@@ -1,11 +1,12 @@
 'use client';
 
-import { BadgePercent, LayoutDashboard, Package, Users } from 'lucide-react';
+import { BadgePercent, LayoutDashboard, Package, ShoppingBag, Users } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const ITEMS = [
-  { href: '/admin', label: 'Orders', icon: LayoutDashboard },
+  { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/admin/orders', label: 'Orders', icon: ShoppingBag },
   { href: '/admin/products', label: 'Products', icon: Package },
   { href: '/admin/customers', label: 'Customers', icon: Users },
   { href: '/admin/coupons', label: 'Coupons', icon: BadgePercent },
@@ -19,7 +20,10 @@ export function AdminNav() {
       aria-label="Admin sections"
     >
       {ITEMS.map(({ href, label, icon: Icon }) => {
-        const active = pathname === href;
+        const active =
+          href === '/admin'
+            ? pathname === href
+            : pathname === href || pathname.startsWith(`${href}/`);
         return (
           <Link
             key={href}

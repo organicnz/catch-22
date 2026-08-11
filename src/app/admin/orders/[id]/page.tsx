@@ -47,6 +47,7 @@ type Order = {
   currency: string | null;
   payment_method: string | null;
   stripe_session_id: string | null;
+  coupon_code: string | null;
   shipping_address: {
     line1?: string;
     line2?: string;
@@ -85,7 +86,7 @@ export default async function AdminOrderDetailPage({
     .from('orders')
     .select(
       `id, created_at, status, total_amount, currency, tracking_number, admin_notes,
-       payment_method, stripe_session_id,
+       payment_method, stripe_session_id, coupon_code,
        shipping_address,
        order_items ( id, product_name, quantity, total ),
        profiles ( first_name, last_name, email )`
@@ -110,7 +111,7 @@ export default async function AdminOrderDetailPage({
   return (
     <div>
       <Link
-        href="/admin"
+        href="/admin/orders"
         className="inline-flex items-center gap-2 text-[11px] font-black text-slate-400 uppercase tracking-widest hover:text-secondary transition-colors mb-6"
       >
         <ArrowLeft size={12} /> Back to Orders
@@ -269,6 +270,14 @@ export default async function AdminOrderDetailPage({
                 {order.stripe_session_id ?? '—'}
               </dd>
             </div>
+            {order.coupon_code && (
+              <div className="flex justify-between gap-4">
+                <dt className="text-slate-400 font-bold uppercase tracking-wider text-[10px] pt-0.5">
+                  Coupon
+                </dt>
+                <dd className="text-secondary font-black text-[11px]">{order.coupon_code}</dd>
+              </div>
+            )}
           </dl>
         </section>
       </div>

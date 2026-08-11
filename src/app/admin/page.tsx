@@ -1,28 +1,20 @@
 import { OrderStatusSelect } from '@/components/admin/OrderStatusSelect';
-import { OrdersExport } from '@/components/admin/OrdersExport';
 import { requireAdmin } from '@/lib/admin-auth';
-import { ExternalLink, MapPin, Package, Search, ShoppingBag, TrendingUp, User } from 'lucide-react';
+import {
+  AlertTriangle,
+  ArrowRight,
+  BadgePercent,
+  DollarSign,
+  Package,
+  ShoppingBag,
+  TrendingUp,
+  Users,
+} from 'lucide-react';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Orders — Admin · Catch-22',
+  title: 'Dashboard — Admin · Catch-22',
   robots: { index: false, follow: false },
-};
-
-type ShippingAddress = {
-  line1?: string;
-  line2?: string;
-  city?: string;
-  state?: string;
-  postal_code?: string;
-  country?: string;
-};
-
-type OrderItem = {
-  id: number;
-  product_name: string | null;
-  quantity: number | null;
-  total: number | null;
 };
 
 type Order = {
@@ -31,100 +23,140 @@ type Order = {
   status: string | null;
   total_amount: number | null;
   currency: string | null;
-  payment_method: string | null;
-  stripe_session_id: string | null;
-  shipping_address: ShippingAddress | null;
-  order_items: OrderItem[];
-  profiles: {
-    first_name: string | null;
-    last_name: string | null;
-    email: string | null;
-  } | null;
+  coupon_code: string | null;
+  order_items: { product_name: string | null; quantity: number | null }[];
+  profiles: { first_name: string | null; last_name: string | null; email: string | null } | null;
 };
 
-const STATUS_FILTERS = ['all', 'processing', 'completed', 'cancelled', 'refunded', 'on-hold'];
+type Product = {
+  id: number;
+  name: string;
+  stock_status: string | null;
+};
 
-export default async function AdminOrdersPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ status?: string; q?: string }>;
-}) {
+const STATUS_ORDER = {
+  processing: 0,
+  'on-hold': 1,
+  completed: 2,
+  refunded: 3,
+  cancelled: 4,
+};
+
+export default async function AdminDashboardPage() {
   const { adminClient } = await requireAdmin();
-  const { status, q } = await searchParams;
 
-  const statusFilter = STATUS_FILTERS.includes(status || 'all') ? status || 'all' : 'all';
-  const query = (q || '').trim().toLowerCase();
+  const now = new Date();
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString();
 
-  // Stats need the full picture regardless of the filter
-  const { data: allOrders } = await adminClient
-    .from('orders')
-    .select(
-      `id, created_at, status, total_amount, currency,
-       payment_method, stripe_session_id,
-       shipping_address,
-       order_items ( id, product_name, quantity, total ),
-       profiles ( first_name, last_name, email )`
-    )
-    .order('created_at', { ascending: false })
-    .limit(500);
+  const [{ data: recentOrders }, { data: products }, { data: couponUsage }] = await Promise.all([
+    adminClient
+      .from('orders')
+      .select(
+        `id, created_at, status, total_amount, currency, coupon_code,
+         order_items ( product_name, quantity ),
+         profiles ( first_name, last_name, email )`
+      )
+      .gte('created_at', thirtyDaysAgo)
+      .order('created_at', { ascending: false })
+      .limit(200),
+    adminClient.from('products').select('id, name, stock_status').order('name'),
+    adminClient
+      .from('orders')
+      .select('coupon_code, total_amount')
+      .not('coupon_code', 'is', null)
+      .gte('created_at', thirtyDaysAgo)
+      .limit(500),
+  ]);
 
-  const orders = (allOrders || []) as Order[];
+  const orders = (recentOrders || []) as Order[];
+  const productRows = (products || []) as Product[];
+  const couponRows = (couponUsage || []) as { coupon_code: string; total_amount: number | null }[];
 
-  const filtered = orders.filter((o) => {
-    if (statusFilter !== 'all' && o.status !== statusFilter) return false;
-    if (!query) return true;
-    const customer = o.profiles;
-    const name = customer
-      ? [customer.first_name, customer.last_name].filter(Boolean).join(' ').toLowerCase()
-      : '';
-    const email = customer?.email?.toLowerCase() || '';
-    const items = o.order_items
-      .map((i) => i.product_name || '')
-      .join(' ')
-      .toLowerCase();
+  // KPI metrics (last 30 days)
+  const revenue = orders.reduce((s, o) => s + (Number(o.total_amount) || 0), 0);
+  const paidOrders = orders.filter((o) => o.status !== 'cancelled' && o.status !== 'refunded');
+  const aov = paidOrders.length > 0 ? revenue / paidOrders.length : 0;
+  const toShip = orders.filter((o) => o.status === 'processing' || o.status === 'on-hold');
+  const outOfStock = productRows.filter((p) => p.stock_status === 'outofstock' || !p.stock_status);
+  const backorder = productRows.filter((p) => p.stock_status === 'onbackorder');
+
+  // Revenue per day for the bar chart (last 14 days)
+  const dayBuckets = new Map<string, number>();
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+    dayBuckets.set(d.toISOString().slice(0, 10), 0);
+  }
+  for (const o of orders) {
+    if (!o.created_at) continue;
+    const day = o.created_at.slice(0, 10);
+    if (dayBuckets.has(day)) {
+      dayBuckets.set(day, dayBuckets.get(day)! + (Number(o.total_amount) || 0));
+    }
+  }
+  const dayLabels = new Map(
+    [...dayBuckets.keys()].map((k) => [
+      k,
+      new Date(`${k}T12:00:00`).toLocaleDateString('en-NZ', { day: '2-digit', month: 'short' }),
+    ])
+  );
+  const dayValues = [...dayBuckets.values()];
+  const maxDay = Math.max(...dayValues, 1);
+
+  // Top products by units sold (last 30 days)
+  const unitsByProduct = new Map<string, number>();
+  for (const o of paidOrders) {
+    for (const item of o.order_items) {
+      const name = item.product_name || 'Unknown item';
+      unitsByProduct.set(name, (unitsByProduct.get(name) || 0) + (item.quantity || 0));
+    }
+  }
+  const topProducts = [...unitsByProduct.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+  // Coupon usage (last 30 days)
+  const couponStats = new Map<string, { uses: number; revenue: number }>();
+  for (const c of couponRows) {
+    const stat = couponStats.get(c.coupon_code) || { uses: 0, revenue: 0 };
+    stat.uses += 1;
+    stat.revenue += Number(c.total_amount) || 0;
+    couponStats.set(c.coupon_code, stat);
+  }
+
+  const sortedOrders = [...orders].sort((a, b) => {
     return (
-      String(o.id).includes(query) ||
-      name.includes(query) ||
-      email.includes(query) ||
-      items.includes(query)
+      (STATUS_ORDER[(b.status || '') as keyof typeof STATUS_ORDER] ?? 99) -
+      (STATUS_ORDER[(a.status || '') as keyof typeof STATUS_ORDER] ?? 99)
     );
   });
+  const topPending = sortedOrders
+    .filter((o) => o.status === 'processing' || o.status === 'on-hold')
+    .slice(0, 5);
 
-  const totalRevenue = orders.reduce((s, o) => s + (Number(o.total_amount) || 0), 0);
-  const processing = orders.filter((o) => o.status === 'processing').length;
-  const completed = orders.filter((o) => o.status === 'completed').length;
-
-  const formatAddress = (addr: ShippingAddress | Record<string, string> | null) => {
-    if (!addr) return 'No address';
-    const a = addr as Record<string, string>;
-    const line1 = a.line1 ?? a.address_1;
-    const line2 = a.line2 ?? a.address_2;
-    const postal = a.postal_code ?? a.postcode;
-    return [line1, line2, a.city, postal, a.country].filter(Boolean).join(', ');
-  };
+  const fmtMoney = (n: number) =>
+    `$${n.toLocaleString('en-NZ', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   return (
     <div>
       <div className="flex flex-col mb-8">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-            <Package size={14} className="text-secondary" />
+            <TrendingUp size={14} className="text-secondary" />
           </div>
           <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">
             Admin Panel
           </span>
         </div>
-        <h1 className="text-4xl font-black tracking-tight text-secondary uppercase">Orders</h1>
+        <h1 className="text-4xl font-black tracking-tight text-secondary uppercase">Dashboard</h1>
         <div className="h-1.5 w-24 bg-primary mt-3" />
       </div>
 
-      {/* Stats */}
+      {/* KPI cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {[
-          { label: 'Total Orders', value: orders.length, icon: ShoppingBag },
-          { label: 'Processing', value: processing, icon: Package },
-          { label: 'Completed', value: completed, icon: TrendingUp },
-          { label: 'Total Revenue', value: `$${totalRevenue.toFixed(2)}`, icon: TrendingUp },
+          { label: 'Revenue (30d)', value: fmtMoney(revenue), icon: DollarSign },
+          { label: 'Orders (30d)', value: orders.length, icon: ShoppingBag },
+          { label: 'Avg. order value', value: fmtMoney(aov), icon: TrendingUp },
+          { label: 'Awaiting shipment', value: toShip.length, icon: Package },
         ].map(({ label, value, icon: Icon }) => (
           <div key={label} className="bg-secondary rounded-3xl p-6">
             <Icon size={16} className="text-primary mb-3" />
@@ -136,187 +168,209 @@ export default async function AdminOrdersPage({
         ))}
       </div>
 
-      {/* Filter bar */}
-      <div className="flex flex-wrap items-center gap-3 mb-8">
-        <nav className="flex items-center gap-2 overflow-x-auto" aria-label="Order status filter">
-          {STATUS_FILTERS.map((s) => (
-            <Link
-              key={s}
-              href={s === 'all' ? '/admin' : `/admin?status=${s}`}
-              className={`px-4 py-2 rounded-full text-[11px] font-black uppercase tracking-widest whitespace-nowrap transition-colors ${
-                statusFilter === s
-                  ? 'bg-primary text-secondary'
-                  : 'bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-secondary'
-              }`}
-            >
-              {s}
-            </Link>
-          ))}
-        </nav>
-        <form className="flex items-center gap-2 bg-slate-100 rounded-full px-4 py-2 ml-auto">
-          <Search size={13} className="text-slate-400" />
-          <input
-            name="q"
-            defaultValue={q}
-            placeholder="Search order, customer, item…"
-            className="bg-transparent text-sm font-bold text-secondary outline-none placeholder:text-slate-400 w-56"
-          />
-        </form>
-        <OrdersExport
-          orders={filtered.map((order) => {
-            const customer = order.profiles;
-            return {
-              id: order.id,
-              created_at: order.created_at,
-              status: order.status,
-              customer: customer
-                ? [customer.first_name, customer.last_name].filter(Boolean).join(' ') ||
-                  customer.email ||
-                  'Guest'
-                : 'Guest',
-              email: customer?.email || null,
-              shipping: formatAddress(order.shipping_address),
-              items: order.order_items
-                .map((i) => `${i.product_name || 'Item'} x${i.quantity || 1}`)
-                .join('; '),
-              total: order.total_amount,
-            };
-          })}
-        />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        {/* Revenue chart */}
+        <section className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm lg:col-span-2">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.25em]">
+              Revenue — last 14 days
+            </h2>
+            <span className="text-[10px] text-slate-300 font-black uppercase tracking-widest">
+              {fmtMoney(maxDay)}↑ best day
+            </span>
+          </div>
+          <div className="flex items-end gap-1.5 h-40">
+            {dayValues.map((v, i) => {
+              const day = [...dayBuckets.keys()][i];
+              const h = Math.max(4, Math.round((v / maxDay) * 100));
+              return (
+                <div
+                  key={day}
+                  title={`${dayLabels.get(day)} — ${fmtMoney(v)}`}
+                  className={`flex-1 rounded-t-md transition-all ${v > 0 ? 'bg-primary' : 'bg-slate-100'}`}
+                  style={{ height: `${h}%` }}
+                />
+              );
+            })}
+          </div>
+          <div className="flex justify-between mt-2">
+            {[...dayBuckets.keys()].map((day) => (
+              <span key={day} className="text-[9px] text-slate-300 font-bold uppercase">
+                {dayLabels.get(day)}
+              </span>
+            ))}
+          </div>
+        </section>
+
+        {/* Top products */}
+        <section className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm">
+          <h2 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.25em] mb-6">
+            Top products (30d)
+          </h2>
+          {topProducts.length === 0 ? (
+            <p className="text-slate-400 font-bold text-sm">No sales yet.</p>
+          ) : (
+            <ul className="space-y-4">
+              {topProducts.map(([name, units], i) => (
+                <li key={name} className="flex items-center gap-3">
+                  <span className="w-7 h-7 rounded-xl bg-slate-100 flex items-center justify-center text-[10px] font-black text-secondary">
+                    {i + 1}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-black text-secondary uppercase tracking-wider truncate">
+                      {name}
+                    </p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">
+                      {units} sold
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
       </div>
 
-      {/* Orders */}
-      <div className="space-y-6">
-        {filtered.length === 0 ? (
-          <div className="bg-slate-50 p-16 rounded-3xl border border-dashed border-slate-200 text-center">
-            <p className="text-slate-400 font-black uppercase tracking-widest text-sm">
-              {orders.length === 0 ? 'No orders yet.' : 'No orders match the filter.'}
-            </p>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Pending fulfilment */}
+        <section className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.25em]">
+              Pending fulfilment
+            </h2>
+            <Link
+              href="/admin/orders?status=processing"
+              className="inline-flex items-center gap-1 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-primary transition-colors"
+            >
+              View all <ArrowRight size={11} />
+            </Link>
           </div>
-        ) : (
-          filtered.map((order) => {
-            const customer = order.profiles;
-            const name = customer
-              ? [customer.first_name, customer.last_name].filter(Boolean).join(' ') ||
-                customer.email
-              : 'Guest';
-            const shippingAddr = formatAddress(order.shipping_address);
-            const stripeUrl = order.stripe_session_id
-              ? `https://dashboard.stripe.com/payments/${order.stripe_session_id}`
-              : null;
-
-            return (
-              <div
-                key={order.id}
-                className="bg-white border border-slate-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-shadow"
-              >
-                {/* Order header */}
-                <div className="bg-slate-50 px-8 py-6 border-b border-slate-100 grid grid-cols-2 md:grid-cols-5 gap-4 items-center">
-                  <div>
-                    <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black mb-1">
-                      Order
-                    </p>
+          {topPending.length === 0 ? (
+            <p className="text-slate-400 font-bold text-sm">All caught up.</p>
+          ) : (
+            <ul className="space-y-4">
+              {topPending.map((o) => {
+                const customer = o.profiles;
+                const name = customer
+                  ? [customer.first_name, customer.last_name].filter(Boolean).join(' ') ||
+                    customer.email
+                  : 'Guest';
+                return (
+                  <li key={o.id} className="flex items-center gap-3">
                     <Link
-                      href={`/admin/orders/${order.id}`}
-                      className="text-sm text-secondary font-black hover:text-primary transition-colors"
+                      href={`/admin/orders/${o.id}`}
+                      className="flex-1 min-w-0 hover:text-primary transition-colors"
                     >
-                      #{order.id} <ExternalLink size={10} className="inline text-slate-300" />
-                    </Link>
-                    <p className="text-[10px] text-slate-400 mt-0.5">
-                      {order.created_at
-                        ? new Date(order.created_at).toLocaleDateString('en-NZ', {
-                            day: 'numeric',
-                            month: 'short',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })
-                        : 'N/A'}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black mb-1">
-                      Customer
-                    </p>
-                    <div className="flex items-center gap-1.5">
-                      <User size={11} className="text-slate-400 shrink-0" />
-                      <p className="text-sm text-secondary font-black truncate">{name}</p>
-                    </div>
-                    {customer?.email && (
-                      <p className="text-[10px] text-slate-400 mt-0.5 truncate">{customer.email}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black mb-1">
-                      Ship To
-                    </p>
-                    <div className="flex items-start gap-1.5">
-                      <MapPin size={11} className="text-slate-400 shrink-0 mt-0.5" />
-                      <p className="text-[11px] text-slate-600 font-bold leading-tight">
-                        {shippingAddr}
+                      <p className="text-sm font-black text-secondary uppercase tracking-wider truncate">
+                        #{o.id} · {name}
                       </p>
-                    </div>
-                  </div>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">
+                        {o.created_at
+                          ? new Date(o.created_at).toLocaleDateString('en-NZ', {
+                              day: 'numeric',
+                              month: 'short',
+                            })
+                          : 'N/A'}
+                        {' · '}
+                        {fmtMoney(Number(o.total_amount) || 0)}
+                      </p>
+                    </Link>
+                    <OrderStatusSelect orderId={o.id} currentStatus={o.status || 'processing'} />
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
 
-                  <div>
-                    <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black mb-1">
-                      Total
+        {/* Stock alert */}
+        <section className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm">
+          <h2 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.25em] mb-6">
+            Stock alerts
+          </h2>
+          {outOfStock.length === 0 && backorder.length === 0 ? (
+            <p className="text-slate-400 font-bold text-sm">All products in stock.</p>
+          ) : (
+            <ul className="space-y-3">
+              {outOfStock.slice(0, 5).map((p) => (
+                <li
+                  key={p.id}
+                  className="flex items-center gap-2.5 bg-rose-50 rounded-2xl px-4 py-3"
+                >
+                  <AlertTriangle size={13} className="text-rose-500 shrink-0" />
+                  <p className="text-sm font-black text-rose-700 uppercase tracking-wider truncate">
+                    {p.name}
+                  </p>
+                  <span className="ml-auto text-[10px] font-black text-rose-500 uppercase">
+                    Out of stock
+                  </span>
+                </li>
+              ))}
+              {backorder.slice(0, 5).map((p) => (
+                <li
+                  key={p.id}
+                  className="flex items-center gap-2.5 bg-amber-50 rounded-2xl px-4 py-3"
+                >
+                  <Package size={13} className="text-amber-500 shrink-0" />
+                  <p className="text-sm font-black text-amber-700 uppercase tracking-wider truncate">
+                    {p.name}
+                  </p>
+                  <span className="ml-auto text-[10px] font-black text-amber-500 uppercase">
+                    Backorder
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <Link
+            href="/admin/products"
+            className="inline-flex items-center gap-1 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-primary transition-colors mt-4"
+          >
+            Manage products <ArrowRight size={11} />
+          </Link>
+        </section>
+
+        {/* Coupon usage */}
+        <section className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.25em]">
+              Coupon usage (30d)
+            </h2>
+            <Link
+              href="/admin/coupons"
+              className="inline-flex items-center gap-1 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-primary transition-colors"
+            >
+              Manage <ArrowRight size={11} />
+            </Link>
+          </div>
+          {couponStats.size === 0 ? (
+            <p className="text-slate-400 font-bold text-sm">No coupons used yet.</p>
+          ) : (
+            <ul className="space-y-4">
+              {[...couponStats.entries()].map(([code, stat]) => (
+                <li key={code} className="flex items-center gap-3">
+                  <div className="w-7 h-7 rounded-xl bg-primary flex items-center justify-center">
+                    <BadgePercent size={13} className="text-secondary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-black text-secondary uppercase tracking-wider">
+                      {code}
                     </p>
-                    <p className="text-lg text-primary font-black">
-                      ${Number(order.total_amount).toFixed(2)}
-                      <span className="text-[10px] text-slate-400 font-bold ml-1">
-                        {(order.currency || 'NZD').toUpperCase()}
-                      </span>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">
+                      {stat.uses}× · {fmtMoney(stat.revenue)} in orders
                     </p>
                   </div>
-
-                  <div className="flex flex-col gap-2 items-end">
-                    <OrderStatusSelect
-                      orderId={order.id}
-                      currentStatus={order.status || 'processing'}
-                    />
-                    {stripeUrl && (
-                      <a
-                        href={stripeUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-primary transition-colors"
-                      >
-                        <ExternalLink size={11} /> Stripe
-                      </a>
-                    )}
-                  </div>
-                </div>
-
-                {/* Line items */}
-                <div className="px-8 py-5">
-                  <ul className="divide-y divide-slate-50">
-                    {order.order_items.map((item) => (
-                      <li key={item.id} className="py-3 flex justify-between items-center group">
-                        <div className="flex items-center gap-3">
-                          <div className="w-1.5 h-1.5 bg-primary rounded-full group-hover:scale-150 transition-transform" />
-                          <div>
-                            <p className="text-sm font-black text-secondary uppercase tracking-wider">
-                              {item.product_name}
-                            </p>
-                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">
-                              Qty: {item.quantity}
-                            </p>
-                          </div>
-                        </div>
-                        <p className="text-sm font-black text-secondary">
-                          ${Number(item.total).toFixed(2)}
-                        </p>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            );
-          })
-        )}
+                </li>
+              ))}
+            </ul>
+          )}
+          <Link
+            href="/admin/customers"
+            className="inline-flex items-center gap-1 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-primary transition-colors mt-4"
+          >
+            <Users size={11} /> View customers
+          </Link>
+        </section>
       </div>
     </div>
   );
