@@ -1,6 +1,6 @@
 import { CustomerAdminToggle } from '@/components/admin/CustomerAdminToggle';
 import { requireAdmin } from '@/lib/admin-auth';
-import { Users } from 'lucide-react';
+import { Search, Users } from 'lucide-react';
 import Link from 'next/link';
 
 export const metadata = {
@@ -23,8 +23,14 @@ type Customer = {
   }[];
 };
 
-export default async function AdminCustomersPage() {
+export default async function AdminCustomersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
   const { adminClient } = await requireAdmin();
+  const { q } = await searchParams;
+  const query = (q || '').trim().toLowerCase();
 
   const { data: customers } = await adminClient
     .from('profiles')
@@ -33,7 +39,11 @@ export default async function AdminCustomersPage() {
     .order('created_at', { ascending: false })
     .limit(500);
 
-  const rows = (customers || []) as unknown as Customer[];
+  const rows = ((customers || []) as unknown as Customer[]).filter((c) => {
+    if (!query) return true;
+    const name = [c.first_name, c.last_name].filter(Boolean).join(' ').toLowerCase();
+    return name.includes(query) || c.email.toLowerCase().includes(query) || String(c.id) === query;
+  });
 
   return (
     <div>
@@ -52,6 +62,16 @@ export default async function AdminCustomersPage() {
           {rows.length} profiles
         </p>
       </div>
+
+      <form className="flex items-center gap-2 bg-slate-100 rounded-full px-4 py-2 mb-8 max-w-md">
+        <Search size={13} className="text-slate-400" />
+        <input
+          name="q"
+          defaultValue={q}
+          placeholder="Search customers…"
+          className="bg-transparent text-sm font-bold text-secondary outline-none placeholder:text-slate-400"
+        />
+      </form>
 
       <div className="space-y-3">
         {rows.length === 0 ? (

@@ -47,9 +47,15 @@ export default async function AdminDashboardPage() {
 
   const now = new Date();
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000).toISOString();
   const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString();
 
-  const [{ data: recentOrders }, { data: products }, { data: couponUsage }] = await Promise.all([
+  const [
+    { data: recentOrders },
+    { data: previousOrders },
+    { data: products },
+    { data: couponUsage },
+  ] = await Promise.all([
     adminClient
       .from('orders')
       .select(
@@ -58,6 +64,13 @@ export default async function AdminDashboardPage() {
          profiles ( first_name, last_name, email )`
       )
       .gte('created_at', thirtyDaysAgo)
+      .order('created_at', { ascending: false })
+      .limit(200),
+    adminClient
+      .from('orders')
+      .select('status, total_amount')
+      .gte('created_at', sixtyDaysAgo)
+      .lt('created_at', thirtyDaysAgo)
       .order('created_at', { ascending: false })
       .limit(200),
     adminClient.from('products').select('id, name, stock_status').order('name'),
@@ -70,14 +83,26 @@ export default async function AdminDashboardPage() {
   ]);
 
   const orders = (recentOrders || []) as Order[];
+  const previousRows = (previousOrders || []) as Pick<Order, 'status' | 'total_amount'>[];
   const productRows = (products || []) as Product[];
   const couponRows = (couponUsage || []) as { coupon_code: string; total_amount: number | null }[];
+
+  // Previous-period baseline (days 30–60) for deltas
+  const prevRevenue = previousRows.reduce((s, o) => s + (Number(o.total_amount) || 0), 0);
+  const prevOrdersCount = previousRows.length;
 
   // KPI metrics (last 30 days)
   const revenue = orders.reduce((s, o) => s + (Number(o.total_amount) || 0), 0);
   const paidOrders = orders.filter((o) => o.status !== 'cancelled' && o.status !== 'refunded');
   const aov = paidOrders.length > 0 ? revenue / paidOrders.length : 0;
   const toShip = orders.filter((o) => o.status === 'processing' || o.status === 'on-hold');
+
+  const pctChange = (current: number, previous: number): number | null => {
+    if (previous === 0) return current > 0 ? null : 0;
+    return ((current - previous) / previous) * 100;
+  };
+  const revenueDelta = pctChange(revenue, prevRevenue);
+  const ordersDelta = pctChange(orders.length, prevOrdersCount);
   const outOfStock = productRows.filter((p) => p.stock_status === 'outofstock' || !p.stock_status);
   const backorder = productRows.filter((p) => p.stock_status === 'onbackorder');
 
@@ -153,17 +178,50 @@ export default async function AdminDashboardPage() {
       {/* KPI cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {[
-          { label: 'Revenue (30d)', value: fmtMoney(revenue), icon: DollarSign },
-          { label: 'Orders (30d)', value: orders.length, icon: ShoppingBag },
+          {
+            label: 'Revenue (30d)',
+            value: fmtMoney(revenue),
+            icon: DollarSign,
+            delta: revenueDelta,
+          },
+          {
+            label: 'Orders (30d)',
+            value: orders.length,
+            icon: ShoppingBag,
+            delta: ordersDelta,
+          },
           { label: 'Avg. order value', value: fmtMoney(aov), icon: TrendingUp },
           { label: 'Awaiting shipment', value: toShip.length, icon: Package },
-        ].map(({ label, value, icon: Icon }) => (
+        ].map(({ label, value, icon: Icon, delta }) => (
           <div key={label} className="bg-secondary rounded-3xl p-6">
             <Icon size={16} className="text-primary mb-3" />
             <p className="text-[10px] text-white/40 font-black uppercase tracking-[0.2em] mb-1">
               {label}
             </p>
             <p className="text-2xl font-black text-white">{value}</p>
+            {delta !== undefined && (
+              <p
+                className={`mt-2 text-[10px] font-black uppercase tracking-widest flex items-center gap-1 ${
+                  delta === null
+                    ? 'text-white/40'
+                    : delta > 0
+                      ? 'text-emerald-400'
+                      : delta < 0
+                        ? 'text-rose-400'
+                        : 'text-white/40'
+                }`}
+              >
+                {delta === null ? (
+                  'No prior data'
+                ) : (
+                  <>
+                    <TrendingUp size={10} className={delta < 0 ? 'rotate-180' : undefined} />
+                    {delta > 0 ? '+' : ''}
+                    {delta.toFixed(1)}% vs prev 30d
+                  </>
+                )}
+              </p>
+            )}
           </div>
         ))}
       </div>
