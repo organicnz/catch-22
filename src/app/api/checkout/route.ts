@@ -1,15 +1,16 @@
 import { getStripeShippingOptions } from '@/config/shipping';
+import { env } from '@/lib/env';
 import { createServerClient } from '@/lib/supabase-server';
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-const STRIPE_API_VERSION = '2026-04-22.dahlia' as const;
+const STRIPE_API_VERSION = '2026-07-29.dahlia' as const;
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
   try {
-    const stripeKey = process.env.STRIPE_SECRET_KEY;
+    const stripeKey = env.STRIPE_SECRET_KEY;
     if (!stripeKey) {
       throw new Error('STRIPE_SECRET_KEY is not configured');
     }

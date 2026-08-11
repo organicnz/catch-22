@@ -1,3 +1,4 @@
+import { env } from '@/lib/env';
 import { createAdminClient } from '@/lib/supabase-server';
 import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
@@ -5,21 +6,17 @@ import Stripe from 'stripe';
 
 export const dynamic = 'force-dynamic';
 
-const STRIPE_API_VERSION = '2026-04-22.dahlia' as const;
+const STRIPE_API_VERSION = '2026-07-29.dahlia' as const;
 
 function getStripe() {
-  const stripeKey = process.env.STRIPE_SECRET_KEY;
-  if (!stripeKey) {
-    throw new Error('STRIPE_SECRET_KEY is not configured');
-  }
-  return new Stripe(stripeKey, {
+  return new Stripe(env.STRIPE_SECRET_KEY, {
     apiVersion: STRIPE_API_VERSION,
   });
 }
 
 export async function POST(req: Request) {
   const stripe = getStripe();
-  const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  const endpointSecret = env.STRIPE_WEBHOOK_SECRET;
 
   const body = await req.text();
   const headersList = await headers();
