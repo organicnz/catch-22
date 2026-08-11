@@ -102,6 +102,17 @@ jobs:
       # local hook still trips a hard CI gate before anything is pushed.
       - name: Validate migration files
         run: |
+          # Documented baselines (legacy files that predate the guards and are
+          # superseded externally). Keep this list empty for new violations.
+          # - 20260507000000_audiobookshelf_schema.sql: legacy audiobookshelf
+          #   mirror tables that do not exist in this project DB (never
+          #   effective / dropped). File is recorded as applied in the ledger,
+          #   so it must not be deleted; its tables therefore need no RLS.
+          # - 20240501000000_harden_profiles.sql: handle_new_user() SECURITY
+          #   DEFINER superseded by 20260811020000_harden_legacy_schema.sql
+          #   (replaced with SET search_path = '' version on the live DB).
+          BASELINE_RLS="20260507000000_audiobookshelf_schema.sql"
+          BASELINE_DEFINER="20240501000000_harden_profiles.sql"
           ERRORS=""
           for f in supabase/migrations/*.sql; do
             [ -f "$f" ] || continue
@@ -111,23 +122,27 @@ jobs:
             fi
 
             # RLS guard: every new CREATE TABLE must enable RLS in the same file
-            TABLES=$(grep -oiE "CREATE TABLE (IF NOT EXISTS )?[a-zA-Z_\"]+" "$f" \
-              | sed -E 's/CREATE TABLE (IF NOT EXISTS )?//' | tr -d '"' | grep -v "^$" || true)
-            for tbl in $TABLES; do
-              tbl_bare=$(echo "$tbl" | sed 's/.*\.//')
-              if ! grep -qi "ALTER TABLE.*${tbl_bare}.*ENABLE ROW LEVEL SECURITY" "$f"; then
-                ERRORS="$ERRORS\n  $name — CREATE TABLE $tbl_bare without ENABLE ROW LEVEL SECURITY"
-              fi
-            done
+            if ! echo "$BASELINE_RLS" | tr ' ' '\n' | grep -qx "$name"; then
+              TABLES=$(grep -oiE "CREATE TABLE (IF NOT EXISTS )?[a-zA-Z_\"]+" "$f" \
+                | sed -E 's/CREATE TABLE (IF NOT EXISTS )?//' | tr -d '"' | grep -v "^$" || true)
+              for tbl in $TABLES; do
+                tbl_bare=$(echo "$tbl" | sed 's/.*\.//')
+                if ! grep -qi "ALTER TABLE.*${tbl_bare}.*ENABLE ROW LEVEL SECURITY" "$f"; then
+                  ERRORS="$ERRORS\n  $name — CREATE TABLE $tbl_bare without ENABLE ROW LEVEL SECURITY"
+                fi
+              done
+            fi
 
             # SECURITY DEFINER guard: search_path must be pinned
-            for lineno in $(grep -n "SECURITY DEFINER" "$f" | cut -d: -f1); do
-              start=$((lineno - 5)); [ "$start" -lt 1 ] && start=1
-              end=$((lineno + 10))
-              if ! sed -n "${start},${end}p" "$f" | grep -qi "SET search_path"; then
-                ERRORS="$ERRORS\n  $name:${lineno} — SECURITY DEFINER without SET search_path"
-              fi
-            done
+            if ! echo "$BASELINE_DEFINER" | tr ' ' '\n' | grep -qx "$name"; then
+              for lineno in $(grep -n "SECURITY DEFINER" "$f" | cut -d: -f1); do
+                start=$((lineno - 5)); [ "$start" -lt 1 ] && start=1
+                end=$((lineno + 10))
+                if ! sed -n "${start},${end}p" "$f" | grep -qi "SET search_path"; then
+                  ERRORS="$ERRORS\n  $name:${lineno} — SECURITY DEFINER without SET search_path"
+                fi
+              done
+            fi
           done
 
           DUPES=$(ls supabase/migrations/ | grep -oE "^[0-9]{14}" | sort | uniq -d)

@@ -77,6 +77,11 @@ pre-commit:
         for f in {staged_files}; do
           [ -f "$f" ] || continue
           # Extract table names from CREATE TABLE (IF NOT EXISTS) statements
+          tmpfile=$(mktemp)
+          grep -oiE "CREATE TABLE (IF NOT EXISTS )?([a-z_\".]+)" "$f" 2>/dev/null \
+            | sed -E 's/CREATE TABLE (IF NOT EXISTS )?//' \
+            | tr -d '"' \
+            | grep -v "^$" > "$tmpfile" || true
           while IFS= read -r tbl; do
             # Strip schema prefix if present (public.foo → foo)
             tbl_bare=$(echo "$tbl" | sed 's/.*\.//')
@@ -84,10 +89,8 @@ pre-commit:
             if ! grep -qi "ALTER TABLE.*${tbl_bare}.*ENABLE ROW LEVEL SECURITY\|ENABLE ROW LEVEL SECURITY.*${tbl_bare}" "$f" 2>/dev/null; then
               VIOLATIONS="$VIOLATIONS\n  $f → table: $tbl_bare"
             fi
-          done < <(grep -oiE "CREATE TABLE (IF NOT EXISTS )?([a-z_\".]+)" "$f" 2>/dev/null \
-                   | sed -E 's/CREATE TABLE (IF NOT EXISTS )?//' \
-                   | tr -d '"' \
-                   | grep -v "^$" || true)
+          done < "$tmpfile"
+          rm -f "$tmpfile"
         done
         if [ -n "$VIOLATIONS" ]; then
           echo ""
@@ -517,6 +520,8 @@ pre-commit:
         VIOLATIONS=""
         for f in {staged_files}; do
           [ -f "$f" ] || continue
+          tmpfile=$(mktemp)
+          grep -nE "from ['\"]|import ['\"]" "$f" 2>/dev/null || true > "$tmpfile"
           while IFS= read -r line; do
             # Match import targets: from '...' or import '...'
             target=$(echo "$line" | sed -nE "s/.*from[[:space:]]+['\"]([^'\"]+)['\"].*/\1/p; s/^[[:space:]]*import[[:space:]]+['\"]([^'\"]+)['\"].*/\1/p" | head -1)
@@ -531,7 +536,8 @@ pre-commit:
                 ;;
               *) continue ;;
             esac
-          done < <(grep -nE "from ['\"]|import ['\"]" "$f" 2>/dev/null || true)
+          done < "$tmpfile"
+          rm -f "$tmpfile"
         done
         if [ -n "$VIOLATIONS" ]; then
           echo ""
