@@ -15,8 +15,11 @@ const publicSchema = z.object({
 
 const serverSchema = publicSchema.extend({
   SUPABASE_SECRET_KEY: z.string().min(1).optional(),
-  STRIPE_SECRET_KEY: z.string().min(1),
-  STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
+  // Optional at build time — these are only needed by runtime Stripe routes,
+  // which validate them explicitly. Keeps preview builds green when the
+  // Preview environment has no secrets (production-only env vars).
+  STRIPE_SECRET_KEY: z.string().min(1).optional().catch(undefined),
+  STRIPE_WEBHOOK_SECRET: z.string().min(1).optional().catch(undefined),
 });
 
 const schema = isClient ? publicSchema : serverSchema;

@@ -191,7 +191,9 @@ export default async function AdminOrdersPage({
   const base = buildBase(adminClient, filters);
 
   // Full filtered set (light columns) for stats + total count
-  const { data: lightData } = await base.select(LIGHT_SELECT);
+  const { data: lightData } = await base.select(LIGHT_SELECT).order('created_at', {
+    ascending: false,
+  });
   const lightOrders = (lightData || []) as {
     id: number;
     created_at: string | null;

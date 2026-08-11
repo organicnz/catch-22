@@ -1,4 +1,5 @@
 import { ProductDetailForm } from '@/components/admin/ProductDetailForm';
+import { ProductImageUpload } from '@/components/admin/ProductImageUpload';
 import { requireAdmin } from '@/lib/admin-auth';
 import { getStorageUrl } from '@/lib/supabase';
 import { ArrowLeft, Calendar, DollarSign, Package, ShoppingBag, Tag } from 'lucide-react';
@@ -77,10 +78,13 @@ export default async function AdminProductDetailPage({
     .filter(Boolean);
 
   const items = product.order_items || [];
-  const unitsSold = items.reduce((s, i) => s + (Number(i.quantity) || 0), 0);
-  const revenue = items.reduce((s, i) => s + (Number(i.total) || 0), 0);
+  // Cancelled/refunded orders are not sales — exclude from the stats
+  const NO_SALE_STATUSES = new Set(['cancelled', 'refunded']);
+  const activeItems = items.filter((i) => !NO_SALE_STATUSES.has(i.orders?.status ?? ''));
+  const unitsSold = activeItems.reduce((s, i) => s + (Number(i.quantity) || 0), 0);
+  const revenue = activeItems.reduce((s, i) => s + (Number(i.total) || 0), 0);
   const ordersByProduct = new Map<number, (typeof items)[number]>();
-  for (const item of items) {
+  for (const item of activeItems) {
     const order = item.orders;
     if (!ordersByProduct.has(order.id)) ordersByProduct.set(order.id, item);
   }
@@ -206,29 +210,28 @@ export default async function AdminProductDetailPage({
         {/* Images */}
         <section className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm">
           <h2 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.25em] mb-6">
-            Images ({images.length})
+            Product image
           </h2>
-          {images.length === 0 ? (
-            <p className="text-slate-400 font-bold text-sm">No images.</p>
-          ) : (
-            <div className="grid grid-cols-2 gap-3">
-              {images.map((src, i) => (
-                <Image
-                  key={src}
-                  src={getStorageUrl(src)}
-                  alt={`${product.name} ${i + 1}`}
-                  width={200}
-                  height={200}
-                  className={`w-full aspect-square object-cover rounded-2xl bg-slate-100 ${
-                    i === 0 ? 'ring-2 ring-primary' : ''
-                  }`}
-                />
-              ))}
+          <ProductImageUpload productId={product.id} currentImageUrl={product.image_url} />
+          {images.length > 0 && (
+            <div className="mt-5">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em] mb-3">
+                Preview ({images.length})
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                {images.map((src) => (
+                  <Image
+                    key={src}
+                    src={getStorageUrl(src)}
+                    alt={`${product.name} preview`}
+                    width={200}
+                    height={200}
+                    className="w-full aspect-square object-cover rounded-2xl bg-slate-100"
+                  />
+                ))}
+              </div>
             </div>
           )}
-          <p className="text-[10px] text-slate-400 font-bold mt-3">
-            First image is the storefront thumbnail.
-          </p>
         </section>
       </div>
 
