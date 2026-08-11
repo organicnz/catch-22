@@ -194,7 +194,12 @@ export default async function AdminOrdersPage({
                     <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black mb-1">
                       Order
                     </p>
-                    <p className="text-sm text-secondary font-black">#{order.id}</p>
+                    <Link
+                      href={`/admin/orders/${order.id}`}
+                      className="text-sm text-secondary font-black hover:text-primary transition-colors"
+                    >
+                      #{order.id} <ExternalLink size={10} className="inline text-slate-300" />
+                    </Link>
                     <p className="text-[10px] text-slate-400 mt-0.5">
                       {order.created_at
                         ? new Date(order.created_at).toLocaleDateString('en-NZ', {
