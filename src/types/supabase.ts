@@ -194,6 +194,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          admin_notes: string | null
           billing_address: Json | null
           created_at: string | null
           currency: string | null
@@ -205,9 +206,11 @@ export type Database = {
           stripe_payment_intent_id: string | null
           stripe_session_id: string | null
           total_amount: number | null
+          tracking_number: string | null
           wp_id: number | null
         }
         Insert: {
+          admin_notes?: string | null
           billing_address?: Json | null
           created_at?: string | null
           currency?: string | null
@@ -219,9 +222,11 @@ export type Database = {
           stripe_payment_intent_id?: string | null
           stripe_session_id?: string | null
           total_amount?: number | null
+          tracking_number?: string | null
           wp_id?: number | null
         }
         Update: {
+          admin_notes?: string | null
           billing_address?: Json | null
           created_at?: string | null
           currency?: string | null
@@ -233,6 +238,7 @@ export type Database = {
           stripe_payment_intent_id?: string | null
           stripe_session_id?: string | null
           total_amount?: number | null
+          tracking_number?: string | null
           wp_id?: number | null
         }
         Relationships: [

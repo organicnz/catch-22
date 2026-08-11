@@ -37,6 +37,30 @@ export async function updateOrderStatus(orderId: number, status: string) {
   revalidatePath('/account');
 }
 
+export async function updateFulfillment(
+  orderId: number,
+  payload: { tracking_number?: string | null; admin_notes?: string | null }
+) {
+  if (payload.tracking_number !== undefined && (payload.tracking_number || '').length > 200) {
+    throw new Error('Tracking number is too long (max 200 chars)');
+  }
+  if (payload.admin_notes !== undefined && (payload.admin_notes || '').length > 2000) {
+    throw new Error('Admin notes are too long (max 2000 chars)');
+  }
+  const adminClient = await requireAdminClient();
+  const update: { tracking_number?: string | null; admin_notes?: string | null } = {};
+  if (payload.tracking_number !== undefined) {
+    update.tracking_number = payload.tracking_number === '' ? null : payload.tracking_number;
+  }
+  if (payload.admin_notes !== undefined) {
+    update.admin_notes = payload.admin_notes === '' ? null : payload.admin_notes;
+  }
+  const { error } = await adminClient.from('orders').update(update).eq('id', orderId);
+  if (error) throw new Error(error.message);
+  revalidatePath('/admin');
+  revalidatePath(`/admin/orders/${orderId}`);
+}
+
 export async function updateProduct(payload: {
   id: number;
   name?: string;
