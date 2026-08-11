@@ -9,6 +9,9 @@ export const dynamic = 'force-dynamic';
 const STRIPE_API_VERSION = '2026-07-29.dahlia' as const;
 
 function getStripe() {
+  if (!env.STRIPE_SECRET_KEY) {
+    throw new Error('STRIPE_SECRET_KEY is not configured');
+  }
   return new Stripe(env.STRIPE_SECRET_KEY, {
     apiVersion: STRIPE_API_VERSION,
   });
