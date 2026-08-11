@@ -65,7 +65,7 @@ export async function updateProduct(payload: {
   id: number;
   name?: string;
   price?: number;
-  sale_price?: number | null;
+  regular_price?: number | null;
   stock_status?: string;
   short_description?: string;
 }) {
@@ -73,9 +73,9 @@ export async function updateProduct(payload: {
   if (fields.price !== undefined && (!Number.isFinite(fields.price) || fields.price < 0)) {
     throw new Error('Price must be a non-negative number');
   }
-  if (fields.sale_price !== undefined && fields.sale_price !== null) {
-    if (!Number.isFinite(fields.sale_price) || fields.sale_price < 0) {
-      throw new Error('Sale price must be a non-negative number');
+  if (fields.regular_price !== undefined && fields.regular_price !== null) {
+    if (!Number.isFinite(fields.regular_price) || fields.regular_price < 0) {
+      throw new Error('Compare-at price must be a non-negative number');
     }
   }
   if (fields.stock_status !== undefined && !VALID_STOCK.includes(fields.stock_status)) {

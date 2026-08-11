@@ -14,7 +14,7 @@ type ProductRow = {
   id: number;
   name: string;
   price: number;
-  sale_price: number | null;
+  regular_price: number | null;
   stock_status: string | null;
 };
 
@@ -23,8 +23,10 @@ export function ProductEditor({ product }: { product: ProductRow }) {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(product.name);
   const [price, setPrice] = useState(String(product.price));
-  const [salePrice, setSalePrice] = useState(
-    product.sale_price !== null ? String(product.sale_price) : ''
+  const [regularPrice, setRegularPrice] = useState(
+    product.regular_price !== null && product.regular_price !== undefined
+      ? String(product.regular_price)
+      : ''
   );
   const [stock, setStock] = useState(product.stock_status || 'instock');
   const [error, setError] = useState<string | null>(null);
@@ -55,7 +57,7 @@ export function ProductEditor({ product }: { product: ProductRow }) {
           id: product.id,
           name,
           price: priceNum,
-          sale_price: salePrice === '' ? null : Number(salePrice),
+          regular_price: regularPrice === '' ? null : Number(regularPrice),
           stock_status: stock,
         });
         setEditing(false);
@@ -108,12 +110,12 @@ export function ProductEditor({ product }: { product: ProductRow }) {
           htmlFor={`sale-${editId}`}
           className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2"
         >
-          Sale
+          Compare-at
         </label>
         <input
           id={`sale-${editId}`}
-          value={salePrice}
-          onChange={(e) => setSalePrice(e.target.value)}
+          value={regularPrice}
+          onChange={(e) => setRegularPrice(e.target.value)}
           className="text-sm font-black text-secondary bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 w-24"
           inputMode="decimal"
           placeholder="None"
