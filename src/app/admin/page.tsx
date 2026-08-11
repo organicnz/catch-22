@@ -157,6 +157,30 @@ export default async function AdminDashboardPage() {
     .filter((o) => o.status === 'processing' || o.status === 'on-hold')
     .slice(0, 5);
 
+  // Status distribution (last 30 days)
+  const statusStats: { status: string; count: number; revenue: number; pct: number }[] = [];
+  if (orders.length > 0) {
+    const byStatus = new Map<string, { count: number; revenue: number }>();
+    for (const o of orders) {
+      const s = o.status || 'unknown';
+      const stat = byStatus.get(s) || { count: 0, revenue: 0 };
+      stat.count += 1;
+      stat.revenue += Number(o.total_amount) || 0;
+      byStatus.set(s, stat);
+    }
+    for (const s of ['processing', 'on-hold', 'completed', 'refunded', 'cancelled']) {
+      const stat = byStatus.get(s);
+      if (stat) statusStats.push({ status: s, ...stat, pct: (stat.count / orders.length) * 100 });
+    }
+  }
+  const statusColours: Record<string, string> = {
+    processing: 'bg-amber-400',
+    'on-hold': 'bg-blue-400',
+    completed: 'bg-emerald-400',
+    refunded: 'bg-slate-300',
+    cancelled: 'bg-rose-400',
+  };
+
   const fmtMoney = (n: number) =>
     `$${n.toLocaleString('en-NZ', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
@@ -288,6 +312,56 @@ export default async function AdminDashboardPage() {
           )}
         </section>
       </div>
+
+      {/* Status distribution */}
+      {statusStats.length > 0 && (
+        <section className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.25em]">
+              Order status (30d)
+            </h2>
+            <Link
+              href="/admin/orders"
+              className="inline-flex items-center gap-1 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-primary transition-colors"
+            >
+              View orders <ArrowRight size={11} />
+            </Link>
+          </div>
+          <div className="flex h-2 rounded-full overflow-hidden mb-6 bg-slate-100">
+            {statusStats.map((s) => (
+              <div
+                key={s.status}
+                title={`${s.status}: ${s.count}`}
+                className={`${statusColours[s.status] || 'bg-slate-300'} transition-all`}
+                style={{ width: `${s.pct}%` }}
+              />
+            ))}
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            {statusStats.map((s) => (
+              <div key={s.status} className="rounded-2xl bg-slate-50 p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <span
+                    className={`w-2 h-2 rounded-full ${statusColours[s.status] || 'bg-slate-300'}`}
+                  />
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                    {s.status}
+                  </p>
+                </div>
+                <p className="text-xl font-black text-secondary">
+                  {s.count}
+                  <span className="text-[10px] text-slate-400 font-bold ml-1">
+                    {s.pct.toFixed(0)}%
+                  </span>
+                </p>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight mt-0.5">
+                  {fmtMoney(s.revenue)}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Pending fulfilment */}

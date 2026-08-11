@@ -1,3 +1,8 @@
+import {
+  BulkOrderBar,
+  BulkOrderProvider,
+  OrderCheckbox,
+} from '@/components/admin/BulkOrderActions';
 import { OrderStatusSelect } from '@/components/admin/OrderStatusSelect';
 import { OrdersExport } from '@/components/admin/OrdersExport';
 import { requireAdmin } from '@/lib/admin-auth';
@@ -197,143 +202,155 @@ export default async function AdminOrdersPage({
       </div>
 
       {/* Orders */}
-      <div className="space-y-6">
-        {filtered.length === 0 ? (
-          <div className="bg-slate-50 p-16 rounded-3xl border border-dashed border-slate-200 text-center">
-            <p className="text-slate-400 font-black uppercase tracking-widest text-sm">
-              {orders.length === 0 ? 'No orders yet.' : 'No orders match the filter.'}
-            </p>
+      <BulkOrderProvider>
+        <div className="flex items-start gap-2 mb-6">
+          <div className="flex-1 min-w-0 flex flex-col gap-2">
+            <BulkOrderBar orderIds={filtered.map((o) => o.id)} />
           </div>
-        ) : (
-          filtered.map((order) => {
-            const customer = order.profiles;
-            const name = customer
-              ? [customer.first_name, customer.last_name].filter(Boolean).join(' ') ||
-                customer.email
-              : 'Guest';
-            const shippingAddr = formatAddress(order.shipping_address);
-            const stripeUrl = order.stripe_session_id
-              ? `https://dashboard.stripe.com/payments/${order.stripe_session_id}`
-              : null;
+        </div>
+        <div className="space-y-6">
+          {filtered.length === 0 ? (
+            <div className="bg-slate-50 p-16 rounded-3xl border border-dashed border-slate-200 text-center">
+              <p className="text-slate-400 font-black uppercase tracking-widest text-sm">
+                {orders.length === 0 ? 'No orders yet.' : 'No orders match the filter.'}
+              </p>
+            </div>
+          ) : (
+            filtered.map((order) => {
+              const customer = order.profiles;
+              const name = customer
+                ? [customer.first_name, customer.last_name].filter(Boolean).join(' ') ||
+                  customer.email
+                : 'Guest';
+              const shippingAddr = formatAddress(order.shipping_address);
+              const stripeUrl = order.stripe_session_id
+                ? `https://dashboard.stripe.com/payments/${order.stripe_session_id}`
+                : null;
 
-            return (
-              <div
-                key={order.id}
-                className="bg-white border border-slate-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-shadow"
-              >
-                {/* Order header */}
-                <div className="bg-slate-50 px-8 py-6 border-b border-slate-100 grid grid-cols-2 md:grid-cols-5 gap-4 items-center">
-                  <div>
-                    <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black mb-1">
-                      Order
-                    </p>
-                    <Link
-                      href={`/admin/orders/${order.id}`}
-                      className="text-sm text-secondary font-black hover:text-primary transition-colors"
-                    >
-                      #{order.id} <ExternalLink size={10} className="inline text-slate-300" />
-                    </Link>
-                    <p className="text-[10px] text-slate-400 mt-0.5">
-                      {order.created_at
-                        ? new Date(order.created_at).toLocaleDateString('en-NZ', {
-                            day: 'numeric',
-                            month: 'short',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })
-                        : 'N/A'}
-                    </p>
-                    {order.coupon_code && (
-                      <span className="inline-flex items-center gap-1 mt-1 text-[9px] font-black uppercase tracking-widest rounded-full px-2 py-0.5 bg-primary/20 text-secondary">
-                        <BadgePercent size={9} /> {order.coupon_code}
-                      </span>
-                    )}
-                  </div>
-
-                  <div>
-                    <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black mb-1">
-                      Customer
-                    </p>
-                    <div className="flex items-center gap-1.5">
-                      <User size={11} className="text-slate-400 shrink-0" />
-                      <p className="text-sm text-secondary font-black truncate">{name}</p>
+              return (
+                <div
+                  key={order.id}
+                  className="bg-white border border-slate-100 rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                >
+                  {/* Order header */}
+                  <div className="bg-slate-50 px-8 py-6 border-b border-slate-100 grid grid-cols-2 md:grid-cols-5 gap-4 items-center">
+                    <div className="flex items-center gap-3">
+                      <OrderCheckbox orderId={order.id} />
+                      <div className="min-w-0">
+                        <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black mb-1">
+                          Order
+                        </p>
+                        <Link
+                          href={`/admin/orders/${order.id}`}
+                          className="text-sm text-secondary font-black hover:text-primary transition-colors"
+                        >
+                          #{order.id} <ExternalLink size={10} className="inline text-slate-300" />
+                        </Link>
+                        <p className="text-[10px] text-slate-400 mt-0.5">
+                          {order.created_at
+                            ? new Date(order.created_at).toLocaleDateString('en-NZ', {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })
+                            : 'N/A'}
+                        </p>
+                        {order.coupon_code && (
+                          <span className="inline-flex items-center gap-1 mt-1 text-[9px] font-black uppercase tracking-widest rounded-full px-2 py-0.5 bg-primary/20 text-secondary">
+                            <BadgePercent size={9} /> {order.coupon_code}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    {customer?.email && (
-                      <p className="text-[10px] text-slate-400 mt-0.5 truncate">{customer.email}</p>
-                    )}
-                  </div>
 
-                  <div>
-                    <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black mb-1">
-                      Ship To
-                    </p>
-                    <div className="flex items-start gap-1.5">
-                      <MapPin size={11} className="text-slate-400 shrink-0 mt-0.5" />
-                      <p className="text-[11px] text-slate-600 font-bold leading-tight">
-                        {shippingAddr}
+                    <div>
+                      <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black mb-1">
+                        Customer
+                      </p>
+                      <div className="flex items-center gap-1.5">
+                        <User size={11} className="text-slate-400 shrink-0" />
+                        <p className="text-sm text-secondary font-black truncate">{name}</p>
+                      </div>
+                      {customer?.email && (
+                        <p className="text-[10px] text-slate-400 mt-0.5 truncate">
+                          {customer.email}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black mb-1">
+                        Ship To
+                      </p>
+                      <div className="flex items-start gap-1.5">
+                        <MapPin size={11} className="text-slate-400 shrink-0 mt-0.5" />
+                        <p className="text-[11px] text-slate-600 font-bold leading-tight">
+                          {shippingAddr}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black mb-1">
+                        Total
+                      </p>
+                      <p className="text-lg text-primary font-black">
+                        ${Number(order.total_amount).toFixed(2)}
+                        <span className="text-[10px] text-slate-400 font-bold ml-1">
+                          {(order.currency || 'NZD').toUpperCase()}
+                        </span>
                       </p>
                     </div>
+
+                    <div className="flex flex-col gap-2 items-end">
+                      <OrderStatusSelect
+                        orderId={order.id}
+                        currentStatus={order.status || 'processing'}
+                      />
+                      {stripeUrl && (
+                        <a
+                          href={stripeUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-primary transition-colors"
+                        >
+                          <ExternalLink size={11} /> Stripe
+                        </a>
+                      )}
+                    </div>
                   </div>
 
-                  <div>
-                    <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black mb-1">
-                      Total
-                    </p>
-                    <p className="text-lg text-primary font-black">
-                      ${Number(order.total_amount).toFixed(2)}
-                      <span className="text-[10px] text-slate-400 font-bold ml-1">
-                        {(order.currency || 'NZD').toUpperCase()}
-                      </span>
-                    </p>
-                  </div>
-
-                  <div className="flex flex-col gap-2 items-end">
-                    <OrderStatusSelect
-                      orderId={order.id}
-                      currentStatus={order.status || 'processing'}
-                    />
-                    {stripeUrl && (
-                      <a
-                        href={stripeUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-primary transition-colors"
-                      >
-                        <ExternalLink size={11} /> Stripe
-                      </a>
-                    )}
-                  </div>
-                </div>
-
-                {/* Line items */}
-                <div className="px-8 py-5">
-                  <ul className="divide-y divide-slate-50">
-                    {order.order_items.map((item) => (
-                      <li key={item.id} className="py-3 flex justify-between items-center group">
-                        <div className="flex items-center gap-3">
-                          <div className="w-1.5 h-1.5 bg-primary rounded-full group-hover:scale-150 transition-transform" />
-                          <div>
-                            <p className="text-sm font-black text-secondary uppercase tracking-wider">
-                              {item.product_name}
-                            </p>
-                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">
-                              Qty: {item.quantity}
-                            </p>
+                  {/* Line items */}
+                  <div className="px-8 py-5">
+                    <ul className="divide-y divide-slate-50">
+                      {order.order_items.map((item) => (
+                        <li key={item.id} className="py-3 flex justify-between items-center group">
+                          <div className="flex items-center gap-3">
+                            <div className="w-1.5 h-1.5 bg-primary rounded-full group-hover:scale-150 transition-transform" />
+                            <div>
+                              <p className="text-sm font-black text-secondary uppercase tracking-wider">
+                                {item.product_name}
+                              </p>
+                              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">
+                                Qty: {item.quantity}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                        <p className="text-sm font-black text-secondary">
-                          ${Number(item.total).toFixed(2)}
-                        </p>
-                      </li>
-                    ))}
-                  </ul>
+                          <p className="text-sm font-black text-secondary">
+                            ${Number(item.total).toFixed(2)}
+                          </p>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
-              </div>
-            );
-          })
-        )}
-      </div>
+              );
+            })
+          )}
+        </div>
+      </BulkOrderProvider>
     </div>
   );
 }
