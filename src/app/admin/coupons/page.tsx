@@ -1,4 +1,5 @@
 import { CouponCreator, CouponDelete } from '@/components/admin/CouponCreator';
+import { CouponEditor } from '@/components/admin/CouponEditor';
 import { requireAdmin } from '@/lib/admin-auth';
 import { BadgePercent } from 'lucide-react';
 
@@ -15,16 +16,38 @@ type Coupon = {
   expiry_date: string | null;
 };
 
+type CouponUsage = {
+  coupon_code: string;
+  total_amount: number | null;
+};
+
 export default async function AdminCouponsPage() {
   const { adminClient } = await requireAdmin();
 
-  const { data: coupons } = await adminClient
-    .from('coupons')
-    .select('id, code, discount_type, amount, expiry_date')
-    .order('code');
+  const [{ data: coupons }, { data: couponUsage }] = await Promise.all([
+    adminClient
+      .from('coupons')
+      .select('id, code, discount_type, amount, expiry_date')
+      .order('code'),
+    adminClient
+      .from('orders')
+      .select('coupon_code, total_amount')
+      .not('coupon_code', 'is', null)
+      .limit(500),
+  ]);
 
   const rows = (coupons || []) as Coupon[];
+  const usage = (couponUsage || []) as CouponUsage[];
   const now = Date.now();
+
+  const usageByCode = new Map<string, { uses: number; revenue: number }>();
+  for (const u of usage) {
+    const stat = usageByCode.get(u.coupon_code) || { uses: 0, revenue: 0 };
+    stat.uses += 1;
+    stat.revenue += Number(u.total_amount) || 0;
+    usageByCode.set(u.coupon_code, stat);
+  }
+  const maxUses = Math.max(0, ...[...usageByCode.values()].map((s) => s.uses));
 
   return (
     <div>
@@ -61,12 +84,19 @@ export default async function AdminCouponsPage() {
                 key={c.id}
                 className="bg-white border border-slate-100 rounded-3xl overflow-hidden shadow-sm"
               >
-                <div className="px-8 py-5 grid grid-cols-2 md:grid-cols-5 gap-4 items-center">
+                <div className="px-8 py-5 grid grid-cols-2 md:grid-cols-6 gap-4 items-center">
                   <div>
                     <p className="text-sm font-black text-secondary uppercase tracking-wider">
                       {c.code}
                     </p>
-                    <p className="text-[10px] text-slate-400 font-bold mt-0.5">#{c.id}</p>
+                    <p className="text-[10px] text-slate-400 font-bold mt-0.5">
+                      #{c.id}
+                      {expired && (
+                        <span className="ml-2 text-[9px] font-black uppercase tracking-widest rounded-full px-2 py-0.5 bg-rose-100 text-rose-700">
+                          Expired
+                        </span>
+                      )}
+                    </p>
                   </div>
                   <div>
                     <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black mb-1">
@@ -97,16 +127,40 @@ export default async function AdminCouponsPage() {
                     </p>
                   </div>
                   <div>
-                    {expired && (
-                      <span className="text-[10px] font-black uppercase tracking-widest rounded-full px-2.5 py-1 bg-rose-100 text-rose-700">
-                        Expired
-                      </span>
-                    )}
+                    <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black mb-1">
+                      Used
+                    </p>
+                    <p className="text-sm font-black text-secondary">
+                      {usageByCode.get(c.code)?.uses ?? 0}×
+                    </p>
+                    <div className="mt-1.5 h-1 w-20 bg-slate-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-primary rounded-full"
+                        style={{
+                          width: `${Math.round(((usageByCode.get(c.code)?.uses ?? 0) / Math.max(maxUses, 1)) * 100)}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-black mb-1">
+                      Order revenue
+                    </p>
+                    <p className="text-sm font-black text-secondary">
+                      ${(usageByCode.get(c.code)?.revenue ?? 0).toFixed(2)}
+                    </p>
                   </div>
                   <div className="flex justify-end">
                     <CouponDelete id={c.id} code={c.code} />
                   </div>
                 </div>
+                <CouponEditor
+                  id={c.id}
+                  code={c.code}
+                  discountType={c.discount_type}
+                  amount={c.amount}
+                  expiryDate={c.expiry_date}
+                />
               </div>
             );
           })

@@ -186,11 +186,18 @@ async function ensureOrder(
   const customerId = await resolveCustomerId(supabase, session)
   const [billing, shipping] = buildAddresses(session)
 
+  // The discount may be expanded to a full Coupon object (webhook payload) or
+  // left as its id — record the human-readable code when we have it.
+  const discount = session.discounts?.[0]?.coupon
+  const couponCode =
+    typeof discount === 'object' && discount !== null ? discount.name : null
+
   const { data: order, error: orderError } = await supabase
     .from('orders')
     .insert({
       customer_id: customerId,
       stripe_session_id: session.id,
+      coupon_code: couponCode,
       stripe_payment_intent_id: typeof session.payment_intent === 'string'
         ? session.payment_intent
         : (session.payment_intent?.id ?? null),
