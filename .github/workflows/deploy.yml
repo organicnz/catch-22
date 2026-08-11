@@ -268,6 +268,7 @@ jobs:
             -H "apikey: $ANON" -H "Authorization: Bearer $ANON" \
             "https://$PROJECT_REF.supabase.co/rest/v1/products?select=id&limit=1")
           AUTH_HEALTH=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "apikey: $ANON" \
             "https://$PROJECT_REF.supabase.co/auth/v1/health")
           echo "rest/v1/products → $PRODUCTS | auth/v1/health → $AUTH_HEALTH"
           if [ "$PRODUCTS" != "200" ] || [ "$AUTH_HEALTH" != "200" ]; then
