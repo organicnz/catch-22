@@ -6,7 +6,7 @@ import {
 import { ProductEditor } from '@/components/admin/ProductEditor';
 import { requireAdmin } from '@/lib/admin-auth';
 import { getStorageUrl } from '@/lib/supabase';
-import { Package, Search } from 'lucide-react';
+import { Package, Plus, Search } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -80,9 +80,17 @@ export default async function AdminProductsPage({
         </div>
         <h1 className="text-4xl font-black tracking-tight text-secondary uppercase">Products</h1>
         <div className="h-1.5 w-24 bg-primary mt-3" />
-        <p className="mt-4 text-slate-400 font-bold uppercase tracking-widest text-[10px]">
-          {filtered.length} of {rows.length} products
-        </p>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+          <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">
+            {filtered.length} of {rows.length} products
+          </p>
+          <Link
+            href="/admin/products/new"
+            className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest bg-primary text-secondary rounded-full px-4 py-2 hover:opacity-90 transition-opacity"
+          >
+            <Plus size={12} /> Add product
+          </Link>
+        </div>
       </div>
 
       {/* Filter bar */}

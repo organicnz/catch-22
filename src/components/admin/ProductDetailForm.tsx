@@ -36,6 +36,10 @@ export function ProductDetailForm({ product }: { product: ProductFields }) {
   const [isPending, startTransition] = useTransition();
 
   const save = () => {
+    if (price.trim() === '') {
+      setError('Price is required');
+      return;
+    }
     const priceNum = Number(price);
     if (!Number.isFinite(priceNum) || priceNum < 0) {
       setError('Price must be a non-negative number');

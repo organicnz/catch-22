@@ -1,10 +1,40 @@
 'use server';
 
+import { getStorageUrl } from '@/lib/supabase';
 import { createAdminClient, createServerClient } from '@/lib/supabase-server';
 import { revalidatePath } from 'next/cache';
 
 const VALID_STATUSES = ['processing', 'completed', 'cancelled', 'refunded', 'on-hold'];
 const VALID_STOCK = ['instock', 'outofstock', 'onbackorder'];
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+
+const slugify = (s: string) =>
+  s
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/\p{M}/gu, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 100);
+
+function storagePathFromUrl(url: string | null): string | null {
+  if (!url) return null;
+  const marker = '/storage/v1/object/public/media/';
+  const i = url.indexOf(marker);
+  if (i === -1) return null;
+  const path = url.slice(i + marker.length).split('?')[0];
+  return path || null;
+}
+
+async function deleteStoredImage(path: string | null) {
+  if (!path) return;
+  try {
+    const adminClient = await requireAdminClient();
+    await adminClient.storage.from('media').remove([path]);
+  } catch {
+    // Best effort — a stale orphaned file is not worth failing the action
+  }
+}
 
 async function requireAdminClient() {
   const supabase = await createServerClient();
@@ -117,6 +147,7 @@ export async function updateProduct(payload: {
     .eq('id', id);
   if (error) throw new Error(error.message);
   revalidatePath('/admin/products');
+  revalidatePath(`/admin/products/${id}`);
   revalidatePath('/products');
 }
 
@@ -137,6 +168,132 @@ export async function bulkUpdateProductStock(productIds: number[], stockStatus: 
     .in('id', productIds);
   if (error) throw new Error(error.message);
   revalidatePath('/admin/products');
+  revalidatePath('/products');
+}
+
+export async function createProduct(payload: {
+  name: string;
+  price: number;
+  regular_price?: number | null;
+  stock_status?: string;
+  short_description?: string;
+  description?: string;
+}): Promise<number> {
+  const name = payload.name.trim();
+  if (!name) throw new Error('Name cannot be empty');
+  if (name.length > 255) throw new Error('Name is too long (max 255 chars)');
+  if (!Number.isFinite(payload.price) || payload.price < 0) {
+    throw new Error('Price must be a non-negative number');
+  }
+  if (payload.regular_price !== undefined && payload.regular_price !== null) {
+    if (!Number.isFinite(payload.regular_price) || payload.regular_price < 0) {
+      throw new Error('Compare-at price must be a non-negative number');
+    }
+  }
+  if (payload.short_description && payload.short_description.length > 2000) {
+    throw new Error('Short description is too long (max 2000 chars)');
+  }
+  if (payload.description && payload.description.length > 50000) {
+    throw new Error('Description is too long (max 50000 chars)');
+  }
+  const stockStatus = payload.stock_status || 'instock';
+  if (!VALID_STOCK.includes(stockStatus)) throw new Error('Invalid stock status');
+
+  const adminClient = await requireAdminClient();
+
+  const baseSlug = slugify(name) || 'product';
+  const { data: existing } = await adminClient
+    .from('products')
+    .select('slug')
+    .like('slug', `${baseSlug}%`);
+  const taken = new Set((existing || []).map((r) => r.slug));
+  let slug = baseSlug;
+  let n = 2;
+  while (taken.has(slug)) slug = `${baseSlug}-${n++}`;
+
+  const { data, error } = await adminClient
+    .from('products')
+    .insert({
+      name,
+      slug,
+      price: payload.price,
+      regular_price: payload.regular_price ?? null,
+      stock_status: stockStatus,
+      short_description: payload.short_description?.trim() || null,
+      description: payload.description?.trim() || null,
+    })
+    .select('id')
+    .single();
+  if (error) throw new Error(error.message);
+  revalidatePath('/admin/products');
+  revalidatePath('/products');
+  return data.id;
+}
+
+export async function uploadProductImage(formData: FormData): Promise<{ url: string }> {
+  const file = formData.get('file');
+  const productId = Number(formData.get('productId'));
+  if (!(file instanceof File)) throw new Error('No file provided');
+  if (!file.type.startsWith('image/')) throw new Error('File must be an image');
+  if (file.size > MAX_IMAGE_SIZE) throw new Error('Image must be 5MB or smaller');
+  if (!Number.isInteger(productId) || productId <= 0) throw new Error('Invalid product');
+
+  const adminClient = await requireAdminClient();
+  const { data: product } = await adminClient
+    .from('products')
+    .select('image_url')
+    .eq('id', productId)
+    .single();
+  if (!product) throw new Error('Product not found');
+
+  const extMap: Record<string, string> = {
+    jpeg: 'jpg',
+    png: 'png',
+    webp: 'webp',
+    gif: 'gif',
+  };
+  const ext = extMap[file.type.split('/')[1]] || 'png';
+  const base = slugify(file.name.replace(/\.[^.]+$/, '')) || 'image';
+  const path = `products/${productId}/${Date.now()}-${base.slice(0, 40)}.${ext}`;
+
+  const { error: uploadError } = await adminClient.storage
+    .from('media')
+    .upload(path, file, { upsert: true, contentType: file.type });
+  if (uploadError) throw new Error(uploadError.message);
+
+  const url = getStorageUrl(path);
+  const { error } = await adminClient
+    .from('products')
+    .update({ image_url: url })
+    .eq('id', productId);
+  if (error) throw new Error(error.message);
+
+  await deleteStoredImage(storagePathFromUrl(product.image_url));
+  revalidatePath('/admin/products');
+  revalidatePath(`/admin/products/${productId}`);
+  revalidatePath('/products');
+  return { url };
+}
+
+export async function removeProductImage(productId: number) {
+  if (!Number.isInteger(productId) || productId <= 0) throw new Error('Invalid product');
+  const adminClient = await requireAdminClient();
+  const { data: product } = await adminClient
+    .from('products')
+    .select('image_url')
+    .eq('id', productId)
+    .single();
+  if (!product) throw new Error('Product not found');
+
+  const { error } = await adminClient
+    .from('products')
+    .update({ image_url: null })
+    .eq('id', productId);
+  if (error) throw new Error(error.message);
+
+  await deleteStoredImage(storagePathFromUrl(product.image_url));
+  revalidatePath('/admin/products');
+  revalidatePath(`/admin/products/${productId}`);
   revalidatePath('/products');
 }
 
