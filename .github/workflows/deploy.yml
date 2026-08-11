@@ -75,13 +75,50 @@ jobs:
         run: bun test
 
   # ─────────────────────────────────────────────────────────────────────────────
+  # 2b. Production build
+  #    `next build` exercises what Vercel will deploy — server/client compile,
+  #    sitemap + robots generation. The sitemap does a live public read against
+  #    Supabase with the anon key, so a revoked key or dead project URL fails
+  #    here, not in production. NEXT_PUBLIC_* values are public by design (they
+  #    ship in the browser bundle); storing them as secrets is fine for CI.
+  # ─────────────────────────────────────────────────────────────────────────────
+  build:
+    name: Production Build
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+      NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Cache bun install
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-cache-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            bun-cache-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Production build
+        run: bun run build
+
+  # ─────────────────────────────────────────────────────────────────────────────
   # 3. Supabase — DB migrations + edge function deployments
   #    Only runs on push to main. Failure here fails the whole run.
   # ─────────────────────────────────────────────────────────────────────────────
   supabase:
     name: Supabase (Migrations + Edge Functions)
     runs-on: ubuntu-latest
-    needs: [lint, test]
+    needs: [lint, test, build]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     timeout-minutes: 20
     permissions:
