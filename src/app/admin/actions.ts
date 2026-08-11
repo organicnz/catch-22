@@ -37,6 +37,24 @@ export async function updateOrderStatus(orderId: number, status: string) {
   revalidatePath('/account');
 }
 
+export async function bulkUpdateOrderStatus(orderIds: number[], status: string) {
+  if (!VALID_STATUSES.includes(status)) {
+    throw new Error('Invalid status');
+  }
+  if (orderIds.length === 0) {
+    throw new Error('No orders selected');
+  }
+  if (orderIds.length > 200) {
+    throw new Error('Select at most 200 orders at once');
+  }
+  const adminClient = await requireAdminClient();
+  const { error } = await adminClient.from('orders').update({ status }).in('id', orderIds);
+  if (error) throw new Error(error.message);
+  revalidatePath('/admin');
+  revalidatePath('/admin/orders');
+  revalidatePath('/account');
+}
+
 export async function updateFulfillment(
   orderId: number,
   payload: { tracking_number?: string | null; admin_notes?: string | null }

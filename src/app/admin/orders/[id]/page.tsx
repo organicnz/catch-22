@@ -1,3 +1,4 @@
+import { EmailActions } from '@/components/admin/EmailActions';
 import { FulfilmentEditor } from '@/components/admin/FulfilmentEditor';
 import { OrderStatusSelect } from '@/components/admin/OrderStatusSelect';
 import { requireAdmin } from '@/lib/admin-auth';
@@ -213,6 +214,7 @@ export default async function AdminOrderDetailPage({
               <Mail size={12} className="text-slate-300" /> {customer.email}
             </p>
           )}
+          <EmailActions email={customer?.email ?? null} />
           <span
             className={`inline-block mt-3 text-[10px] font-black uppercase tracking-widest rounded-full px-3 py-1 ${customer ? 'bg-slate-100 text-slate-600' : 'bg-amber-50 text-amber-700'}`}
           >
