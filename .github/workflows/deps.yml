@@ -196,8 +196,10 @@ jobs:
         if: steps.diff.outputs.changed == 'true'
         run: bun audit --audit-level=critical
 
+      # Gates above fail the job on any problem, so reaching this step means
+      # everything passed. No extra condition chaining needed.
       - name: Open upgrade PR
-        if: steps.diff.outputs.changed == 'true' && !cancelled() && !failure()
+        if: steps.diff.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@v6
         with:
           branch: deps/bun-update
@@ -216,5 +218,4 @@ jobs:
             - critical audit across all deps (none)
 
             Review and merge this PR to keep drift low.
-          labels:
-            - dependencies
+          labels: dependencies
