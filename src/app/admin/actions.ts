@@ -246,7 +246,13 @@ export async function uploadProductImage(formData: FormData): Promise<{ url: str
     .single();
   if (!product) throw new Error('Product not found');
 
-  const ext = file.type.replace('jpeg', 'jpg').split('/')[1] || 'png';
+  const extMap: Record<string, string> = {
+    jpeg: 'jpg',
+    png: 'png',
+    webp: 'webp',
+    gif: 'gif',
+  };
+  const ext = extMap[file.type.split('/')[1]] || 'png';
   const base = slugify(file.name.replace(/\.[^.]+$/, '')) || 'image';
   const path = `products/${productId}/${Date.now()}-${base.slice(0, 40)}.${ext}`;
 
