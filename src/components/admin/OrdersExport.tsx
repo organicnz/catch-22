@@ -11,6 +11,7 @@ type ExportOrder = {
   shipping: string;
   items: string;
   total: number | null;
+  coupon: string | null;
 };
 
 function escapeCell(value: string): string {
@@ -28,6 +29,7 @@ export function OrdersExport({ orders }: { orders: ExportOrder[] }) {
       'Email',
       'Ship To',
       'Items',
+      'Coupon',
       'Total (NZD)',
     ];
     const lines = orders.map((o) =>
@@ -39,6 +41,7 @@ export function OrdersExport({ orders }: { orders: ExportOrder[] }) {
         o.email || '',
         o.shipping,
         o.items,
+        o.coupon || '',
         Number(o.total || 0).toFixed(2),
       ]
         .map(escapeCell)

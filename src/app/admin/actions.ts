@@ -113,6 +113,26 @@ export async function updateProduct(payload: {
   revalidatePath('/products');
 }
 
+export async function bulkUpdateProductStock(productIds: number[], stockStatus: string) {
+  if (!VALID_STOCK.includes(stockStatus)) {
+    throw new Error('Invalid stock status');
+  }
+  if (productIds.length === 0) {
+    throw new Error('No products selected');
+  }
+  if (productIds.length > 200) {
+    throw new Error('Select at most 200 products at once');
+  }
+  const adminClient = await requireAdminClient();
+  const { error } = await adminClient
+    .from('products')
+    .update({ stock_status: stockStatus })
+    .in('id', productIds);
+  if (error) throw new Error(error.message);
+  revalidatePath('/admin/products');
+  revalidatePath('/products');
+}
+
 export async function createCoupon(payload: {
   code: string;
   discount_type: 'percent' | 'fixed';

@@ -58,20 +58,30 @@ type Order = {
 };
 
 const STATUS_FILTERS = ['all', 'processing', 'completed', 'cancelled', 'refunded', 'on-hold'];
+const RANGE_FILTERS = ['30d', '90d', '180d', 'all'] as const;
+type RangeKey = (typeof RANGE_FILTERS)[number];
+const RANGE_DAYS: Record<Exclude<RangeKey, 'all'>, number> = {
+  '30d': 30,
+  '90d': 90,
+  '180d': 180,
+};
 
 export default async function AdminOrdersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; q?: string }>;
+  searchParams: Promise<{ status?: string; q?: string; range?: string }>;
 }) {
   const { adminClient } = await requireAdmin();
-  const { status, q } = await searchParams;
+  const { status, q, range } = await searchParams;
 
   const statusFilter = STATUS_FILTERS.includes(status || 'all') ? status || 'all' : 'all';
   const query = (q || '').trim().toLowerCase();
+  const rangeKey: RangeKey = RANGE_FILTERS.includes(range as RangeKey)
+    ? (range as RangeKey)
+    : 'all';
 
   // Stats need the full picture regardless of the filter
-  const { data: allOrders } = await adminClient
+  let ordersQuery = adminClient
     .from('orders')
     .select(
       `id, created_at, status, total_amount, currency,
@@ -82,6 +92,11 @@ export default async function AdminOrdersPage({
     )
     .order('created_at', { ascending: false })
     .limit(500);
+  if (rangeKey !== 'all') {
+    const cutoff = new Date(Date.now() - RANGE_DAYS[rangeKey] * 24 * 60 * 60 * 1000).toISOString();
+    ordersQuery = ordersQuery.gte('created_at', cutoff);
+  }
+  const { data: allOrders } = await ordersQuery;
 
   const orders = (allOrders || []) as Order[];
 
@@ -158,7 +173,7 @@ export default async function AdminOrdersPage({
           {STATUS_FILTERS.map((s) => (
             <Link
               key={s}
-              href={s === 'all' ? '/admin/orders' : `/admin/orders?status=${s}`}
+              href={s === 'all' ? '/admin/orders' : `/admin/orders?status=${s}&range=${rangeKey}`}
               className={`px-4 py-2 rounded-full text-[11px] font-black uppercase tracking-widest whitespace-nowrap transition-colors ${
                 statusFilter === s
                   ? 'bg-primary text-secondary'
@@ -166,6 +181,23 @@ export default async function AdminOrdersPage({
               }`}
             >
               {s}
+            </Link>
+          ))}
+        </nav>
+        <nav className="flex items-center gap-2" aria-label="Order date range">
+          {RANGE_FILTERS.map((r) => (
+            <Link
+              key={r}
+              href={
+                r === 'all' ? '/admin/orders' : `/admin/orders?range=${r}&status=${statusFilter}`
+              }
+              className={`px-3 py-2 rounded-full text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-colors ${
+                rangeKey === r
+                  ? 'bg-secondary text-primary'
+                  : 'bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-secondary'
+              }`}
+            >
+              {r === 'all' ? 'All time' : `Last ${r}`}
             </Link>
           ))}
         </nav>
@@ -196,6 +228,7 @@ export default async function AdminOrdersPage({
                 .map((i) => `${i.product_name || 'Item'} x${i.quantity || 1}`)
                 .join('; '),
               total: order.total_amount,
+              coupon: order.coupon_code,
             };
           })}
         />

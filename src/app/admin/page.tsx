@@ -68,7 +68,7 @@ export default async function AdminDashboardPage() {
       .limit(200),
     adminClient
       .from('orders')
-      .select('status, total_amount')
+      .select('created_at, status, total_amount')
       .gte('created_at', sixtyDaysAgo)
       .lt('created_at', thirtyDaysAgo)
       .order('created_at', { ascending: false })
@@ -83,7 +83,10 @@ export default async function AdminDashboardPage() {
   ]);
 
   const orders = (recentOrders || []) as Order[];
-  const previousRows = (previousOrders || []) as Pick<Order, 'status' | 'total_amount'>[];
+  const previousRows = (previousOrders || []) as Pick<
+    Order,
+    'created_at' | 'status' | 'total_amount'
+  >[];
   const productRows = (products || []) as Product[];
   const couponRows = (couponUsage || []) as { coupon_code: string; total_amount: number | null }[];
 
@@ -127,6 +130,24 @@ export default async function AdminDashboardPage() {
   );
   const dayValues = [...dayBuckets.values()];
   const maxDay = Math.max(...dayValues, 1);
+
+  // Previous-period revenue per the same calendar day (30 days earlier),
+  // aligned so each bar pair covers the same weekday — muted underlay.
+  const prevDayBuckets = new Map<string, number>();
+  for (const day of dayBuckets.keys()) {
+    prevDayBuckets.set(day, 0);
+  }
+  for (const o of previousRows) {
+    if (!o.created_at) continue;
+    const shifted = new Date(new Date(o.created_at).getTime() + 30 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .slice(0, 10);
+    if (prevDayBuckets.has(shifted)) {
+      prevDayBuckets.set(shifted, prevDayBuckets.get(shifted)! + (Number(o.total_amount) || 0));
+    }
+  }
+  const prevDayValues = [...prevDayBuckets.values()];
+  const maxDayBoth = Math.max(maxDay, ...prevDayValues, 1);
 
   // Top products by units sold (last 30 days)
   const unitsByProduct = new Map<string, number>();
@@ -257,21 +278,39 @@ export default async function AdminDashboardPage() {
             <h2 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.25em]">
               Revenue — last 14 days
             </h2>
-            <span className="text-[10px] text-slate-300 font-black uppercase tracking-widest">
-              {fmtMoney(maxDay)}↑ best day
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="text-[9px] text-slate-400 font-black uppercase tracking-widest inline-flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-primary" /> This period
+              </span>
+              <span className="text-[9px] text-slate-400 font-black uppercase tracking-widest inline-flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-slate-200" /> Prior period
+              </span>
+              <span className="text-[10px] text-slate-300 font-black uppercase tracking-widest">
+                {fmtMoney(maxDay)}↑ best day
+              </span>
+            </div>
           </div>
           <div className="flex items-end gap-1.5 h-40">
             {dayValues.map((v, i) => {
               const day = [...dayBuckets.keys()][i];
-              const h = Math.max(4, Math.round((v / maxDay) * 100));
+              const prev = prevDayValues[i] || 0;
+              const h = Math.max(4, Math.round((v / maxDayBoth) * 100));
+              const ph = Math.max(2, Math.round((prev / maxDayBoth) * 100));
               return (
-                <div
-                  key={day}
-                  title={`${dayLabels.get(day)} — ${fmtMoney(v)}`}
-                  className={`flex-1 rounded-t-md transition-all ${v > 0 ? 'bg-primary' : 'bg-slate-100'}`}
-                  style={{ height: `${h}%` }}
-                />
+                <div key={day} className="flex-1 flex flex-col justify-end gap-0.5">
+                  {prev > 0 && (
+                    <div
+                      title={`${dayLabels.get(day)} (prior period) — ${fmtMoney(prev)}`}
+                      className="rounded-t-sm bg-slate-200 transition-all"
+                      style={{ height: `${ph}%` }}
+                    />
+                  )}
+                  <div
+                    title={`${dayLabels.get(day)} — ${fmtMoney(v)}`}
+                    className={`rounded-t-md transition-all ${v > 0 ? 'bg-primary' : 'bg-slate-100'}`}
+                    style={{ height: `${h}%` }}
+                  />
+                </div>
               );
             })}
           </div>
