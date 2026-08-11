@@ -16,6 +16,7 @@ export default function AccountError({
           <p className="text-slate-400 text-xs font-mono mb-6">Digest: {error.digest}</p>
         )}
         <button
+          type="button"
           onClick={reset}
           className="bg-primary text-secondary font-black text-xs uppercase tracking-widest px-6 py-3 rounded-full"
         >

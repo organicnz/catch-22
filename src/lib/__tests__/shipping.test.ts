@@ -33,8 +33,7 @@ describe('SHIPPING_RATES', () => {
 
   it('pickup rate has zero amount', () => {
     const pickup = SHIPPING_RATES.find((r) => r.id === 'pickup');
-    expect(pickup).toBeDefined();
-    expect(pickup!.amount).toBe(0);
+    expect(pickup?.amount).toBe(0);
   });
 
   it('standard rate is 800 cents ($8.00 NZD)', () => {
@@ -43,9 +42,10 @@ describe('SHIPPING_RATES', () => {
   });
 
   it('rural rate is more expensive than standard', () => {
-    const standard = SHIPPING_RATES.find((r) => r.id === 'standard')!;
-    const rural = SHIPPING_RATES.find((r) => r.id === 'rural')!;
-    expect(rural.amount).toBeGreaterThan(standard.amount);
+    const standard = SHIPPING_RATES.find((r) => r.id === 'standard');
+    const rural = SHIPPING_RATES.find((r) => r.id === 'rural');
+    expect(standard?.amount).toBeGreaterThanOrEqual(0);
+    expect(rural?.amount).toBeGreaterThan(standard?.amount ?? 0);
   });
 });
 
@@ -76,7 +76,9 @@ describe('getStripeShippingOptions()', () => {
   });
 
   it('uses stripeDisplayName when present, falls back to name', () => {
-    const pickup = SHIPPING_RATES.find((r) => r.id === 'pickup')!;
+    const pickup = SHIPPING_RATES.find((r) => r.id === 'pickup');
+    expect(pickup).toBeDefined();
+    if (!pickup) return;
     const options = getStripeShippingOptions();
     const pickupOpt = options[SHIPPING_RATES.indexOf(pickup)];
     // pickup has a stripeDisplayName

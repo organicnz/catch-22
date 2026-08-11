@@ -127,6 +127,7 @@ export type Database = {
           discount_type: string | null
           expiry_date: string | null
           id: number
+          stripe_coupon_id: string | null
           wp_id: number | null
         }
         Insert: {
@@ -135,6 +136,7 @@ export type Database = {
           discount_type?: string | null
           expiry_date?: string | null
           id?: number
+          stripe_coupon_id?: string | null
           wp_id?: number | null
         }
         Update: {
@@ -143,6 +145,7 @@ export type Database = {
           discount_type?: string | null
           expiry_date?: string | null
           id?: number
+          stripe_coupon_id?: string | null
           wp_id?: number | null
         }
         Relationships: []

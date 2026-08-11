@@ -304,11 +304,14 @@ pre-commit:
     #   src/app/api/webhooks/  — stripe webhook (server-to-server, no user session)
     #   src/app/products/page.tsx — public product listing (read-only, no write)
     #   src/app/account/page.tsx  — profile fetch with user-id scoping
+    #   src/lib/admin-auth.ts     — admin-only chokepoint: verifies is_admin
+    #                              BEFORE issuing the admin client, then hands
+    #                              it only to /admin routes and actions.
     admin-client-scope:
       priority: 10
       glob: "src/**/*.{ts,tsx}"
       run: |
-        ALLOWLIST="src/app/admin/|src/app/api/webhooks/|src/app/products/page.tsx|src/app/account/page.tsx|src/lib/supabase-server.ts"
+        ALLOWLIST="src/app/admin/|src/app/api/webhooks/|src/app/products/page.tsx|src/app/account/page.tsx|src/lib/supabase-server.ts|src/lib/admin-auth.ts"
         VIOLATIONS=""
         for f in {staged_files}; do
           [ -f "$f" ] || continue

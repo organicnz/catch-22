@@ -46,6 +46,7 @@ export function AccountTabShell({ tabs, activeTab, children }: Props) {
           const isActive = activeTab === tab.id;
           return (
             <button
+              type="button"
               key={tab.id}
               role="tab"
               id={`tab-${tab.id}`}
