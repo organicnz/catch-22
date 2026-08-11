@@ -59,6 +59,7 @@ function TabsInner({ tabs, panels, defaultTab }: TabsProps) {
           const isActive = activeId === tab.id;
           return (
             <button
+              type="button"
               key={tab.id}
               role="tab"
               id={`tab-${tab.id}`}
