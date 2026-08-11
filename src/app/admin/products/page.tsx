@@ -1,6 +1,8 @@
 import { ProductEditor } from '@/components/admin/ProductEditor';
 import { requireAdmin } from '@/lib/admin-auth';
+import { getStorageUrl } from '@/lib/supabase';
 import { Package } from 'lucide-react';
+import Image from 'next/image';
 
 export const metadata = {
   title: 'Products — Admin · Catch-22',
@@ -70,10 +72,11 @@ export default async function AdminProductsPage() {
             >
               <div className="px-8 py-5 flex flex-wrap items-center gap-6">
                 {p.image_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={p.image_url}
+                  <Image
+                    src={getStorageUrl(p.image_url)}
                     alt={p.name}
+                    width={56}
+                    height={56}
                     className="w-14 h-14 rounded-2xl object-cover bg-slate-100 shrink-0"
                   />
                 ) : (
