@@ -101,16 +101,6 @@ export default async function AdminOrderDetailPage({
     ? [customer.first_name, customer.last_name].filter(Boolean).join(' ') || customer.email
     : 'Guest';
   const addr = order.shipping_address as Record<string, string> | null;
-  const addressLines = [
-    addr?.line1 ?? addr?.address_1,
-    addr?.line2 ?? addr?.address_2,
-    addr?.city,
-    addr?.state,
-    addr?.postal_code ?? addr?.postcode,
-    addr?.country,
-  ]
-    .filter(Boolean)
-    .join(', ');
 
   const stripeUrl = order.stripe_session_id
     ? `https://dashboard.stripe.com/payments/${order.stripe_session_id}`

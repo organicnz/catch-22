@@ -7,6 +7,9 @@
 # ── Baseline metrics (update when intentionally changed) ─────────────────────
 # suppress-count baseline: 5   (checked in pre-push)
 # coverage threshold     : 90% (checked in pre-push + vitest.config.ts)
+# env contract           : every code-referenced env var exists in .env.example
+# lockfile contract      : package.json and bun.lock must move together
+# deps contract          : all non-optional peerDependencies must be satisfied
 # ─────────────────────────────────────────────────────────────────────────────
 
 # ─── pre-commit ───────────────────────────────────────────────────────────────
@@ -113,16 +116,19 @@ pre-commit:
         for f in {staged_files}; do
           [ -f "$f" ] || continue
           # Find SECURITY DEFINER occurrences
-          while IFS= read -r lineno; do
-            # Check ±10 lines around the SECURITY DEFINER for SET search_path
-            start=$((lineno - 5))
-            [ "$start" -lt 1 ] && start=1
-            end=$((lineno + 10))
-            context=$(sed -n "${start},${end}p" "$f" 2>/dev/null || true)
-            if ! echo "$context" | grep -qi "SET search_path"; then
-              VIOLATIONS="$VIOLATIONS\n  $f:$lineno"
-            fi
-          done < <(grep -n "SECURITY DEFINER" "$f" 2>/dev/null | cut -d: -f1 || true)
+          LINES=$(grep -n "SECURITY DEFINER" "$f" 2>/dev/null | cut -d: -f1 || true)
+          if [ -n "$LINES" ]; then
+            for lineno in $LINES; do
+              # Check ±10 lines around the SECURITY DEFINER for SET search_path
+              start=$((lineno - 5))
+              [ "$start" -lt 1 ] && start=1
+              end=$((lineno + 10))
+              context=$(sed -n "${start},${end}p" "$f" 2>/dev/null || true)
+              if ! echo "$context" | grep -qi "SET search_path"; then
+                VIOLATIONS="$VIOLATIONS\n  $f:$lineno"
+              fi
+            done
+          fi
         done
         if [ -n "$VIOLATIONS" ]; then
           echo ""
@@ -603,6 +609,62 @@ pre-commit:
       glob: "*.{ts,tsx}"
       run: bun tsc --noEmit --incremental false
 
+    # ── 20. Env usage coverage ────────────────────────────────────────────────
+    # Every env var referenced in code must be declared in .env.example.
+    # A referenced-but-undeclared var is silently undefined in CI/deploy
+    # (validation-layer drift) — the Vault/edge secrets only cover declared
+    # keys, so undeclared access would ship a runtime bug.
+    # Allowed raw-access files (env.ts, supabase init) are already exempted
+    # by no-raw-env-access; this closes the NEXT_PUBLIC + declaration gap.
+    env-usage-coverage:
+      priority: 20
+      glob: "src/**/*.{ts,tsx}"
+      run: |
+        VIOLATIONS=""
+        for f in {staged_files}; do
+          [ -f "$f" ] || continue
+          FOUND=$(grep -oE "process\.env\.[A-Z_][A-Z0-9_]*" "$f" 2>/dev/null | sed 's/process\.env\.//' | sort -u || true)
+          if [ -n "$FOUND" ]; then
+            for var in $FOUND; do
+              case "$var" in
+                NEXT_PUBLIC_*|NODE_ENV|NEXT_SKIP_ENV_VALIDATION) continue ;;
+              esac
+              if ! grep -q "^${var}=" .env.example 2>/dev/null; then
+                VIOLATIONS="$VIOLATIONS\n  $f → process.env.$var"
+              fi
+            done
+          fi
+        done
+        if [ -n "$VIOLATIONS" ]; then
+          echo ""
+          echo "✖  Env vars used in code but missing from .env.example:"
+          printf "$VIOLATIONS"
+          echo ""
+          echo ""
+          echo "   Add the key to .env.example (and a value to .env.local)."
+          echo "   Secrets live in the Supabase Vault / edge secrets and in"
+          echo "   Vercel Env Variables for the app — .env.example is the"
+          echo "   contract every environment must honour."
+          echo ""
+          exit 1
+        fi
+
+    # ── 21. Lockfile pairing ──────────────────────────────────────────────────
+    # A package.json change without a bun.lock change ships a frozen-lockfile
+    # CI failure (or worse, drift). Require them to move together on commit.
+    lockfile-pair:
+      priority: 21
+      run: |
+        STAGED=$(git diff --cached --name-only 2>/dev/null || true)
+        if echo "$STAGED" | grep -qx "package.json" && ! echo "$STAGED" | grep -qx "bun.lock"; then
+          echo ""
+          echo "✖  package.json staged without bun.lock."
+          echo "   Run: bun install   (updates the lockfile) then re-stage bun.lock."
+          echo "   CI installs with --frozen-lockfile and will fail otherwise."
+          echo ""
+          exit 1
+        fi
+
 # ─── commit-msg ───────────────────────────────────────────────────────────────
 commit-msg:
   commands:
@@ -786,6 +848,14 @@ pre-push:
     build-check:
       priority: 9
       run: NEXT_SKIP_ENV_VALIDATION=1 bun run build
+
+    # ── 8. Peer-dependency compatibility ──────────────────────────────────────
+    # Mirrors the nightly deps.yml gate: a dependency update can pass install,
+    # audits, and tests while still violating a peer range that only breaks at
+    # build/deploy time. Cheap to run locally (node_modules is present).
+    peer-deps:
+      priority: 10
+      run: bun scripts/check-peer-deps.mjs --all
 
 # ─── post-checkout ────────────────────────────────────────────────────────────
 post-checkout:

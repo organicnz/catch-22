@@ -1,13 +1,14 @@
+import { env } from '@/lib/env';
 import { createClient } from '@supabase/supabase-js';
 import type { MetadataRoute } from 'next';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://catch-22.co.nz';
+  const baseUrl = env.NEXT_PUBLIC_SITE_URL;
 
   // Use anon key for public data
   const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? ''
+    env.NEXT_PUBLIC_SUPABASE_URL,
+    env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
   );
 
   const { data: products } = await supabase

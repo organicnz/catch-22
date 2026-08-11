@@ -150,14 +150,13 @@ export default async function AdminCustomerDetailPage({
           { label: 'Avg Order Value', value: `$${aov.toFixed(2)}`, icon: TrendingUp },
           {
             label: 'Last Order',
-            value:
-              lastOrder?.created_at
-                ? new Date(lastOrder.created_at).toLocaleDateString('en-NZ', {
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric',
-                  })
-                : '—',
+            value: lastOrder?.created_at
+              ? new Date(lastOrder.created_at).toLocaleDateString('en-NZ', {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric',
+                })
+              : '—',
             icon: Calendar,
           },
         ].map(({ label, value, icon: Icon }) => (

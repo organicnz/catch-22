@@ -24,6 +24,14 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Cache bun install
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-cache-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            bun-cache-
+
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
@@ -49,8 +57,19 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Cache bun install
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-cache-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            bun-cache-
+
       - name: Install dependencies
         run: bun install --frozen-lockfile
+
+      - name: Peer-dependency compatibility
+        run: bun scripts/check-peer-deps.mjs --all
 
       - name: Run tests
         run: bun test
@@ -74,7 +93,54 @@ jobs:
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v2
         with:
-          version: latest
+          # Pinned — a CLI major bump must be reviewed deliberately, never
+          # surprise-shipped. Update after verifying against a live deploy.
+          version: v2.113.0
+
+      # ── 0. Local-only migration hygiene — pure file checks, no network ──────
+      # Locked in here (not just lefthook) so merged code with a bypassed
+      # local hook still trips a hard CI gate before anything is pushed.
+      - name: Validate migration files
+        run: |
+          ERRORS=""
+          for f in supabase/migrations/*.sql; do
+            [ -f "$f" ] || continue
+            name=$(basename "$f")
+            if ! echo "$name" | grep -qE "^[0-9]{14}_[a-z0-9_]+\.sql$"; then
+              ERRORS="$ERRORS\n  $name — must match ^YYYYMMDDHHMMSS_name.sql$"
+            fi
+
+            # RLS guard: every new CREATE TABLE must enable RLS in the same file
+            TABLES=$(grep -oiE "CREATE TABLE (IF NOT EXISTS )?[a-zA-Z_\"]+" "$f" \
+              | sed -E 's/CREATE TABLE (IF NOT EXISTS )?//' | tr -d '"' | grep -v "^$" || true)
+            for tbl in $TABLES; do
+              tbl_bare=$(echo "$tbl" | sed 's/.*\.//')
+              if ! grep -qi "ALTER TABLE.*${tbl_bare}.*ENABLE ROW LEVEL SECURITY" "$f"; then
+                ERRORS="$ERRORS\n  $name — CREATE TABLE $tbl_bare without ENABLE ROW LEVEL SECURITY"
+              fi
+            done
+
+            # SECURITY DEFINER guard: search_path must be pinned
+            for lineno in $(grep -n "SECURITY DEFINER" "$f" | cut -d: -f1); do
+              start=$((lineno - 5)); [ "$start" -lt 1 ] && start=1
+              end=$((lineno + 10))
+              if ! sed -n "${start},${end}p" "$f" | grep -qi "SET search_path"; then
+                ERRORS="$ERRORS\n  $name:${lineno} — SECURITY DEFINER without SET search_path"
+              fi
+            done
+          done
+
+          DUPES=$(ls supabase/migrations/ | grep -oE "^[0-9]{14}" | sort | uniq -d)
+          if [ -n "$DUPES" ]; then
+            ERRORS="$ERRORS\n  duplicate migration versions: $(echo "$DUPES" | tr '\n' ' ')"
+          fi
+
+          if [ -n "$ERRORS" ]; then
+            echo "::error::Migration file validation failed:"
+            printf "%b\n" "$ERRORS"
+            exit 1
+          fi
+          echo "✅ Migration files validated (naming, RLS, definer, uniqueness)"
 
       # ── 0. Fail loudly on misconfiguration — never skip silently ────────────
       # DB access is token-only (supabase db push --linked): the CLI leases a
@@ -162,6 +228,39 @@ jobs:
             exit 1
           fi
           echo "✅ Migrations applied and ledger 100% in sync"
+
+      # ── 1b. Data-plane smoke after migrations ───────────────────────────────
+      # Proves the REST/PostgREST layer actually serves the applied schema with
+      # the SAME anon publishable key the storefront uses in production —
+      # fetched live from the Management API (single source of truth, never
+      # duplicated into GitHub secrets). A corrupted schema, broken RLS, or
+      # revoked key would surface here in seconds, not at 3am in the store.
+      - name: Smoke-test REST + auth with the production anon key
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: |
+          ANON=$(curl -s "https://api.supabase.com/v1/projects/$PROJECT_REF/api-keys" \
+            -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+            | python3 -c "import json,sys; k=[x for x in json.load(sys.stdin) if x['name']=='anon']; print(k[0]['api_key'] if k else '')")
+          if [ -z "$ANON" ]; then
+            echo "::error::Could not fetch the anon key from the Management API."
+            exit 1
+          fi
+          echo "anon key: ${ANON:0:6}…${ANON: -4} (fetched live from Management API)"
+
+          PRODUCTS=$(curl -s -o /tmp/anon_products.json -w "%{http_code}" \
+            -H "apikey: $ANON" -H "Authorization: Bearer $ANON" \
+            "https://$PROJECT_REF.supabase.co/rest/v1/products?select=id&limit=1")
+          AUTH_HEALTH=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://$PROJECT_REF.supabase.co/auth/v1/health")
+          echo "rest/v1/products → $PRODUCTS | auth/v1/health → $AUTH_HEALTH"
+          if [ "$PRODUCTS" != "200" ] || [ "$AUTH_HEALTH" != "200" ]; then
+            echo "::error::Data-plane smoke failed (products=$PRODUCTS, auth=$AUTH_HEALTH)."
+            cat /tmp/anon_products.json 2>/dev/null || true
+            exit 1
+          fi
+          echo "✅ REST + auth serving with the production anon key"
 
       # ── 2. Edge functions: pre-flight secrets + deploy each with retry ─────
       # Every function validates its required env vars at boot (and the boot
@@ -281,6 +380,11 @@ jobs:
             echo "## ☁️ Supabase deployment"
             echo ""
             echo "**Commit:** \`${{ github.sha }}\`"
+            echo ""
+            echo "**Tooling:**"
+            echo '```'
+            echo "supabase CLI: $(supabase --version)"
+            echo '```'
             echo ""
             echo "### Edge functions"
             echo '```'

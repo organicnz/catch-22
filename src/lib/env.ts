@@ -1,26 +1,28 @@
 import { z } from 'zod';
 
-const envSchema = z.object({
-  // Supabase
+// Public vars are validated in BOTH environments (they are inlined by Next.js
+// into the client bundle). Server-only secrets are added to the schema on the
+// server — they are never inlined, so a client import must not reference them.
+const isClient = typeof window !== 'undefined';
+const skipValidation = process.env.NEXT_SKIP_ENV_VALIDATION === '1';
+
+const publicSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
-  SUPABASE_SECRET_KEY: z.string().min(1).optional(),
-
-  // Stripe
-  STRIPE_SECRET_KEY: z.string().min(1),
-  STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
-  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().min(1).optional(), // Optional for now — checkout will fail without it
-
-  // App
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().min(1).optional(),
   NEXT_PUBLIC_SITE_URL: z.string().url().default('https://catch-22.co.nz'),
 });
 
-export const env = envSchema.parse({
-  NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
-  SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
-  STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
-  STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
-  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
-  NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL || 'https://catch-22.co.nz',
+const serverSchema = publicSchema.extend({
+  SUPABASE_SECRET_KEY: z.string().min(1).optional(),
+  STRIPE_SECRET_KEY: z.string().min(1),
+  STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
 });
+
+const schema = isClient ? publicSchema : serverSchema;
+
+type EnvValue = z.infer<typeof serverSchema>;
+
+export const env: EnvValue = skipValidation
+  ? (process.env as unknown as EnvValue)
+  : (schema.parse({ ...process.env }) as EnvValue);
