@@ -1,3 +1,4 @@
+import { FulfilmentEditor } from '@/components/admin/FulfilmentEditor';
 import { OrderStatusSelect } from '@/components/admin/OrderStatusSelect';
 import { requireAdmin } from '@/lib/admin-auth';
 import {
@@ -8,7 +9,6 @@ import {
   Mail,
   MapPin,
   Package,
-  Phone,
   ShoppingBag,
   User,
 } from 'lucide-react';
@@ -55,6 +55,8 @@ type Order = {
     postal_code?: string;
     country?: string;
   } | null;
+  tracking_number: string | null;
+  admin_notes: string | null;
   order_items: {
     id: number;
     product_name: string | null;
@@ -65,7 +67,6 @@ type Order = {
     first_name: string | null;
     last_name: string | null;
     email: string | null;
-    phone: string | null;
   } | null;
 };
 
@@ -83,11 +84,11 @@ export default async function AdminOrderDetailPage({
   const { data } = await adminClient
     .from('orders')
     .select(
-      `id, created_at, status, total_amount, currency,
+      `id, created_at, status, total_amount, currency, tracking_number, admin_notes,
        payment_method, stripe_session_id,
        shipping_address,
        order_items ( id, product_name, quantity, total ),
-       profiles ( first_name, last_name, email, phone )`
+       profiles ( first_name, last_name, email )`
     )
     .eq('id', orderId)
     .single();
@@ -221,11 +222,6 @@ export default async function AdminOrderDetailPage({
               <Mail size={12} className="text-slate-300" /> {customer.email}
             </p>
           )}
-          {customer?.phone && (
-            <p className="text-sm text-slate-500 font-bold mt-1 flex items-center gap-2">
-              <Phone size={12} className="text-slate-300" /> {customer.phone}
-            </p>
-          )}
           <span
             className={`inline-block mt-3 text-[10px] font-black uppercase tracking-widest rounded-full px-3 py-1 ${customer ? 'bg-slate-100 text-slate-600' : 'bg-amber-50 text-amber-700'}`}
           >
@@ -314,6 +310,26 @@ export default async function AdminOrderDetailPage({
             </li>
           ))}
         </ul>
+      </section>
+
+      {/* Fulfilment */}
+      <section className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm mt-6">
+        <div className="flex items-center gap-2 mb-2">
+          <Package size={14} className="text-primary" />
+          <h2 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.25em]">
+            Fulfilment
+          </h2>
+          {order.tracking_number && (
+            <span className="ml-2 text-[10px] font-black uppercase tracking-widest rounded-full px-3 py-1 bg-emerald-100 text-emerald-800">
+              Shipped
+            </span>
+          )}
+        </div>
+        <FulfilmentEditor
+          orderId={order.id}
+          trackingNumber={order.tracking_number}
+          adminNotes={order.admin_notes}
+        />
       </section>
     </div>
   );

@@ -1,6 +1,7 @@
 import { CustomerAdminToggle } from '@/components/admin/CustomerAdminToggle';
 import { requireAdmin } from '@/lib/admin-auth';
 import { Users } from 'lucide-react';
+import Link from 'next/link';
 
 export const metadata = {
   title: 'Customers — Admin · Catch-22',
@@ -73,9 +74,12 @@ export default async function AdminCustomersPage() {
                 <div className="px-8 py-5 grid grid-cols-2 md:grid-cols-5 gap-4 items-center">
                   <div className="col-span-2">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-sm font-black text-secondary uppercase tracking-wider">
+                      <Link
+                        href={`/admin/customers/${c.id}`}
+                        className="text-sm font-black text-secondary uppercase tracking-wider hover:text-primary transition-colors"
+                      >
                         {[c.first_name, c.last_name].filter(Boolean).join(' ') || 'Guest'}
-                      </p>
+                      </Link>
                       {c.is_admin && (
                         <span className="text-[10px] font-black uppercase tracking-widest rounded-full px-2.5 py-1 bg-primary text-secondary">
                           Admin

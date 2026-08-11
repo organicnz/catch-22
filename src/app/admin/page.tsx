@@ -1,3 +1,4 @@
+import { OrdersExport } from '@/components/admin/OrdersExport';
 import { OrderStatusSelect } from '@/components/admin/OrderStatusSelect';
 import { requireAdmin } from '@/lib/admin-auth';
 import { ExternalLink, MapPin, Package, Search, ShoppingBag, TrendingUp, User } from 'lucide-react';
@@ -65,7 +66,7 @@ export default async function AdminOrdersPage({
        profiles ( first_name, last_name, email )`
     )
     .order('created_at', { ascending: false })
-    .limit(200);
+    .limit(500);
 
   const orders = (allOrders || []) as Order[];
 
@@ -161,6 +162,27 @@ export default async function AdminOrdersPage({
             className="bg-transparent text-sm font-bold text-secondary outline-none placeholder:text-slate-400 w-56"
           />
         </form>
+        <OrdersExport
+          orders={filtered.map((order) => {
+            const customer = order.profiles;
+            return {
+              id: order.id,
+              created_at: order.created_at,
+              status: order.status,
+              customer: customer
+                ? [customer.first_name, customer.last_name].filter(Boolean).join(' ') ||
+                  customer.email ||
+                  'Guest'
+                : 'Guest',
+              email: customer?.email || null,
+              shipping: formatAddress(order.shipping_address),
+              items: order.order_items
+                .map((i) => `${i.product_name || 'Item'} x${i.quantity || 1}`)
+                .join('; '),
+              total: order.total_amount,
+            };
+          })}
+        />
       </div>
 
       {/* Orders */}
