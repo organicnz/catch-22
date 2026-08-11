@@ -98,6 +98,13 @@ jobs:
             exit 1
           fi
 
+      # ── 2c. Peer-dependency compatibility gate ─────────────────────────────
+      # `bun update` (and manual bumps) can satisfy every range, pass every
+      # audit, and still violate a peerDependency that only breaks at build
+      # time. Verify all installed peer relationships up front.
+      - name: Gate peer-dependency compatibility
+        run: bun scripts/check-peer-deps.mjs --all
+
       # ── 3. Drift report (non-blocking, informational) ──────────────────────
       # Outdated packages are surfaced in the job summary, never silently.
       - name: Report outdated packages
@@ -195,6 +202,10 @@ jobs:
       - name: Gate — critical anywhere
         if: steps.diff.outputs.changed == 'true'
         run: bun audit --audit-level=critical
+
+      - name: Gate — peer dependencies
+        if: steps.diff.outputs.changed == 'true'
+        run: bun scripts/check-peer-deps.mjs --all
 
       # Gates above fail the job on any problem, so reaching this step means
       # everything passed. No extra condition chaining needed.

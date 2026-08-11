@@ -1,19 +1,20 @@
 'use client';
 
+import { env } from '@/lib/env';
 import { useCartStore } from '@/lib/store/cart';
 import { Elements, ExpressCheckoutElement } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import type { StripeExpressCheckoutElementConfirmEvent } from '@stripe/stripe-js';
 import { useState } from 'react';
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
+const stripePromise = loadStripe(env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
 
 export function StripeExpressCheckout() {
   const { items, totalPrice } = useCartStore();
   const [errorMessage, setErrorMessage] = useState('');
   const amount = totalPrice();
 
-  if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
+  if (!env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
     return null; // Do not render if publishable key is missing
   }
 

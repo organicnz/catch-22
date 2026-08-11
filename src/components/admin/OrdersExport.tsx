@@ -20,7 +20,16 @@ function escapeCell(value: string): string {
 
 export function OrdersExport({ orders }: { orders: ExportOrder[] }) {
   const handleExport = () => {
-    const header = ['Order ID', 'Date', 'Status', 'Customer', 'Email', 'Ship To', 'Items', 'Total (NZD)'];
+    const header = [
+      'Order ID',
+      'Date',
+      'Status',
+      'Customer',
+      'Email',
+      'Ship To',
+      'Items',
+      'Total (NZD)',
+    ];
     const lines = orders.map((o) =>
       [
         String(o.id),

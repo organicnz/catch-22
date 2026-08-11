@@ -42,7 +42,10 @@ export function FulfilmentEditor({
     <form onSubmit={handleSubmit}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label htmlFor={`tracking-${orderId}`} className="flex items-center gap-1.5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1.5">
+          <label
+            htmlFor={`tracking-${orderId}`}
+            className="flex items-center gap-1.5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1.5"
+          >
             <Truck size={11} /> Tracking number
           </label>
           <input
@@ -55,7 +58,10 @@ export function FulfilmentEditor({
           />
         </div>
         <div>
-          <label htmlFor={`notes-${orderId}`} className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1.5">
+          <label
+            htmlFor={`notes-${orderId}`}
+            className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1.5"
+          >
             Admin notes
           </label>
           <textarea
