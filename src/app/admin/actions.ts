@@ -33,6 +33,7 @@ export async function updateOrderStatus(orderId: number, status: string) {
   if (error) throw new Error(error.message);
   revalidatePath('/admin');
   revalidatePath('/admin/orders');
+  revalidatePath(`/admin/orders/${orderId}`);
   revalidatePath('/account');
 }
 
