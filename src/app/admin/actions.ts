@@ -147,6 +147,7 @@ export async function updateProduct(payload: {
     .eq('id', id);
   if (error) throw new Error(error.message);
   revalidatePath('/admin/products');
+  revalidatePath(`/admin/products/${id}`);
   revalidatePath('/products');
 }
 

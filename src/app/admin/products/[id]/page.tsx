@@ -78,10 +78,13 @@ export default async function AdminProductDetailPage({
     .filter(Boolean);
 
   const items = product.order_items || [];
-  const unitsSold = items.reduce((s, i) => s + (Number(i.quantity) || 0), 0);
-  const revenue = items.reduce((s, i) => s + (Number(i.total) || 0), 0);
+  // Cancelled/refunded orders are not sales — exclude from the stats
+  const NO_SALE_STATUSES = new Set(['cancelled', 'refunded']);
+  const activeItems = items.filter((i) => !NO_SALE_STATUSES.has(i.orders?.status ?? ''));
+  const unitsSold = activeItems.reduce((s, i) => s + (Number(i.quantity) || 0), 0);
+  const revenue = activeItems.reduce((s, i) => s + (Number(i.total) || 0), 0);
   const ordersByProduct = new Map<number, (typeof items)[number]>();
-  for (const item of items) {
+  for (const item of activeItems) {
     const order = item.orders;
     if (!ordersByProduct.has(order.id)) ordersByProduct.set(order.id, item);
   }
