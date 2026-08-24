@@ -89,7 +89,7 @@ export default function PartnersPage() {
   ];
 
   return (
-    <main className="bg-white pt-28 pb-16 px-4 sm:px-6 lg:px-8 min-h-screen">
+    <main className="bg-white pt-(--header-h) pb-16 px-4 sm:px-6 lg:px-8 min-h-screen">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col items-center text-center mb-16">
           <h1 className="text-4xl font-black text-secondary uppercase tracking-tight mb-4">

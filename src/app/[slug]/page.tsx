@@ -58,7 +58,7 @@ export default function ContentPage({ params }: { params: Promise<{ slug: string
 
 function ContentSkeleton() {
   return (
-    <div className="bg-white min-h-screen pt-28 pb-16 px-4 sm:px-6 lg:px-8">
+    <div className="bg-white min-h-screen pt-(--header-h) pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto animate-pulse">
         <div className="flex flex-col mb-12">
           <div className="h-12 w-3/4 bg-slate-100 rounded" />
@@ -85,7 +85,7 @@ async function ContentBody({ params }: { params: Promise<{ slug: string }> }) {
   const cleanBody = sanitizeWPContent(content.body || '');
 
   return (
-    <div className="bg-white min-h-screen pt-28 pb-16 px-4 sm:px-6 lg:px-8">
+    <div className="bg-white min-h-screen pt-(--header-h) pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <div className="flex flex-col mb-12">
           <h1 className="text-4xl md:text-5xl font-black tracking-tight text-secondary uppercase mb-4 leading-tight">

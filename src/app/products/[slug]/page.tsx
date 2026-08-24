@@ -112,7 +112,7 @@ export default function ProductDetails({ params }: { params: Promise<{ slug: str
 function ProductSkeleton() {
   return (
     <div className="bg-white min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-12 sm:py-20 animate-pulse">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-(--header-h) pb-12 sm:py-20 animate-pulse">
         <div className="lg:grid lg:grid-cols-2 lg:gap-x-12 xl:gap-x-16">
           <div className="aspect-square rounded-3xl bg-slate-100" />
           <div className="mt-8 lg:mt-0 space-y-6">
@@ -158,7 +158,7 @@ async function ProductDetailsBody({ params }: { params: Promise<{ slug: string }
 
   return (
     <div className="bg-white min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-12 sm:py-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-(--header-h) pb-12 sm:py-20">
         <div className="lg:grid lg:grid-cols-2 lg:gap-x-12 xl:gap-x-16">
           {/* Image gallery */}
           <div className="flex flex-col">

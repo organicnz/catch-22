@@ -8,7 +8,7 @@ export default function AccountError({
   reset: () => void;
 }) {
   return (
-    <div className="bg-white min-h-screen pt-28 pb-16">
+    <div className="bg-white min-h-screen pt-(--header-h) pb-16">
       <div className="max-w-2xl mx-auto px-4 text-center">
         <h1 className="text-2xl font-black text-secondary uppercase mb-4">Something went wrong</h1>
         <p className="text-slate-500 text-sm mb-2">{error.message}</p>
