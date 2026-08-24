@@ -6,8 +6,6 @@ import { createServerClient } from '@/lib/supabase-server';
 
 const STRIPE_API_VERSION = '2026-07-29.dahlia' as const;
 
-export const dynamic = 'force-dynamic';
-
 export async function POST(req: Request) {
   try {
     const stripeKey = env.STRIPE_SECRET_KEY;

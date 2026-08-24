@@ -4,8 +4,6 @@ import Stripe from 'stripe';
 import { env } from '@/lib/env';
 import { createAdminClient } from '@/lib/supabase-server';
 
-export const dynamic = 'force-dynamic';
-
 const STRIPE_API_VERSION = '2026-07-29.dahlia' as const;
 
 function getStripe() {

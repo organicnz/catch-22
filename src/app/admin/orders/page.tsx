@@ -21,6 +21,10 @@ import { OrdersExport } from '@/components/admin/OrdersExport';
 import { requireAdmin } from '@/lib/admin-auth';
 import type { createAdminClient } from '@/lib/supabase-server';
 
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 export const metadata = {
   title: 'Orders — Admin · Catch-22',
   robots: { index: false, follow: false },

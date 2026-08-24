@@ -3,6 +3,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { getStorageUrl } from '@/lib/supabase';
 
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 // TODO: Cache Components adoption — restore revalidate = 60 as a "use cache" boundary on partners fetch
 export const metadata: Metadata = {
   title: 'Our Partners | Catch-22 New Zealand',
