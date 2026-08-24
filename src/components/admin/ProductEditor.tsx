@@ -1,8 +1,8 @@
 'use client';
 
-import { updateProduct } from '@/app/admin/actions';
 import { Check, Pencil, X } from 'lucide-react';
 import { useState, useTransition } from 'react';
+import { updateProduct } from '@/app/admin/actions';
 
 const STOCK = [
   { value: 'instock', label: 'In stock' },

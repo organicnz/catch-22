@@ -1,6 +1,6 @@
-import { createAdminClient, createPublicClient } from '@/lib/supabase-server';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { createAdminClient, createPublicClient } from '@/lib/supabase-server';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 60; // Revalidate every 60 seconds

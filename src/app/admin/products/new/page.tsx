@@ -1,7 +1,7 @@
-import { ProductCreateForm } from '@/components/admin/ProductCreateForm';
-import { requireAdmin } from '@/lib/admin-auth';
 import { ArrowLeft, Package } from 'lucide-react';
 import Link from 'next/link';
+import { ProductCreateForm } from '@/components/admin/ProductCreateForm';
+import { requireAdmin } from '@/lib/admin-auth';
 
 export const metadata = {
   title: 'New Product — Admin · Catch-22',

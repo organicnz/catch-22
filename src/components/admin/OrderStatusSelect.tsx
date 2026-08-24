@@ -1,7 +1,7 @@
 'use client';
 
-import { updateOrderStatus } from '@/app/admin/actions';
 import { useTransition } from 'react';
+import { updateOrderStatus } from '@/app/admin/actions';
 
 const STATUSES = ['processing', 'completed', 'cancelled', 'refunded', 'on-hold'];
 

@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.5.10/schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
@@ -7,16 +7,18 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "ignore": [
-      ".next/**",
-      "node_modules/**",
-      "out/**",
-      "build/**",
-      "next-env.d.ts",
-      "src/types/supabase.ts",
-      "supabase/functions/**",
-      "scratch/**",
-      "scripts/**"
+    "includes": [
+      "**",
+      "!**/.next",
+      "!**/node_modules",
+      "!**/out",
+      "!**/build",
+      "!**/*.css",
+      "!**/next-env.d.ts",
+      "!**/src/types/supabase.ts",
+      "!**/supabase/functions",
+      "!**/scratch",
+      "!**/scripts"
     ]
   },
   "formatter": {
@@ -29,7 +31,7 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "correctness": {
         "noUnusedVariables": "warn",
         "noUnusedImports": "warn",
@@ -38,7 +40,7 @@
       },
       "suspicious": {
         "noExplicitAny": "warn",
-        "noConsoleLog": "off"
+        "noConsole": { "level": "off", "options": { "allow": ["log"] } }
       },
       "style": {
         "noNonNullAssertion": "warn",
@@ -71,17 +73,11 @@
       "bracketSpacing": true,
       "jsxQuoteStyle": "double"
     },
-    "globals": [
-      "React"
-    ]
+    "globals": ["React"]
   },
   "overrides": [
     {
-      "include": [
-        "**/*.test.ts",
-        "**/*.test.tsx",
-        "**/*.spec.ts"
-      ],
+      "includes": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts"],
       "linter": {
         "rules": {
           "suspicious": {
@@ -91,10 +87,10 @@
       }
     },
     {
-      "include": [
-        "src/app/page.tsx",
-        "src/app/[slug]/page.tsx",
-        "src/app/products/[slug]/page.tsx"
+      "includes": [
+        "**/src/app/page.tsx",
+        "**/src/app/\\[slug\\]/page.tsx",
+        "**/src/app/products/\\[slug\\]/page.tsx"
       ],
       "linter": {
         "rules": {
@@ -105,10 +101,7 @@
       }
     },
     {
-      "include": [
-        "src/app/auth/mfa/page.tsx",
-        "src/components/products/ProductSlider.tsx"
-      ],
+      "includes": ["**/src/app/auth/mfa/page.tsx", "**/src/components/products/ProductSlider.tsx"],
       "linter": {
         "rules": {
           "correctness": {

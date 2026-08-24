@@ -1,7 +1,7 @@
+import Link from 'next/link';
 import { ProductCard } from '@/components/products/ProductCard';
 import { isSpamContent } from '@/lib/sanitize';
 import { createPublicClient } from '@/lib/supabase-server';
-import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 60;

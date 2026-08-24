@@ -1,9 +1,9 @@
 'use client';
 
-import { createClient } from '@/lib/supabase';
 import { Loader2, ShieldAlert, ShieldCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { createClient } from '@/lib/supabase';
 
 export default function MfaChallengePage() {
   const [code, setCode] = useState('');

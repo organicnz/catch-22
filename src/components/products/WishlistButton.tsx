@@ -1,8 +1,8 @@
 'use client';
 
-import { useWishlistStore } from '@/lib/store/wishlist';
 import { Heart } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useWishlistStore } from '@/lib/store/wishlist';
 
 interface WishlistButtonProps {
   product: {

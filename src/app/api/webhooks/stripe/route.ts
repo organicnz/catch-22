@@ -1,8 +1,8 @@
-import { env } from '@/lib/env';
-import { createAdminClient } from '@/lib/supabase-server';
 import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { env } from '@/lib/env';
+import { createAdminClient } from '@/lib/supabase-server';
 
 export const dynamic = 'force-dynamic';
 
@@ -114,7 +114,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, 
     const product = item.price?.product as Stripe.Product;
     return {
       order_id: order.id,
-      product_id: product?.metadata?.id ? Number.parseInt(product.metadata.id) : null,
+      product_id: product?.metadata?.id ? Number.parseInt(product.metadata.id, 10) : null,
       product_name: product?.name || item.description,
       quantity: item.quantity || 1,
       total: (item.amount_total || 0) / 100,

@@ -1,5 +1,5 @@
-import { createAdminClient, createServerClient } from '@/lib/supabase-server';
 import { redirect } from 'next/navigation';
+import { createAdminClient, createServerClient } from '@/lib/supabase-server';
 
 export type AdminSession = {
   adminUserId: string;

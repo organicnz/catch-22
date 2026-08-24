@@ -1,5 +1,5 @@
-import { getStorageUrl } from '@/lib/supabase';
 import Image from 'next/image';
+import { getStorageUrl } from '@/lib/supabase';
 
 const partners = [
   { name: 'Sea Cleaners', logo: getStorageUrl('site/partner-seacleaners.jpg') },

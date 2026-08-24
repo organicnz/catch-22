@@ -1,6 +1,6 @@
-import { createClient } from '@/lib/supabase';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
+import { createClient } from '@/lib/supabase';
 import { updateUserSettingsAction } from '../actions/settings';
 
 export interface UserSettings {

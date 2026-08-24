@@ -1,6 +1,6 @@
-import { SHIPPING_RATES } from '@/config/shipping';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { SHIPPING_RATES } from '@/config/shipping';
 
 export const revalidate = 60;
 

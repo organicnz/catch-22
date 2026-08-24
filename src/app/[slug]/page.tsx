@@ -1,14 +1,16 @@
-import { sanitizeWPContent } from '@/lib/sanitize';
-import { createPublicClient } from '@/lib/supabase-server';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { sanitizeWPContent } from '@/lib/sanitize';
+import { createPublicClient } from '@/lib/supabase-server';
 
 export const revalidate = 3600; // Cache for 1 hour
 
 export async function generateMetadata({
   params,
-}: { params: { slug: string } }): Promise<Metadata> {
+}: {
+  params: { slug: string };
+}): Promise<Metadata> {
   const supabase = createPublicClient();
   const slug = (await params).slug;
 
@@ -87,6 +89,7 @@ export default async function ContentPage({ params }: { params: { slug: string }
             prose-a:text-primary prose-a:font-bold prose-a:no-underline hover:prose-a:underline
             prose-strong:text-secondary prose-strong:font-black
             prose-img:rounded-3xl prose-img:shadow-lg"
+          // cleanBody is produced by sanitizeWPContent (line 28)
           dangerouslySetInnerHTML={{ __html: cleanBody }}
         />
         {content.type === 'post' && (

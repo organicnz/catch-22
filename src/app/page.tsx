@@ -1,3 +1,7 @@
+import type { Metadata } from 'next';
+import Image from 'next/image';
+import Link from 'next/link';
+import { Suspense } from 'react';
 import { CharitySection } from '@/components/home/CharitySection';
 import { HeroSlider } from '@/components/home/HeroSlider';
 import { SustainableSection } from '@/components/home/SustainableSection';
@@ -5,10 +9,6 @@ import { TestimonialSection } from '@/components/home/TestimonialSection';
 import { ProductSlider } from '@/components/products/ProductSlider';
 import { getStorageUrl } from '@/lib/supabase';
 import { createPublicClient } from '@/lib/supabase-server';
-import type { Metadata } from 'next';
-import Image from 'next/image';
-import Link from 'next/link';
-import { Suspense } from 'react';
 
 export const revalidate = 60;
 
@@ -196,6 +196,7 @@ export default async function Home() {
       {/* Schema.org Organization Data */}
       <script
         type="application/ld+json"
+        // Structured data, not WP content: sanitizeWPContent intentionally not applied
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             '@context': 'https://schema.org',

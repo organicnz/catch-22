@@ -1,8 +1,8 @@
 'use client';
 
-import { markAdminUser } from '@/app/admin/actions';
 import { ShieldCheck } from 'lucide-react';
 import { useState, useTransition } from 'react';
+import { markAdminUser } from '@/app/admin/actions';
 
 export function CustomerAdminToggle({
   profileId,

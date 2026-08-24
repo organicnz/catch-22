@@ -1,8 +1,8 @@
 'use client';
 
-import { updateCoupon } from '@/app/admin/actions';
 import { Edit3 } from 'lucide-react';
 import { useState, useTransition } from 'react';
+import { updateCoupon } from '@/app/admin/actions';
 
 export function CouponEditor({
   id,

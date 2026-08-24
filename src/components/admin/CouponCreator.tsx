@@ -1,8 +1,8 @@
 'use client';
 
-import { createCoupon, deleteCoupon } from '@/app/admin/actions';
 import { Plus, Trash2 } from 'lucide-react';
 import { useState, useTransition } from 'react';
+import { createCoupon, deleteCoupon } from '@/app/admin/actions';
 
 export function CouponCreator() {
   const [code, setCode] = useState('');

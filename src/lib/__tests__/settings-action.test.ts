@@ -90,9 +90,9 @@ vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
 }));
 
+import { revalidatePath } from 'next/cache';
 // Import AFTER mocks are registered
 import { updateUserSettingsAction } from '@/lib/actions/settings';
-import { revalidatePath } from 'next/cache';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

@@ -1,7 +1,7 @@
 'use client';
 
-import { useSettingsStore } from '@/lib/store/settings';
 import { Bell, CheckCircle2, CreditCard, Loader2, Mail } from 'lucide-react';
+import { useSettingsStore } from '@/lib/store/settings';
 
 export function UserSettings() {
   const { settings, isLoading, error, updateSettings } = useSettingsStore();

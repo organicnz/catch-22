@@ -1,4 +1,3 @@
-import { SPAM_KEYWORDS, hasSuspiciousContent, isSpamContent, sanitizeText } from '@/lib/sanitize';
 /**
  * Unit tests for the three sanitize.ts functions not covered by the
  * existing property-based test suite: isSpamContent, sanitizeText,
@@ -8,6 +7,7 @@ import { SPAM_KEYWORDS, hasSuspiciousContent, isSpamContent, sanitizeText } from
  * These tests cover the deterministic contract of the remaining exports.
  */
 import { describe, expect, it } from 'vitest';
+import { hasSuspiciousContent, isSpamContent, SPAM_KEYWORDS, sanitizeText } from '@/lib/sanitize';
 
 // ─── isSpamContent ────────────────────────────────────────────────────────────
 describe('isSpamContent()', () => {

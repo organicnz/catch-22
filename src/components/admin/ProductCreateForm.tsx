@@ -1,9 +1,9 @@
 'use client';
 
-import { createProduct } from '@/app/admin/actions';
 import { Check } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
+import { createProduct } from '@/app/admin/actions';
 
 const STOCK = [
   { value: 'instock', label: 'In stock' },

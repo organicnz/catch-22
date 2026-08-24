@@ -1,14 +1,13 @@
 'use client';
 
-import { SHIPPING_RATES } from '@/config/shipping';
-import { useCartStore } from '@/lib/store/cart';
-import { getStorageUrl } from '@/lib/supabase';
 import { ArrowRight, Minus, Plus, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
-
 import { StripeExpressCheckout } from '@/components/checkout/StripeExpressCheckout';
+import { SHIPPING_RATES } from '@/config/shipping';
+import { useCartStore } from '@/lib/store/cart';
+import { getStorageUrl } from '@/lib/supabase';
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, totalPrice } = useCartStore();

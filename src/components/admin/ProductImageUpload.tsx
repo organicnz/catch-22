@@ -1,10 +1,10 @@
 'use client';
 
-import { removeProductImage, uploadProductImage } from '@/app/admin/actions';
 import { ImagePlus, Loader2, Trash2, Upload } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useRef, useState, useTransition } from 'react';
+import { removeProductImage, uploadProductImage } from '@/app/admin/actions';
 
 export function ProductImageUpload({
   productId,

@@ -1,7 +1,7 @@
-import { CustomerAdminToggle } from '@/components/admin/CustomerAdminToggle';
-import { requireAdmin } from '@/lib/admin-auth';
 import { Search, Users } from 'lucide-react';
 import Link from 'next/link';
+import { CustomerAdminToggle } from '@/components/admin/CustomerAdminToggle';
+import { requireAdmin } from '@/lib/admin-auth';
 
 export const metadata = {
   title: 'Customers — Admin · Catch-22',

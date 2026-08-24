@@ -84,11 +84,9 @@ function TabsInner({ tabs, panels, defaultTab }: TabsProps) {
               <Icon size={13} aria-hidden="true" />
               {tab.label}
               {(tab.badge ?? 0) > 0 && (
-                <span
-                  aria-label={`${tab.badge} pending`}
-                  className="ml-1 bg-primary text-secondary text-[9px] font-black rounded-full min-w-[1rem] h-4 px-1 flex items-center justify-center leading-none"
-                >
+                <span className="ml-1 bg-primary text-secondary text-[9px] font-black rounded-full min-w-[1rem] h-4 px-1 flex items-center justify-center leading-none">
                   {tab.badge}
+                  <span className="sr-only">pending</span>
                 </span>
               )}
             </button>

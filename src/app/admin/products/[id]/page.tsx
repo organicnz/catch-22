@@ -1,11 +1,11 @@
-import { ProductDetailForm } from '@/components/admin/ProductDetailForm';
-import { ProductImageUpload } from '@/components/admin/ProductImageUpload';
-import { requireAdmin } from '@/lib/admin-auth';
-import { getStorageUrl } from '@/lib/supabase';
 import { ArrowLeft, Calendar, DollarSign, Package, ShoppingBag, Tag } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { ProductDetailForm } from '@/components/admin/ProductDetailForm';
+import { ProductImageUpload } from '@/components/admin/ProductImageUpload';
+import { requireAdmin } from '@/lib/admin-auth';
+import { getStorageUrl } from '@/lib/supabase';
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

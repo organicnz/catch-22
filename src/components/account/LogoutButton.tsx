@@ -1,10 +1,10 @@
 'use client';
 
-import { useSettingsStore } from '@/lib/store/settings';
-import { createClient } from '@/lib/supabase';
 import { LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useSettingsStore } from '@/lib/store/settings';
+import { createClient } from '@/lib/supabase';
 
 export function LogoutButton() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);

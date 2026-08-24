@@ -1,5 +1,9 @@
 'use client';
 
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Loader2, Shield, ShieldAlert, ShieldCheck } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import {
   Dialog,
@@ -9,10 +13,6 @@ import {
   DialogTitle,
 } from '@/components/ui/Dialog';
 import { createClient } from '@/lib/supabase';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Loader2, Shield, ShieldAlert, ShieldCheck } from 'lucide-react';
-import { QRCodeSVG } from 'qrcode.react';
-import { useState } from 'react';
 
 export function MfaSettings() {
   const [enrolling, setEnrolling] = useState(false);

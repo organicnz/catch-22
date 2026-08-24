@@ -1,5 +1,3 @@
-import { OrderStatusSelect } from '@/components/admin/OrderStatusSelect';
-import { requireAdmin } from '@/lib/admin-auth';
 import {
   AlertTriangle,
   ArrowRight,
@@ -11,6 +9,8 @@ import {
   Users,
 } from 'lucide-react';
 import Link from 'next/link';
+import { OrderStatusSelect } from '@/components/admin/OrderStatusSelect';
+import { requireAdmin } from '@/lib/admin-auth';
 
 export const metadata = {
   title: 'Dashboard — Admin · Catch-22',

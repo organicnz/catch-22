@@ -1,5 +1,5 @@
-import { SHIPPING_RATES, getStripeShippingOptions } from '@/config/shipping';
 import { describe, expect, it } from 'vitest';
+import { getStripeShippingOptions, SHIPPING_RATES } from '@/config/shipping';
 
 // ─── SHIPPING_RATES data integrity ────────────────────────────────────────────
 // Shipping rates are sent directly to Stripe. Wrong values = wrong charges.

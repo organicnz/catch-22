@@ -1,8 +1,8 @@
+import { NextResponse } from 'next/server';
+import Stripe from 'stripe';
 import { getStripeShippingOptions } from '@/config/shipping';
 import { env } from '@/lib/env';
 import { createServerClient } from '@/lib/supabase-server';
-import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
 
 const STRIPE_API_VERSION = '2026-07-29.dahlia' as const;
 
