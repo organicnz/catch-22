@@ -120,7 +120,11 @@ export const getSettings = cache(async () => {
 
     return data?.settings;
   } catch (error) {
-    console.error('Error in getSettings:', error);
+    // Under Cache Components, cookies() rejects once the static shell completes
+    // prerendering; React retries this read at request time. Don't log that signal.
+    if (!(error instanceof Error && /prerender/i.test(error.message))) {
+      console.error('Error in getSettings:', error);
+    }
     return null;
   }
 });
