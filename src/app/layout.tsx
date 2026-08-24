@@ -3,6 +3,7 @@ import { Inter, Outfit } from 'next/font/google';
 import { Suspense } from 'react';
 import './globals.css';
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Toaster } from 'sonner';
 import { SettingsHydrator } from '@/components/account/SettingsHydrator';
 import { Footer } from '@/components/layout/Footer';
@@ -77,6 +78,7 @@ export default function RootLayout({
         </Providers>
         <Toaster position="bottom-right" richColors theme="light" />
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
