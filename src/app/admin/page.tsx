@@ -118,7 +118,7 @@ export default async function AdminDashboardPage() {
     if (!o.created_at) continue;
     const day = o.created_at.slice(0, 10);
     if (dayBuckets.has(day)) {
-      dayBuckets.set(day, dayBuckets.get(day)! + (Number(o.total_amount) || 0));
+      dayBuckets.set(day, (dayBuckets.get(day) ?? 0) + (Number(o.total_amount) || 0));
     }
   }
   const dayLabels = new Map(
@@ -142,7 +142,10 @@ export default async function AdminDashboardPage() {
       .toISOString()
       .slice(0, 10);
     if (prevDayBuckets.has(shifted)) {
-      prevDayBuckets.set(shifted, prevDayBuckets.get(shifted)! + (Number(o.total_amount) || 0));
+      prevDayBuckets.set(
+        shifted,
+        (prevDayBuckets.get(shifted) ?? 0) + (Number(o.total_amount) || 0)
+      );
     }
   }
   const prevDayValues = [...prevDayBuckets.values()];

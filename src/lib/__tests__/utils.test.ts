@@ -20,7 +20,7 @@ describe('cn()', () => {
   });
 
   it('handles conditional falsy values', () => {
-    expect(cn('base', false && 'never', null, undefined, 0 && 'zero')).toBe('base');
+    expect(cn('base', false, null, undefined, 0)).toBe('base');
   });
 
   it('handles conditional truthy values', () => {
