@@ -9,8 +9,8 @@ import { Header } from '@/components/layout/Header';
 import { getSettings } from '@/lib/supabase-server';
 import Providers from './providers';
 
-// Layout reads cookies for auth state — must be dynamic
-export const dynamic = 'force-dynamic';
+// TODO: Cache Components adoption — layout reads cookies for auth state; move the read
+// behind <Suspense> (Header auth section) so the shell can prerender.
 
 const inter = Inter({
   subsets: ['latin'],

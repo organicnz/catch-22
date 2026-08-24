@@ -3,8 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { getStorageUrl } from '@/lib/supabase';
 
-export const revalidate = 60;
-
+// TODO: Cache Components adoption — restore revalidate = 60 as a "use cache" boundary on partners fetch
 export const metadata: Metadata = {
   title: 'Our Partners | Catch-22 New Zealand',
   description:

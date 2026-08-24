@@ -3,8 +3,7 @@ import { ProductCard } from '@/components/products/ProductCard';
 import { isSpamContent } from '@/lib/sanitize';
 import { createPublicClient } from '@/lib/supabase-server';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 60;
+// TODO: Cache Components adoption — search is request-time by nature; no revalidate to restore
 
 export default async function SearchPage({
   searchParams,

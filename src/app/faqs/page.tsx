@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { SHIPPING_RATES } from '@/config/shipping';
 
-export const revalidate = 60;
+// TODO: Cache Components adoption — restore revalidate = 60 as a "use cache" boundary on static content fetches
 
 export const metadata: Metadata = {
   title: 'FAQs | Catch-22 New Zealand',

@@ -10,8 +10,7 @@ import { getStorageUrl } from '@/lib/supabase';
 import { createPublicClient } from '@/lib/supabase-server';
 import type { Json } from '@/types/supabase';
 
-export const revalidate = 60;
-
+// TODO: Cache Components adoption — restore revalidate = 60 as a "use cache" boundary on product fetch
 export async function generateMetadata({
   params,
 }: {
