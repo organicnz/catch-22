@@ -8,8 +8,7 @@ import { UserSettings } from '@/components/account/UserSettings';
 import { createAdminClient, createServerClient } from '@/lib/supabase-server';
 import type { AdminOrder, MyOrder } from '@/types/orders';
 
-// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
-// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+// Deliberate Cache Components opt-out (Block): per-user auth + MFA state, entire surface is request-time.
 export const instant = false;
 
 export const metadata = {

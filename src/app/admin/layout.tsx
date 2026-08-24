@@ -1,8 +1,7 @@
 import { AdminNav } from '@/components/admin/AdminNav';
 import { requireAdmin } from '@/lib/admin-auth';
 
-// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
-// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+// Deliberate Cache Components opt-out (Block): requireAdmin() session gate covers every admin segment.
 export const instant = false;
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
