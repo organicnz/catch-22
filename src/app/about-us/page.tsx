@@ -13,7 +13,7 @@ export default function AboutPage() {
   return (
     <div className="bg-white min-h-screen">
       {/* Hero Section — full bleed, overlaps navbar intentionally */}
-      <div className="relative h-[400px] pt-28 flex items-end pb-16 overflow-hidden">
+      <div className="relative h-[400px] pt-(--header-h) flex items-end pb-16 overflow-hidden">
         <Image
           src={getStorageUrl('site/about-hero.jpg')}
           alt="Fishing in New Zealand"

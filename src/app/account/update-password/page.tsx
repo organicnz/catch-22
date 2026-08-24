@@ -68,7 +68,7 @@ export default function UpdatePasswordPage() {
 
   if (status === 'success') {
     return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4 pt-28 pb-16">
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4 pt-(--header-h) pb-16">
         <div className="max-w-md w-full bg-slate-50 p-10 rounded-3xl shadow-sm text-center border border-slate-100">
           <div className="bg-emerald-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
             <CheckCircle className="w-10 h-10 text-emerald-600" strokeWidth={2.5} />
@@ -93,7 +93,7 @@ export default function UpdatePasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4 pt-28 pb-16">
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4 pt-(--header-h) pb-16">
       <div className="max-w-md w-full">
         {/* Header */}
         <div className="text-center mb-10">

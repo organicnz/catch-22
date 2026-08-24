@@ -5,7 +5,7 @@ import { SHIPPING_RATES } from '@/config/shipping';
 
 export default function ShippingReturnsPage() {
   return (
-    <div className="bg-white min-h-screen pt-28 pb-16 px-4 sm:px-6 lg:px-8">
+    <div className="bg-white min-h-screen pt-(--header-h) pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-16">
           <h1 className="text-4xl font-black text-secondary uppercase tracking-tight mb-4">

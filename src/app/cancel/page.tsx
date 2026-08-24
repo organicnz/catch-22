@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export default function CancelPage() {
   return (
-    <div className="min-h-[80vh] bg-white flex items-center justify-center px-4 pt-28 pb-16">
+    <div className="min-h-[80vh] bg-white flex items-center justify-center px-4 pt-(--header-h) pb-16">
       <div className="max-w-md w-full bg-slate-50 p-10 rounded-3xl shadow-sm text-center border border-slate-100">
         <div className="bg-rose-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
           <XCircle className="w-12 h-12 text-rose-600" strokeWidth={3} />
