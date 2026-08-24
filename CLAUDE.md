@@ -6,6 +6,9 @@
 - `bun run lint`: Code quality and syntax validation.
 - `bun run test`: Execute project test suite (if applicable).
 
+### Agent Skills (Vercel)
+Vercel-published skills are installed in `.agents/skills/` (symlinked into `.claude/skills/`) and pinned via `skills-lock.json`. Load on demand when the task matches: React/Next.js code (`vercel-react-best-practices`, `vercel-composition-patterns`), UI audits (`web-design-guidelines`), route animations (`vercel-react-view-transitions`), deployments (`deploy-to-vercel`, `vercel-cli-with-tokens`), cost/perf tuning (`vercel-optimize`), prose review (`writing-guidelines`). Full trigger table lives in AGENTS.md. Update with `npx skills update`; never re-install manually.
+
 ---
 
 ## 🎨 Design System: "Sensory Luxury"
