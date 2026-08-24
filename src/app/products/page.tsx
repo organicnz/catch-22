@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { createAdminClient, createPublicClient } from '@/lib/supabase-server';
+import { createPublicClient } from '@/lib/supabase-server';
 
 export async function generateMetadata({
   searchParams,
@@ -11,7 +11,7 @@ export async function generateMetadata({
   const categorySlug = typeof resolvedParams.category === 'string' ? resolvedParams.category : null;
 
   if (categorySlug) {
-    const supabase = await createAdminClient();
+    const supabase = createPublicClient();
     const { data: category } = await supabase
       .from('categories')
       .select('name')
@@ -103,7 +103,7 @@ export default async function ProductsPage({
     typeof resolvedSearchParams.category === 'string' ? resolvedSearchParams.category : null;
 
   // Fetch Categories for the Sidebar
-  const { data: categories, error: categoriesError } = await (await createAdminClient())
+  const { data: categories, error: categoriesError } = await createPublicClient()
     .from('categories')
     .select('*')
     .order('name');
