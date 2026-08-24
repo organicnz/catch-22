@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Suspense } from 'react';
@@ -9,12 +10,6 @@ import { TestimonialSection } from '@/components/home/TestimonialSection';
 import { ProductSlider } from '@/components/products/ProductSlider';
 import { getStorageUrl } from '@/lib/supabase';
 import { createPublicClient } from '@/lib/supabase-server';
-
-// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
-// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
-export const instant = false;
-
-// TODO: Cache Components adoption — restore revalidate = 60 as a "use cache" boundary on best-sellers fetch
 
 export const metadata: Metadata = {
   title: 'Catch-22 | Premium Fishing Gear New Zealand',
@@ -49,6 +44,8 @@ export const metadata: Metadata = {
 };
 
 async function BestSellers() {
+  'use cache';
+  cacheLife('minutes');
   const supabase = createPublicClient();
 
   // Fetch featured products (Best Sellers)
@@ -84,6 +81,8 @@ function BestSellersLoading() {
 }
 
 async function DealOfTheDay() {
+  'use cache';
+  cacheLife('minutes');
   const supabase = createPublicClient();
 
   // Fetch a deal product (using the first product with a sale price)

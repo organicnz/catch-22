@@ -5,13 +5,62 @@ import { Heart, LogOut, Menu, Search, ShoppingBag, User, X } from 'lucide-react'
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useCartStore } from '@/lib/store/cart';
 import { useSettingsStore } from '@/lib/store/settings';
 import { useWishlistStore } from '@/lib/store/wishlist';
 import { createClient, getStorageUrl } from '@/lib/supabase';
 
+const NAV_LINKS = [
+  { name: 'Home', href: '/' },
+  { name: 'Shop', href: '/products' },
+  { name: 'Snaps', href: '/gallery' },
+  { name: 'Visit Our Partners', href: '/partners' },
+  { name: 'FAQs', href: '/faqs' },
+  { name: 'Contact', href: '/contact' },
+];
+
 export function Header() {
+  return (
+    <Suspense fallback={<HeaderFallback />}>
+      <HeaderInner />
+    </Suspense>
+  );
+}
+
+// Static-shell placeholder: matches the solid header's height so dynamic-route
+// shells have zero CLS. Hero pages ('/', '/gallery') resolve usePathname during
+// their own prerender, so they never show this fallback.
+function HeaderFallback() {
+  return (
+    <header className="bg-secondary py-6 border-b border-white/5">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+        <Image
+          src={getStorageUrl('site/logo.png')}
+          alt="CATCH-22"
+          width={319}
+          height={225}
+          className="h-16 md:h-24 w-auto"
+          sizes="(max-width: 768px) 120px, 240px"
+          priority
+        />
+        <div className="hidden lg:flex items-center gap-10" aria-hidden="true">
+          {NAV_LINKS.map((link) => (
+            <span
+              key={link.name}
+              className="text-[10px] font-black uppercase tracking-[0.4em] text-white/70"
+            >
+              {link.name}
+            </span>
+          ))}
+        </div>
+        <div className="w-24" aria-hidden="true" />
+      </div>
+    </header>
+  );
+}
+
+function HeaderInner() {
   const [isMounted, setIsMounted] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -70,15 +119,6 @@ export function Header() {
     router.push('/');
   };
 
-  const navLinks = [
-    { name: 'Home', href: '/' },
-    { name: 'Shop', href: '/products' },
-    { name: 'Snaps', href: '/gallery' },
-    { name: 'Visit Our Partners', href: '/partners' },
-    { name: 'FAQs', href: '/faqs' },
-    { name: 'Contact', href: '/contact' },
-  ];
-
   const headerBg = isScrolled
     ? 'bg-secondary/95 backdrop-blur-2xl py-4 shadow-2xl border-b border-white/5'
     : isTransparentPage
@@ -117,7 +157,7 @@ export function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-10">
-            {navLinks.map((link) => (
+            {NAV_LINKS.map((link) => (
               <Link
                 key={link.name}
                 href={link.href}
@@ -225,7 +265,7 @@ export function Header() {
         </div>
 
         <nav className="flex flex-col gap-8">
-          {navLinks.map((link) => (
+          {NAV_LINKS.map((link) => (
             <Link
               key={link.name}
               href={link.href}
