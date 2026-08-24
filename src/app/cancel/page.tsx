@@ -1,6 +1,10 @@
 import { XCircle } from 'lucide-react';
 import Link from 'next/link';
 
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 export default function CancelPage() {
   return (
     <div className="min-h-[80vh] bg-white flex items-center justify-center px-4 pt-28 pb-16">
