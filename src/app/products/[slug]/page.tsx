@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { Suspense } from 'react';
 import { AddToCartButton } from '@/components/checkout/AddToCartButton';
 import { ProductSlider } from '@/components/products/ProductSlider';
 import { WishlistButton } from '@/components/products/WishlistButton';
@@ -10,24 +12,71 @@ import { getStorageUrl } from '@/lib/supabase';
 import { createPublicClient } from '@/lib/supabase-server';
 import type { Json } from '@/types/supabase';
 
-// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
-// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
-export const instant = false;
+async function getProductMeta(slug: string) {
+  'use cache';
+  cacheLife('minutes');
+  const supabase = createPublicClient();
+  const { data } = await supabase
+    .from('products')
+    .select('name, short_description, description, image_url')
+    .eq('slug', slug)
+    .single();
+  return data;
+}
 
-// TODO: Cache Components adoption — restore revalidate = 60 as a "use cache" boundary on product fetch
+async function getProductDetail(slug: string) {
+  'use cache';
+  cacheLife('minutes');
+  const supabase = createPublicClient();
+  const { data, error } = await supabase
+    .from('products')
+    .select(`
+      *,
+      product_categories (
+        category_id
+      ),
+      product_variations (*)
+    `)
+    .eq('slug', slug)
+    .single();
+  return error ? null : data;
+}
+
+async function getRelatedProducts(productId: number, categoryIds: number[]) {
+  'use cache';
+  cacheLife('minutes');
+  const supabase = createPublicClient();
+  const { data: related } = await supabase
+    .from('products')
+    .select(`
+      id, name, slug, price, image_url, stock_status,
+      product_categories!inner (category_id)
+    `)
+    .in('product_categories.category_id', categoryIds)
+    .neq('id', productId)
+    .eq('stock_status', 'instock')
+    .limit(4);
+
+  if (!related) return [];
+
+  // Filter duplicates locally if the query returns multiple due to multiple categories
+  const uniqueIds = new Set();
+  return related.filter((p) => {
+    if (!uniqueIds.has(p.id)) {
+      uniqueIds.add(p.id);
+      return true;
+    }
+    return false;
+  });
+}
+
 export async function generateMetadata({
   params,
 }: {
   params: { slug: string };
 }): Promise<Metadata> {
   const slug = (await params).slug;
-  const supabase = createPublicClient();
-
-  const { data: product } = await supabase
-    .from('products')
-    .select('name, short_description, description, image_url')
-    .eq('slug', slug)
-    .single();
+  const product = await getProductMeta(slug);
 
   if (!product) {
     return { title: 'Product Not Found' };
@@ -52,23 +101,41 @@ export async function generateMetadata({
   };
 }
 
-export default async function ProductDetails({ params }: { params: { slug: string } }) {
-  const supabase = createPublicClient();
+export default function ProductDetails({ params }: { params: Promise<{ slug: string }> }) {
+  return (
+    <Suspense fallback={<ProductSkeleton />}>
+      <ProductDetailsBody params={params} />
+    </Suspense>
+  );
+}
+
+function ProductSkeleton() {
+  return (
+    <div className="bg-white min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-12 sm:py-20 animate-pulse">
+        <div className="lg:grid lg:grid-cols-2 lg:gap-x-12 xl:gap-x-16">
+          <div className="aspect-square rounded-3xl bg-slate-100" />
+          <div className="mt-8 lg:mt-0 space-y-6">
+            <div className="h-10 w-3/4 bg-slate-100 rounded" />
+            <div className="h-6 w-1/4 bg-slate-100 rounded" />
+            <div className="space-y-3 pt-4">
+              {['90%', '81%', '72%', '63%', '45%'].map((width) => (
+                <div key={width} className="h-4 bg-slate-100 rounded" style={{ width }} />
+              ))}
+            </div>
+            <div className="h-14 w-56 bg-slate-100 rounded-full" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+async function ProductDetailsBody({ params }: { params: Promise<{ slug: string }> }) {
   const slug = (await params).slug;
+  const product = await getProductDetail(slug);
 
-  const { data: product, error } = await supabase
-    .from('products')
-    .select(`
-      *,
-      product_categories (
-        category_id
-      ),
-      product_variations (*)
-    `)
-    .eq('slug', slug)
-    .single();
-
-  if (error || !product) {
+  if (!product) {
     return notFound();
   }
 
@@ -83,34 +150,11 @@ export default async function ProductDetails({ params }: { params: { slug: strin
     product_categories: { category_id: number }[];
   }
 
-  let relatedProducts: RelatedProduct[] = [];
   const categoryIds =
     (product.product_categories as { category_id: number }[])?.map((pc) => pc.category_id) || [];
 
-  if (categoryIds.length > 0) {
-    const { data: related } = await supabase
-      .from('products')
-      .select(`
-        id, name, slug, price, image_url, stock_status,
-        product_categories!inner (category_id)
-      `)
-      .in('product_categories.category_id', categoryIds)
-      .neq('id', product.id)
-      .eq('stock_status', 'instock')
-      .limit(4);
-
-    // Filter duplicates locally if the query returns multiple due to multiple categories
-    if (related) {
-      const uniqueIds = new Set();
-      relatedProducts = related.filter((p) => {
-        if (!uniqueIds.has(p.id)) {
-          uniqueIds.add(p.id);
-          return true;
-        }
-        return false;
-      });
-    }
-  }
+  const relatedProducts: RelatedProduct[] =
+    categoryIds.length > 0 ? await getRelatedProducts(product.id, categoryIds) : [];
 
   return (
     <div className="bg-white min-h-screen">

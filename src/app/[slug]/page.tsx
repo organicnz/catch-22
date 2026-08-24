@@ -1,29 +1,31 @@
 import type { Metadata } from 'next';
+import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { Suspense } from 'react';
 import { sanitizeWPContent } from '@/lib/sanitize';
 import { createPublicClient } from '@/lib/supabase-server';
 
-// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
-// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
-export const instant = false;
-
-// TODO: Cache Components adoption — restore revalidate = 3600 as a "use cache" + cacheLife boundary on content fetch
+async function getPublishedContent(slug: string) {
+  'use cache';
+  cacheLife('hours');
+  const supabase = createPublicClient();
+  const { data } = await supabase
+    .from('content')
+    .select('*')
+    .eq('slug', slug)
+    .eq('status', 'publish')
+    .single();
+  return data;
+}
 
 export async function generateMetadata({
   params,
 }: {
   params: { slug: string };
 }): Promise<Metadata> {
-  const supabase = createPublicClient();
   const slug = (await params).slug;
-
-  const { data: content } = await supabase
-    .from('content')
-    .select('title, body')
-    .eq('slug', slug)
-    .eq('status', 'publish')
-    .single();
+  const content = await getPublishedContent(slug);
 
   if (!content) {
     return { title: 'Not Found' };
@@ -46,18 +48,37 @@ export async function generateMetadata({
   };
 }
 
-export default async function ContentPage({ params }: { params: { slug: string } }) {
-  const supabase = createPublicClient();
+export default function ContentPage({ params }: { params: Promise<{ slug: string }> }) {
+  return (
+    <Suspense fallback={<ContentSkeleton />}>
+      <ContentBody params={params} />
+    </Suspense>
+  );
+}
+
+function ContentSkeleton() {
+  return (
+    <div className="bg-white min-h-screen pt-28 pb-16 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto animate-pulse">
+        <div className="flex flex-col mb-12">
+          <div className="h-12 w-3/4 bg-slate-100 rounded" />
+          <div className="h-2 w-24 bg-slate-100 mt-4" />
+        </div>
+        <div className="space-y-4">
+          {['95%', '88%', '81%', '74%', '67%', '60%', '53%', '40%'].map((width) => (
+            <div key={width} className="h-4 bg-slate-100 rounded" style={{ width }} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+async function ContentBody({ params }: { params: Promise<{ slug: string }> }) {
   const slug = (await params).slug;
+  const content = await getPublishedContent(slug);
 
-  const { data: content, error } = await supabase
-    .from('content')
-    .select('*')
-    .eq('slug', slug)
-    .eq('status', 'publish')
-    .single();
-
-  if (error || !content) {
+  if (!content) {
     return notFound();
   }
 

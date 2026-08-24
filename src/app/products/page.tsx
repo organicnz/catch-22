@@ -2,8 +2,6 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { createAdminClient, createPublicClient } from '@/lib/supabase-server';
 
-// TODO: Cache Components adoption — restore revalidate = 60 as a "use cache" boundary on the product fetch
-
 export async function generateMetadata({
   searchParams,
 }: {
@@ -87,8 +85,9 @@ export async function generateMetadata({
 
 import { ProductCard } from '@/components/products/ProductCard';
 
-// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
-// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+// Deliberate Cache Components opt-out (Block): per-category SEO titles require
+// awaiting searchParams in generateMetadata, which forces full dynamic rendering.
+// Revisit if Next.js adds streaming metadata support.
 export const instant = false;
 
 export default async function ProductsPage({
