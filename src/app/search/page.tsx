@@ -3,11 +3,9 @@ import { ProductCard } from '@/components/products/ProductCard';
 import { isSpamContent } from '@/lib/sanitize';
 import { createPublicClient } from '@/lib/supabase-server';
 
-// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
-// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+// Deliberate Cache Components opt-out (Block): results derive from
+// request-time searchParams; nothing to prerender.
 export const instant = false;
-
-// TODO: Cache Components adoption — search is request-time by nature; no revalidate to restore
 
 export default async function SearchPage({
   searchParams,

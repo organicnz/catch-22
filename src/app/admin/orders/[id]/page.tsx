@@ -16,8 +16,7 @@ import { FulfilmentEditor } from '@/components/admin/FulfilmentEditor';
 import { OrderStatusSelect } from '@/components/admin/OrderStatusSelect';
 import { requireAdmin } from '@/lib/admin-auth';
 
-// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
-// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+// Deliberate Cache Components opt-out (Block): admin surface behind requireAdmin() session gate.
 export const instant = false;
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
