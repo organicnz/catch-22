@@ -57,6 +57,13 @@ Update with `npx skills update`; restore with `npx skills experimental_install`.
 
 ---
 
+## ⏸ Deferred Upgrades
+- **TypeScript 7**: BLOCKED — Next.js 16.3 loads TS via the JS compiler API (`lib/typescript.js`), removed in TS 7.0; support lands ~TS 7.1 (see vercel/next.js#95633). Stay on TS 5.9 until then. tsconfig is already TS7-shaped (`moduleResolution: bundler`).
+- **TypeScript 6**: bridge release only (deprecations); no value while blocked on 7.
+- Revisit after the Next.js 16.3.x line announces native-TS builds.
+
+---
+
 ## 🗺 Migration Roadmap
 
 ### Phase 1: Core Infrastructure (Completed)
