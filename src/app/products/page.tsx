@@ -2,8 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { createAdminClient, createPublicClient } from '@/lib/supabase-server';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 60; // Revalidate every 60 seconds
+// TODO: Cache Components adoption — restore revalidate = 60 as a "use cache" boundary on the product fetch
 
 export async function generateMetadata({
   searchParams,
