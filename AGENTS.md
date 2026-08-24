@@ -34,6 +34,26 @@ Transform the legacy WordPress/Elementor ecosystem (catch-22.co.nz) into a moder
 - **Payments**: Stripe (Express Checkout & Webhooks)
 - **Styling**: Tailwind CSS 4 (Native CSS variables)
 - **State**: Zustand (Persistent cart & wishlist)
+- **Agent Skills**: Vercel agent skills installed via `skills` CLI (see `.agents/skills/`, pinned in `skills-lock.json`)
+
+---
+
+## 🧠 Agent Skills (Vercel)
+Installed from `vercel-labs/agent-skills` via `npx skills add`. Load on demand; do not re-install.
+
+| Skill | Use when |
+| --- | --- |
+| `vercel-react-best-practices` | Writing/refactoring React or Next.js code (performance patterns). |
+| `vercel-composition-patterns` | Component architecture, compound components, provider APIs. |
+| `web-design-guidelines` | UI/accessibility audits ("review my UI"). |
+| `vercel-react-view-transitions` | Page/route animations via the View Transition API. |
+| `deploy-to-vercel` | Deploying the app or creating preview deployments. |
+| `vercel-cli-with-tokens` | Vercel CLI automation with access tokens (CI). |
+| `vercel-optimize` | Cost/performance optimization of the deployed project. |
+| `react-native-skills` | Not applicable to this web-only project (installed for reference). |
+| `writing-guidelines` | Docs/prose style review. |
+
+Update with `npx skills update`; restore with `npx skills experimental_install`.
 
 ---
 
