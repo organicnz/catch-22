@@ -1,10 +1,10 @@
 'use client';
 
-import { getStorageUrl } from '@/lib/supabase';
 import { Camera, ChevronLeft, ChevronRight, MapPin, Maximize2, Share2, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
+import { getStorageUrl } from '@/lib/supabase';
 
 // Temporary static data - will eventually come from Supabase DB
 const snaps = [
@@ -239,13 +239,12 @@ export default function GalleryPage() {
       {/* Lightbox Modal */}
       {selectedImage && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10">
-          <div
-            className="absolute inset-0 bg-secondary/98 backdrop-blur-2xl"
-            role="button"
-            tabIndex={0}
+          <button
+            type="button"
+            className="absolute inset-0 bg-secondary/98 backdrop-blur-2xl cursor-default"
             onClick={handleClose}
             onKeyDown={(e) => {
-              if (e.key === 'Escape' || e.key === 'Enter') handleClose();
+              if (e.key === 'Escape') handleClose();
             }}
             aria-label="Close gallery"
           />

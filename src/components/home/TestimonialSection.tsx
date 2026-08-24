@@ -1,6 +1,8 @@
-import { getStorageUrl } from '@/lib/supabase';
 import { Quote, Star } from 'lucide-react';
 import Image from 'next/image';
+import { getStorageUrl } from '@/lib/supabase';
+
+const STAR_POSITIONS = ['first', 'second', 'third', 'fourth', 'fifth'] as const;
 
 const testimonials = [
   {
@@ -49,9 +51,9 @@ export function TestimonialSection() {
               className="group p-10 lg:p-12 rounded-[3.5rem] bg-slate-50 border border-slate-100 hover:bg-white hover:shadow-[0_80px_100px_-30px_rgba(0,0,0,0.1)] hover:-translate-y-3 transition-all duration-700 ease-out"
             >
               <div className="flex gap-1 mb-10">
-                {Array.from({ length: t.stars }, (_, starIdx) => (
+                {STAR_POSITIONS.slice(0, t.stars).map((position) => (
                   <Star
-                    key={`${t.name}-star-${starIdx}`}
+                    key={`${t.name}-star-${position}`}
                     className="w-3 h-3 fill-primary text-primary"
                   />
                 ))}

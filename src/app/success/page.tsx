@@ -1,9 +1,9 @@
 'use client';
 
-import { useCartStore } from '@/lib/store/cart';
 import { CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect } from 'react';
+import { useCartStore } from '@/lib/store/cart';
 
 export default function SuccessPage() {
   const clearCart = useCartStore((state) => state.clearCart);

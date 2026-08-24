@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 import { Inter, Outfit } from 'next/font/google';
 import './globals.css';
+import { Analytics } from '@vercel/analytics/react';
+import { Toaster } from 'sonner';
 import { SettingsHydrator } from '@/components/account/SettingsHydrator';
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
 import { getSettings } from '@/lib/supabase-server';
-import { Analytics } from '@vercel/analytics/react';
-import { Toaster } from 'sonner';
 import Providers from './providers';
 
 // Layout reads cookies for auth state — must be dynamic

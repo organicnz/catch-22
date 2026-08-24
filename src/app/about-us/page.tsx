@@ -1,7 +1,7 @@
-import { getStorageUrl } from '@/lib/supabase';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+import { getStorageUrl } from '@/lib/supabase';
 
 export const metadata: Metadata = {
   title: 'About Us - Catch-22',

@@ -1,9 +1,9 @@
 'use server';
 
+import { revalidatePath } from 'next/cache';
 import type { UserSettings } from '@/lib/store/settings';
 import { createServerClient } from '@/lib/supabase-server';
 import type { Json } from '@/types/supabase';
-import { revalidatePath } from 'next/cache';
 
 /**
  * Server Action to update user settings.

@@ -1,8 +1,8 @@
 'use client';
 
-import { bulkUpdateProductStock } from '@/app/admin/actions';
 import { CheckSquare, Square, X } from 'lucide-react';
-import { type ReactNode, createContext, useContext, useState, useTransition } from 'react';
+import { createContext, type ReactNode, useContext, useState, useTransition } from 'react';
+import { bulkUpdateProductStock } from '@/app/admin/actions';
 
 const STOCK_STATUSES = ['instock', 'outofstock', 'onbackorder'];
 

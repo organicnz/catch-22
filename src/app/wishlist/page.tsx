@@ -1,12 +1,12 @@
 'use client';
 
-import { useCartStore } from '@/lib/store/cart';
-import { useWishlistStore } from '@/lib/store/wishlist';
-import { getStorageUrl } from '@/lib/supabase';
 import { Heart, ShoppingCart, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
+import { useCartStore } from '@/lib/store/cart';
+import { useWishlistStore } from '@/lib/store/wishlist';
+import { getStorageUrl } from '@/lib/supabase';
 
 export default function WishlistPage() {
   const { items, removeItem, clearWishlist } = useWishlistStore();

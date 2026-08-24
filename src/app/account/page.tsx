@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation';
 import { AccountTabShell } from '@/components/account/AccountTabShell';
 import { AdminOrdersPanel } from '@/components/account/AdminOrdersPanel';
 import { LogoutButton } from '@/components/account/LogoutButton';
@@ -6,7 +7,6 @@ import { MyOrdersPanel } from '@/components/account/MyOrdersPanel';
 import { UserSettings } from '@/components/account/UserSettings';
 import { createAdminClient, createServerClient } from '@/lib/supabase-server';
 import type { AdminOrder, MyOrder } from '@/types/orders';
-import { redirect } from 'next/navigation';
 
 export const metadata = {
   title: 'Account — Catch-22',

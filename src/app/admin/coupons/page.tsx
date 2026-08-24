@@ -1,7 +1,7 @@
+import { BadgePercent } from 'lucide-react';
 import { CouponCreator, CouponDelete } from '@/components/admin/CouponCreator';
 import { CouponEditor } from '@/components/admin/CouponEditor';
 import { requireAdmin } from '@/lib/admin-auth';
-import { BadgePercent } from 'lucide-react';
 
 export const metadata = {
   title: 'Coupons — Admin · Catch-22',
@@ -38,6 +38,7 @@ export default async function AdminCouponsPage() {
 
   const rows = (coupons || []) as Coupon[];
   const usage = (couponUsage || []) as CouponUsage[];
+  // oxlint-disable-next-line react/purity -- async RSC: evaluated once per server request, never re-rendered
   const now = Date.now();
 
   const usageByCode = new Map<string, { uses: number; revenue: number }>();

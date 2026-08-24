@@ -1,5 +1,5 @@
-import { cn } from '@/lib/utils';
 import { describe, expect, it } from 'vitest';
+import { cn } from '@/lib/utils';
 
 // ─── cn() – Tailwind class merger ────────────────────────────────────────────
 // cn() is used in ~40 components. If it regresses, visual breakage is widespread

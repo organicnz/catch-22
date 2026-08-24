@@ -1,15 +1,15 @@
 'use client';
 
-import { useCartStore } from '@/lib/store/cart';
-import { useSettingsStore } from '@/lib/store/settings';
-import { useWishlistStore } from '@/lib/store/wishlist';
-import { createClient, getStorageUrl } from '@/lib/supabase';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { Heart, LogOut, Menu, Search, ShoppingBag, User, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useCartStore } from '@/lib/store/cart';
+import { useSettingsStore } from '@/lib/store/settings';
+import { useWishlistStore } from '@/lib/store/wishlist';
+import { createClient, getStorageUrl } from '@/lib/supabase';
 
 export function Header() {
   const [isMounted, setIsMounted] = useState(false);

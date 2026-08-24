@@ -1,9 +1,9 @@
 'use client';
 
-import { getStorageUrl } from '@/lib/supabase';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
+import { getStorageUrl } from '@/lib/supabase';
 import { WishlistButton } from './WishlistButton';
 
 interface ProductCardProps {

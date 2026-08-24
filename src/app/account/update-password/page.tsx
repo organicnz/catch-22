@@ -1,9 +1,9 @@
 'use client';
 
-import { createClient } from '@/lib/supabase';
 import { CheckCircle, Eye, EyeOff, Loader2, Lock, ShieldCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { createClient } from '@/lib/supabase';
 
 export default function UpdatePasswordPage() {
   const [password, setPassword] = useState('');

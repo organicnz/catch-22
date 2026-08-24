@@ -1,6 +1,5 @@
 'use client';
 
-import { createClient } from '@/lib/supabase';
 import {
   ArrowRight,
   Code,
@@ -14,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { createClient } from '@/lib/supabase';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');

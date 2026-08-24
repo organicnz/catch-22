@@ -1,7 +1,7 @@
 'use client';
 
-import { SHIPPING_RATES } from '@/config/shipping';
 import { Clock, RotateCcw, ShieldCheck, Truck } from 'lucide-react';
+import { SHIPPING_RATES } from '@/config/shipping';
 
 export default function ShippingReturnsPage() {
   return (

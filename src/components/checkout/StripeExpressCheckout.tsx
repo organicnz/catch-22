@@ -1,11 +1,11 @@
 'use client';
 
+import { Elements, ExpressCheckoutElement } from '@stripe/react-stripe-js';
+import type { StripeExpressCheckoutElementConfirmEvent } from '@stripe/stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
+import { useState } from 'react';
 import { env } from '@/lib/env';
 import { useCartStore } from '@/lib/store/cart';
-import { Elements, ExpressCheckoutElement } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
-import type { StripeExpressCheckoutElementConfirmEvent } from '@stripe/stripe-js';
-import { useState } from 'react';
 
 const stripePromise = loadStripe(env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
 

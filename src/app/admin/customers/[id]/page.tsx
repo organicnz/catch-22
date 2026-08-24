@@ -1,5 +1,3 @@
-import { CustomerAdminToggle } from '@/components/admin/CustomerAdminToggle';
-import { requireAdmin } from '@/lib/admin-auth';
 import {
   ArrowLeft,
   Calendar,
@@ -13,6 +11,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { CustomerAdminToggle } from '@/components/admin/CustomerAdminToggle';
+import { requireAdmin } from '@/lib/admin-auth';
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

@@ -1,6 +1,6 @@
+import { ExternalLink, MapPin, Package, ShoppingBag, TrendingUp, User } from 'lucide-react';
 import { OrderStatusSelect } from '@/components/admin/OrderStatusSelect';
 import { type AdminOrder, formatAddress, formatDate, formatNZD } from '@/types/orders';
-import { ExternalLink, MapPin, Package, ShoppingBag, TrendingUp, User } from 'lucide-react';
 
 // ---------------------------------------------------------------------------
 // Stat card

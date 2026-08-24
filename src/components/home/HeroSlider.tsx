@@ -1,9 +1,9 @@
 'use client';
 
-import { getStorageUrl } from '@/lib/supabase';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { getStorageUrl } from '@/lib/supabase';
 
 const SLIDE_DURATION = 8000; // 8 seconds per slide
 

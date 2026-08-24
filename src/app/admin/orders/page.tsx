@@ -1,13 +1,4 @@
 import {
-  BulkOrderBar,
-  BulkOrderProvider,
-  OrderCheckbox,
-} from '@/components/admin/BulkOrderActions';
-import { OrderStatusSelect } from '@/components/admin/OrderStatusSelect';
-import { OrdersExport } from '@/components/admin/OrdersExport';
-import { requireAdmin } from '@/lib/admin-auth';
-import type { createAdminClient } from '@/lib/supabase-server';
-import {
   BadgePercent,
   ChevronLeft,
   ChevronRight,
@@ -20,6 +11,15 @@ import {
   User,
 } from 'lucide-react';
 import Link from 'next/link';
+import {
+  BulkOrderBar,
+  BulkOrderProvider,
+  OrderCheckbox,
+} from '@/components/admin/BulkOrderActions';
+import { OrderStatusSelect } from '@/components/admin/OrderStatusSelect';
+import { OrdersExport } from '@/components/admin/OrdersExport';
+import { requireAdmin } from '@/lib/admin-auth';
+import type { createAdminClient } from '@/lib/supabase-server';
 
 export const metadata = {
   title: 'Orders — Admin · Catch-22',
@@ -87,11 +87,7 @@ type OrderFilters = {
   search: string;
 };
 
-function buildFilters(searchParams: {
-  status?: string;
-  q?: string;
-  range?: string;
-}): OrderFilters {
+function buildFilters(searchParams: { status?: string; q?: string; range?: string }): OrderFilters {
   const status = STATUS_FILTERS.includes(searchParams.status || 'all')
     ? searchParams.status || 'all'
     : 'all';

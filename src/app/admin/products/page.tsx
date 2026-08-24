@@ -1,3 +1,6 @@
+import { Package, Plus, Search } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
 import {
   BulkStockBar,
   BulkStockProvider,
@@ -6,9 +9,6 @@ import {
 import { ProductEditor } from '@/components/admin/ProductEditor';
 import { requireAdmin } from '@/lib/admin-auth';
 import { getStorageUrl } from '@/lib/supabase';
-import { Package, Plus, Search } from 'lucide-react';
-import Image from 'next/image';
-import Link from 'next/link';
 
 export const metadata = {
   title: 'Products — Admin · Catch-22',

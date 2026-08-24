@@ -1,8 +1,8 @@
 'use client';
 
-import { useCartStore } from '@/lib/store/cart';
 import { ChevronDown, ShoppingCart } from 'lucide-react';
 import { useState } from 'react';
+import { useCartStore } from '@/lib/store/cart';
 
 interface Variation {
   id: number;
@@ -67,7 +67,7 @@ export function AddToCartButton({ product, variations = [] }: AddToCartButtonPro
               id="variation"
               value={selectedVariation?.id || ''}
               onChange={(e) => {
-                const v = variations.find((v) => v.id === Number.parseInt(e.target.value));
+                const v = variations.find((v) => v.id === Number.parseInt(e.target.value, 10));
                 if (v) setSelectedVariation(v);
               }}
               className="w-full appearance-none bg-slate-50 border border-slate-200 text-secondary py-4 px-5 pr-10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-bold text-sm uppercase tracking-wider"

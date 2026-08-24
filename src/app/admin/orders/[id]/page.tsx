@@ -1,7 +1,3 @@
-import { EmailActions } from '@/components/admin/EmailActions';
-import { FulfilmentEditor } from '@/components/admin/FulfilmentEditor';
-import { OrderStatusSelect } from '@/components/admin/OrderStatusSelect';
-import { requireAdmin } from '@/lib/admin-auth';
 import {
   ArrowLeft,
   CreditCard,
@@ -15,6 +11,10 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { EmailActions } from '@/components/admin/EmailActions';
+import { FulfilmentEditor } from '@/components/admin/FulfilmentEditor';
+import { OrderStatusSelect } from '@/components/admin/OrderStatusSelect';
+import { requireAdmin } from '@/lib/admin-auth';
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

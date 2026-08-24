@@ -1,6 +1,6 @@
-import { getStorageUrl } from '@/lib/supabase';
 import Image from 'next/image';
 import Link from 'next/link';
+import { getStorageUrl } from '@/lib/supabase';
 
 export function Footer() {
   return (

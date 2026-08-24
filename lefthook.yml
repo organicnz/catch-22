@@ -390,7 +390,8 @@ pre-commit:
             lineno=$(echo "$match" | cut -d: -f1)
             start=$((lineno - 2))
             [ "$start" -lt 1 ] && start=1
-            context=$(sed -n "${start},${lineno}p" "$f" 2>/dev/null || true)
+            end=$((lineno + 2))
+            context=$(sed -n "${start},${end}p" "$f" 2>/dev/null || true)
             if ! echo "$context" | grep -q "sanitizeWPContent"; then
               VIOLATIONS="$VIOLATIONS\n  $f:$lineno"
             fi

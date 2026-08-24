@@ -1,5 +1,5 @@
-import { productSchema, profileSchema } from '@/lib/validations';
 import { describe, expect, it } from 'vitest';
+import { productSchema, profileSchema } from '@/lib/validations';
 
 // ─── productSchema ────────────────────────────────────────────────────────────
 describe('productSchema', () => {

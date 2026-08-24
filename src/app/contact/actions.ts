@@ -1,7 +1,7 @@
 'use server';
 
-import { createServerClient } from '@/lib/supabase-server';
 import { revalidatePath } from 'next/cache';
+import { createServerClient } from '@/lib/supabase-server';
 
 export async function submitContact(formData: FormData) {
   // 1. Honeypot check (bots often fill all fields)

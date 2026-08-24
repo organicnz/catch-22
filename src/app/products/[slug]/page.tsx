@@ -1,3 +1,7 @@
+import type { Metadata } from 'next';
+import Image from 'next/image';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { AddToCartButton } from '@/components/checkout/AddToCartButton';
 import { ProductSlider } from '@/components/products/ProductSlider';
 import { WishlistButton } from '@/components/products/WishlistButton';
@@ -5,16 +9,14 @@ import { sanitizeWPContent } from '@/lib/sanitize';
 import { getStorageUrl } from '@/lib/supabase';
 import { createPublicClient } from '@/lib/supabase-server';
 import type { Json } from '@/types/supabase';
-import type { Metadata } from 'next';
-import Image from 'next/image';
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
 
 export const revalidate = 60;
 
 export async function generateMetadata({
   params,
-}: { params: { slug: string } }): Promise<Metadata> {
+}: {
+  params: { slug: string };
+}): Promise<Metadata> {
   const slug = (await params).slug;
   const supabase = createPublicClient();
 

@@ -1,6 +1,6 @@
-import { createServerClient } from '@/lib/supabase-server';
 import { unstable_cache } from 'next/cache';
 import { cookies } from 'next/headers';
+import { createServerClient } from '@/lib/supabase-server';
 
 export interface UserSettings {
   marketing_emails: boolean;

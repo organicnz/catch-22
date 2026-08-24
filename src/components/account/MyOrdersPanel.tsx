@@ -1,4 +1,4 @@
-import { type MyOrder, formatDate, formatNZD, statusStyle } from '@/types/orders';
+import { formatDate, formatNZD, type MyOrder, statusStyle } from '@/types/orders';
 
 export function MyOrdersPanel({ orders }: { orders: MyOrder[] }) {
   if (orders.length === 0) {

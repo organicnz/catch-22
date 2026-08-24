@@ -1,8 +1,8 @@
 'use client';
 
-import { bulkUpdateOrderStatus } from '@/app/admin/actions';
 import { CheckSquare, Square, X } from 'lucide-react';
-import { type ReactNode, createContext, useContext, useState, useTransition } from 'react';
+import { createContext, type ReactNode, useContext, useState, useTransition } from 'react';
+import { bulkUpdateOrderStatus } from '@/app/admin/actions';
 
 const STATUSES = ['processing', 'completed', 'cancelled', 'refunded', 'on-hold'];
 
