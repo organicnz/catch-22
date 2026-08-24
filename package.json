@@ -14,6 +14,7 @@
     "check": "biome check --write ./src",
     "check:ci": "biome ci ./src",
     "test": "bun vitest --run",
+    "test:e2e": "playwright test",
     "test:watch": "bun vitest",
     "test:coverage": "bun vitest run --coverage",
     "types:generate": "bun x supabase@latest gen types typescript --project-id wcoaqlglwxwceqktpckt > /tmp/supabase-types.ts && mv /tmp/supabase-types.ts src/types/supabase.ts"
@@ -46,6 +47,8 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.10",
+    "@next/playwright": "^16.3.2",
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^26.2.0",
     "@types/react": "^19.2.18",
