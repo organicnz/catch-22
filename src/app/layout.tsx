@@ -1,16 +1,15 @@
 import type { Metadata } from 'next';
 import { Inter, Outfit } from 'next/font/google';
+import { Suspense } from 'react';
 import './globals.css';
 import { Analytics } from '@vercel/analytics/react';
 import { Toaster } from 'sonner';
 import { SettingsHydrator } from '@/components/account/SettingsHydrator';
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
+import type { UserSettings } from '@/lib/store/settings';
 import { getSettings } from '@/lib/supabase-server';
 import Providers from './providers';
-
-// TODO: Cache Components adoption — layout reads cookies for auth state; move the read
-// behind <Suspense> (Header auth section) so the shell can prerender.
 
 const inter = Inter({
   subsets: ['latin'],
@@ -55,24 +54,23 @@ export const metadata: Metadata = {
   },
 };
 
-import type { UserSettings } from '@/lib/store/settings';
+async function SettingsLoader() {
+  const settings = await getSettings();
+  return <SettingsHydrator settings={settings as UserSettings | null} />;
+}
 
-// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
-// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
-export const instant = false;
-
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const settings = await getSettings();
-
   return (
     <html lang="en" className={`${inter.variable} ${outfit.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-white text-secondary font-sans selection:bg-primary selection:text-secondary">
         <Providers>
-          <SettingsHydrator settings={settings as UserSettings | null} />
+          <Suspense fallback={null}>
+            <SettingsLoader />
+          </Suspense>
           <Header />
           <main className="flex-grow flex flex-col">{children}</main>
           <Footer />
