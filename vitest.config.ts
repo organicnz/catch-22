@@ -6,7 +6,13 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: [],
-    exclude: ['**/node_modules/**', '**/dist/**', '**/.trunk/**', '**/.next/**'],
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/.trunk/**',
+      '**/.next/**',
+      'e2e/**', // Playwright instant-navigation guards run via `playwright test`, not vitest
+    ],
     coverage: {
       provider: 'v8',
 
