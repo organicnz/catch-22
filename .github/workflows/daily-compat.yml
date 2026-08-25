@@ -58,10 +58,11 @@ jobs:
 
       # ── Production probes: boot-level only, no side effects ────────────────
       - name: Probe site health
-        env:
-          SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
         run: |
-          CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 20 "$SITE_URL/api/health")
+          # NEXT_PUBLIC_SITE_URL is the bare apex (catch-22.co.nz), which 308s
+          # to www — follow redirects and judge the destination.
+          CODE=$(curl -sL -o /dev/null -w "%{http_code}" --max-time 20 \
+            "${SITE_URL:-https://catch-22.co.nz}/api/health")
           echo "api/health → $CODE"
           [ "$CODE" = "200" ]
 
