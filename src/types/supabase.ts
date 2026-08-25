@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.17"
   }
   graphql_public: {
     Tables: {
@@ -67,23 +67,29 @@ export type Database = {
         Row: {
           created_at: string | null
           email: string
+          email_sent_at: string | null
           id: number
           message: string
           name: string
+          wants_copy: boolean
         }
         Insert: {
           created_at?: string | null
           email: string
+          email_sent_at?: string | null
           id?: number
           message: string
           name: string
+          wants_copy?: boolean
         }
         Update: {
           created_at?: string | null
           email?: string
+          email_sent_at?: string | null
           id?: number
           message?: string
           name?: string
+          wants_copy?: boolean
         }
         Relationships: []
       }
@@ -496,6 +502,15 @@ export type Database = {
       replace_media_urls: {
         Args: { new_base: string; old_base: string }
         Returns: undefined
+      }
+      submit_contact_submission: {
+        Args: {
+          p_email: string
+          p_message: string
+          p_name: string
+          p_wants_copy?: boolean
+        }
+        Returns: number
       }
     }
     Enums: {

@@ -31,7 +31,7 @@ export function ProductCard({ product }: ProductCardProps) {
     >
       {/* Sale Badge */}
       {isOnSale && (
-        <div className="absolute top-6 left-6 z-30 bg-primary text-white text-[10px] font-black px-4 py-2 rounded-full uppercase tracking-widest shadow-xl shadow-primary/20">
+        <div className="absolute top-6 left-6 z-30 bg-primary text-secondary text-[10px] font-black px-4 py-2 rounded-full uppercase tracking-widest shadow-xl shadow-primary/20">
           On Sale
         </div>
       )}
@@ -50,7 +50,7 @@ export function ProductCard({ product }: ProductCardProps) {
             className="w-full h-full object-center object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-slate-300 font-black uppercase tracking-widest text-[10px]">
+          <div className="w-full h-full flex items-center justify-center text-slate-500 font-black uppercase tracking-widest text-[10px]">
             No Image
           </div>
         )}
@@ -74,16 +74,16 @@ export function ProductCard({ product }: ProductCardProps) {
 
         <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-4 mt-6 sm:mt-8">
           <div className="flex flex-col">
-            <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">
+            <span className="text-[9px] sm:text-[10px] font-black text-slate-600 uppercase tracking-widest mb-0.5">
               Price
             </span>
             <div className="flex flex-col">
               {isOnSale && (
-                <span className="text-[10px] sm:text-xs text-slate-400 line-through font-medium mb-1">
+                <span className="text-[10px] sm:text-xs text-slate-500 line-through font-medium mb-1">
                   ${product.regular_price?.toFixed(2)}
                 </span>
               )}
-              <p className="text-lg sm:text-2xl font-black text-primary leading-none tabular-nums">
+              <p className="text-lg sm:text-2xl font-black text-primary-ink leading-none tabular-nums">
                 ${product.price.toFixed(2)}
               </p>
             </div>

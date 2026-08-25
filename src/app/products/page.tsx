@@ -164,7 +164,7 @@ export default async function ProductsPage({
               <li>
                 <Link
                   href="/products"
-                  className={`block px-4 py-3 rounded-lg text-sm font-bold uppercase tracking-wider transition-all ${!categorySlug ? 'bg-primary text-white shadow-md' : 'text-secondary hover:bg-slate-50 hover:text-primary'}`}
+                  className={`block px-4 py-3 rounded-lg text-sm font-bold uppercase tracking-wider transition-all ${!categorySlug ? 'bg-primary text-secondary shadow-md' : 'text-secondary hover:bg-slate-50 hover:text-primary'}`}
                 >
                   All Gear
                 </Link>
@@ -173,7 +173,7 @@ export default async function ProductsPage({
                 <li key={category.id}>
                   <Link
                     href={`/products?category=${category.slug}`}
-                    className={`block px-4 py-3 rounded-lg text-sm font-bold uppercase tracking-wider transition-all ${categorySlug === category.slug ? 'bg-primary text-white shadow-md' : 'text-secondary hover:bg-slate-50 hover:text-primary'}`}
+                    className={`block px-4 py-3 rounded-lg text-sm font-bold uppercase tracking-wider transition-all ${categorySlug === category.slug ? 'bg-primary text-secondary shadow-md' : 'text-secondary hover:bg-slate-50 hover:text-primary'}`}
                   >
                     {category.name}
                   </Link>
@@ -190,7 +190,7 @@ export default async function ProductsPage({
               </p>
               <Link
                 href="/contact"
-                className="text-xs font-black text-primary uppercase hover:underline"
+                className="text-xs font-black text-primary-ink uppercase hover:underline"
               >
                 Contact Us &rarr;
               </Link>
@@ -215,7 +215,7 @@ export default async function ProductsPage({
                 </p>
                 <Link
                   href="/products"
-                  className="inline-block mt-4 text-primary font-black uppercase text-sm hover:underline"
+                  className="inline-block mt-4 text-primary-ink font-black uppercase text-sm hover:underline"
                 >
                   View all products
                 </Link>

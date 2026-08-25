@@ -17,7 +17,7 @@ export default function ShippingReturnsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-20">
           <div className="bg-slate-50 p-8 rounded-[2rem] border border-slate-100">
             <div className="bg-white w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
-              <Truck className="text-primary" size={28} />
+              <Truck className="text-primary-ink" size={28} />
             </div>
             <h2 className="text-xl font-black text-secondary uppercase mb-4">Shipping Policy</h2>
             <div className="space-y-4 text-slate-600 font-medium leading-relaxed">
@@ -38,7 +38,7 @@ export default function ShippingReturnsPage() {
                     >
                       <span>{rate.name}</span>
                       <span
-                        className={`font-black ${rate.amount === 0 ? 'text-primary' : 'text-secondary'}`}
+                        className={`font-black ${rate.amount === 0 ? 'text-primary-ink' : 'text-secondary'}`}
                       >
                         {rate.displayPrice}
                       </span>
@@ -58,7 +58,7 @@ export default function ShippingReturnsPage() {
 
           <div className="bg-slate-50 p-8 rounded-[2rem] border border-slate-100">
             <div className="bg-white w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
-              <RotateCcw className="text-primary" size={28} />
+              <RotateCcw className="text-primary-ink" size={28} />
             </div>
             <h2 className="text-xl font-black text-secondary uppercase mb-4">
               Returns & Exchanges
@@ -113,7 +113,7 @@ export default function ShippingReturnsPage() {
           </p>
           <a
             href="mailto:orders@catch-22.co.nz"
-            className="inline-block bg-primary hover:bg-white hover:text-secondary text-white font-black py-4 px-10 rounded-full transition-all uppercase tracking-widest text-sm"
+            className="inline-block bg-primary hover:bg-white hover:text-secondary text-secondary font-black py-4 px-10 rounded-full transition-all uppercase tracking-widest text-sm"
           >
             Contact Orders Team
           </a>

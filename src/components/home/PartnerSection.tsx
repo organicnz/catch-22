@@ -15,8 +15,8 @@ export function PartnerSection() {
     <section className="py-20 bg-slate-50 overflow-hidden">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-sm font-black uppercase tracking-[0.3em] text-slate-400 mb-4 italic">
-            Trusted By <span className="text-primary not-italic">Experts</span>
+          <h2 className="text-sm font-black uppercase tracking-[0.3em] text-slate-500 mb-4 italic">
+            Trusted By <span className="text-primary-ink not-italic">Experts</span>
           </h2>
           <div className="h-px w-20 bg-primary mx-auto" />
         </div>
@@ -33,7 +33,7 @@ export function PartnerSection() {
         </div>
 
         <div className="mt-20 text-center">
-          <p className="text-slate-400 text-xs font-bold uppercase tracking-widest max-w-2xl mx-auto">
+          <p className="text-slate-500 text-xs font-bold uppercase tracking-widest max-w-2xl mx-auto">
             We collaborate with industry leaders to ensure our gear meets the highest standards of
             performance and reliability.
           </p>
