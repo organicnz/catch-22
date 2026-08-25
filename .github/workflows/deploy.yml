@@ -12,9 +12,44 @@ concurrency:
 
 jobs:
   # ─────────────────────────────────────────────────────────────────────────────
+  # 0. Runner disk guard — self-hosted runners die silently when the disk
+  #    fills with build artifacts. Fail loudly below the watermark.
+  # ─────────────────────────────────────────────────────────────────────────────
+  preflight:
+    name: Runner Disk Guard
+    runs-on: [self-hosted, linux, ARM64]
+    steps:
+      - name: Verify free disk space (fail under 2 GB)
+        run: |
+          FREE_KB=$(df -Pk . | awk 'NR==2{print $4}')
+          echo "Free: $((FREE_KB / 1024)) MB"
+          if [ "$FREE_KB" -lt 2097152 ]; then
+            echo "✖ Less than 2 GB free on runner — clean up before continuing."
+            df -h
+            exit 1
+          fi
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Terminal cleanup — always runs, wipes per-run artifacts that would
+  # otherwise accumulate forever on a persistent self-hosted workspace.
+  # ─────────────────────────────────────────────────────────────────────────────
+  cleanup:
+    name: Workspace Cleanup
+    runs-on: [self-hosted, linux, ARM64]
+    needs: [lint, test, build, e2e, supabase]
+    if: always()
+    steps:
+      - name: Purge transient artifacts
+        run: |
+          rm -rf test-results playwright-report coverage .next || true
+          echo "Remaining free space:"
+          df -h .
+
+  # ─────────────────────────────────────────────────────────────────────────────
   # 1. Lint & type-check
   # ─────────────────────────────────────────────────────────────────────────────
   lint:
+    needs: [preflight]
     name: Lint & Type Check
     runs-on: [self-hosted, linux, ARM64]
     steps:
@@ -50,6 +85,7 @@ jobs:
   test:
     name: Tests
     runs-on: [self-hosted, linux, ARM64]
+    needs: [preflight]
     steps:
       - uses: actions/checkout@v5
 
@@ -85,6 +121,7 @@ jobs:
   build:
     name: Production Build
     runs-on: [self-hosted, linux, ARM64]
+    needs: [preflight]
     env:
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
@@ -123,7 +160,7 @@ jobs:
   e2e:
     name: Instant Navigation E2E
     runs-on: [self-hosted, linux, ARM64]
-    needs: [build]
+    needs: [preflight, build]
     timeout-minutes: 15
     env:
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
@@ -169,7 +206,7 @@ jobs:
   supabase:
     name: Supabase (Migrations + Edge Functions)
     runs-on: [self-hosted, linux, ARM64]
-    needs: [lint, test, build]
+    needs: [preflight, lint, test, build]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     timeout-minutes: 20
     permissions:

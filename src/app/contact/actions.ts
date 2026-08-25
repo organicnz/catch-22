@@ -1,6 +1,8 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { headers } from 'next/headers';
+import { clientKey, rateLimit } from '@/lib/rate-limit';
 import { createServerClient } from '@/lib/supabase-server';
 
 export async function submitContact(formData: FormData) {
@@ -28,6 +30,12 @@ export async function submitContact(formData: FormData) {
   const spamKeywords = ['casino', 'slot', 'judi', 'togel', 'crypto', 'loan'];
   if (spamKeywords.some((kw) => message.toLowerCase().includes(kw))) {
     return { error: 'Message flagged as potential spam. Please revise.' };
+  }
+
+  // 3 submissions / 10 minutes / IP (on top of the honeypot + keyword filter).
+  const gate = rateLimit(clientKey(await headers(), 'contact'), 3, 10 * 60_000);
+  if (!gate.ok) {
+    return { error: `Too many messages sent. Please try again in ${gate.retryAfterSec}s.` };
   }
 
   const supabase = await createServerClient();
