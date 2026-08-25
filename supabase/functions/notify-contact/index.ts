@@ -34,8 +34,20 @@ const RESEND_API_KEY = REQUIRED_ENV[2][1]!
 const FROM_EMAIL = Deno.env.get('RESEND_FROM_EMAIL') ?? 'orders@catch-22.co.nz'
 const TO_EMAIL = Deno.env.get('ADMIN_ORDER_EMAIL')
 
+// Max notifications per rolling 10 minutes, globally.
+const NOTIFY_VOLUME_CAP = 20
+
 function supabaseAdmin() {
   return createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+}
+
+/** Best-effort claim release — never let cleanup mask the primary outcome. */
+async function releaseClaim(id: number) {
+  try {
+    await supabaseAdmin().from('contact_submissions').update({ email_sent_at: null }).eq('id', id)
+  } catch (err) {
+    console.error(`[contact:${id}] claim release failed:`, err)
+  }
 }
 
 function escapeHtml(value: string): string {
@@ -130,8 +142,23 @@ app.post('*', async (c) => {
 
   if (!TO_EMAIL) {
     console.warn(`[contact:${id}] ADMIN_ORDER_EMAIL not set — releasing claim, skipping send`)
-    await admin.from('contact_submissions').update({ email_sent_at: null }).eq('id', id)
+    await releaseClaim(id)
     return c.json({ ok: true, skipped: 'no-recipient' })
+  }
+
+  // Volume guard (moved here from the retired SQL trigger): RLS permits
+  // anonymous inserts, so a scripted form flood could otherwise generate
+  // unbounded notification sends. Submissions always persist — only the
+  // emails stop past the rolling window.
+  const { count: recent } = await admin
+    .from('contact_submissions')
+    .select('id', { count: 'exact', head: true })
+    .gt('created_at', new Date(Date.now() - 10 * 60_000).toISOString())
+
+  if ((recent ?? 0) > NOTIFY_VOLUME_CAP) {
+    console.warn(`[contact:${id}] volume cap reached (${recent}/10min) — releasing claim, skipping sends`)
+    await releaseClaim(id)
+    return c.json({ ok: true, skipped: 'volume-cap' })
   }
 
   // Control-char hygiene before user data touches subjects, addresses, or
@@ -166,7 +193,7 @@ app.post('*', async (c) => {
   if (!res.ok) {
     const err = await res.text()
     console.error(`[contact:${id}] Resend rejected the email:`, err)
-    await admin.from('contact_submissions').update({ email_sent_at: null }).eq('id', id)
+    await releaseClaim(id)
     return c.json({ ok: false, error: 'send-failed' }, 502)
   }
 
