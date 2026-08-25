@@ -12,6 +12,7 @@ import { getStorageUrl } from '@/lib/supabase';
 import { createPublicClient } from '@/lib/supabase-server';
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/' },
   title: 'Catch-22 | Premium Fishing Gear New Zealand',
   description:
     'Premium fishing braid, lures, and apparel tested in the harshest New Zealand environments. Built to endure. Free NZ shipping available.',

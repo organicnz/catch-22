@@ -25,6 +25,9 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
+  // Resolves every relative OG/canonical URL to the canonical host, killing
+  // www/apex duplicate-content ambiguity for all child routes.
+  metadataBase: new URL('https://www.catch-22.co.nz'),
   title: 'Catch-22 | Built for the Elements',
   description:
     'Premium fishing gear and apparel. Tested in the harshest environments, designed for durability and performance. 2.5% of all profits donated to NZ Sea Cleaners.',

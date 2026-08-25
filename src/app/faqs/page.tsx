@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { SHIPPING_RATES } from '@/config/shipping';
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/faqs' },
   title: 'FAQs | Catch-22 New Zealand',
   description:
     'Find answers to common questions about Catch-22 fishing gear, shipping to New Zealand, charter bookings, and more.',

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/contact' },
   title: 'Contact Us | Catch-22 New Zealand',
   description:
     'Get in touch with the Catch-22 team for questions about orders, gear recommendations, or partnership enquiries.',

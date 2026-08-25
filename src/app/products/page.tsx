@@ -10,6 +10,10 @@ export async function generateMetadata({
   const resolvedParams = await searchParams;
   const categorySlug = typeof resolvedParams.category === 'string' ? resolvedParams.category : null;
 
+  // Canonical always points at the unfiltered listing — filtered views are
+  // variants of one catalog page, not duplicate content.
+  const canonical = categorySlug ? `/products?category=${categorySlug}` : '/products';
+
   if (categorySlug) {
     const supabase = createPublicClient();
     const { data: category } = await supabase
@@ -22,6 +26,7 @@ export async function generateMetadata({
       const title = `${category.name} | Catch-22 New Zealand`;
       const description = `Shop premium ${category.name.toLowerCase()} from Catch-22. High-performance fishing gear built for New Zealand conditions.`;
       return {
+        alternates: { canonical },
         title,
         description,
         openGraph: {
@@ -55,6 +60,7 @@ export async function generateMetadata({
   const description =
     'Browse our full collection of premium fishing braid, lures, and apparel. High-performance gear built for New Zealand conditions.';
   return {
+    alternates: { canonical: '/products' },
     title,
     description,
     openGraph: {
