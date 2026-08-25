@@ -204,6 +204,7 @@ jobs:
 
       - name: Upload Playwright report on failure
         if: failure()
+        continue-on-error: true # artifact storage is unreliable on this runner
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
@@ -214,6 +215,7 @@ jobs:
       # evidence.
       - name: Upload Playwright stdout
         if: always()
+        continue-on-error: true # artifact storage is unreliable on this runner
         uses: actions/upload-artifact@v4
         with:
           name: playwright-stdout
