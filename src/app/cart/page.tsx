@@ -16,8 +16,8 @@ export default function CartPage() {
   const [promoCode, setPromoCode] = useState('');
   // Persisted store rehydrates after mount — render the shell first to avoid
   // an SSR/client mismatch flash of an empty cart.
-  const [hydrated, setHydrated] = useState(false);
-  useEffect(() => setHydrated(true), []);
+  const [hydrated, setHydrated] = useState(useCartStore.persist.hasHydrated());
+  useEffect(() => useCartStore.persist.onFinishHydration(() => setHydrated(true)), []);
 
   const handleCheckout = async () => {
     setIsLoading(true);
