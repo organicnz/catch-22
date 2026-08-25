@@ -96,6 +96,19 @@ export function sanitizeWPContent(html: string): string {
   try {
     let clean = html;
 
+    // 0. Strip active-content vectors BEFORE anything else. Callers inject
+    // this output as raw HTML into the page, so script/iframe/plugin/embed
+    // elements and script-scheme URLs must never survive sanitization.
+    clean = clean.replace(/<script[\s\S]*?<\/script>/gi, '');
+    clean = clean.replace(
+      /<\/?(?:script|iframe|object|embed|form|input|select|textarea|button|link|meta|base)\b[^>]*>/gi,
+      ''
+    );
+    clean = clean.replace(
+      /(\s(?:href|src|xlink:href)\s*=\s*)(?:"\s*(?:javascript|data|vbscript):[^"]*"|'\s*(?:javascript|data|vbscript):[^']*')/gi,
+      '$1"#"'
+    );
+
     // 1. Remove Gutenberg block comments: <!-- wp:... --> and <!-- /wp:... -->
     clean = clean.replace(/<!--\s*\/?wp:[\s\S]*?-->/g, '');
 
