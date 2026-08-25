@@ -31,18 +31,32 @@ const securityHeaders = [
   },
 ];
 
+// Keep crawlers out of non-content surfaces entirely — fewer index-driven
+// crawl requests means fewer function invocations to pay for.
+const noIndexPaths = ['/success', '/cancel', '/account', '/admin', '/wishlist'];
+
+const routeHeaders = [
+  { source: '/(.*)', headers: securityHeaders },
+  ...noIndexPaths.map((source) => ({
+    source,
+    headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
+  })),
+];
+
 const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: securityHeaders,
-      },
-    ];
+    return routeHeaders;
   },
   images: {
+    // Cache transforms for 31 days — product photos rarely change, so repeat
+    // views should never pay a second optimization. Cuts the transformations
+    // quota burn dramatically (each unique width×image pair transforms once).
+    minimumCacheTTL: 2678400,
+    // Slim variant grids: fewer distinct widths = fewer cached transforms.
+    deviceSizes: [640, 828, 1080, 1200, 1920],
+    imageSizes: [64, 128, 256, 384],
     remotePatterns: [
       {
         protocol: 'https',
