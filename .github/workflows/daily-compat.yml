@@ -1,0 +1,110 @@
+name: Daily Compatibility
+
+# Nightly guard for the whole stack: dependency drift, build, unit, e2e
+# (mock-backed — never sends real email), production function boot probes,
+# and an AI second-opinion review of the last 24h of changes.
+#
+# Findings from the AI job are advisory (continue-on-error): models hallucinate,
+# humans triage. Failures in the compat matrix itself page like CI failures.
+
+on:
+  schedule:
+    - cron: '17 21 * * *' # 21:17 UTC daily — off the top of the hour
+  workflow_dispatch:
+
+concurrency:
+  group: daily-compat
+  cancel-in-progress: false
+
+jobs:
+  compatibility:
+    name: Build · Test · E2E · Prod probes
+    runs-on: [self-hosted, linux, ARM64]
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install (frozen lockfile)
+        run: bun install --frozen-lockfile
+
+      - name: Lint + format + types
+        run: |
+          bun run lint:check
+          bun run format:check
+          bunx tsc --noEmit
+
+      - name: Unit tests
+        run: bun run test
+
+      - name: Production build
+        run: bun run build
+
+      # Mock-backed by default via playwright.config webServer env:
+      # CONTACT_FUNCTION_URL points at scripts/mock-notify-contact.mjs, so no
+      # real email leaves. CONTACT_RATE_LIMIT_MAX is raised for the suite.
+      - name: E2E suite
+        run: bunx playwright install chromium --with-deps && bunx playwright test
+
+      # ── Production probes: boot-level only, no side effects ────────────────
+      - name: Probe site health
+        env:
+          SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+        run: |
+          CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 20 "$SITE_URL/api/health")
+          echo "api/health → $CODE"
+          [ "$CODE" = "200" ]
+
+      - name: Probe edge functions boot
+        env:
+          PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: |
+          probe() {
+            case "$1" in
+              checkout)       echo '{"items":[{"id":2147483647,"quantity":1}]}' ;;
+              webhook)        echo '{}' ;;
+              notify-contact) echo '{"id":0}' ;;
+            esac
+          }
+          for slug in webhook checkout notify-contact; do
+            CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 20 \
+              -X POST "https://$PROJECT_REF.supabase.co/functions/v1/$slug" \
+              -H "Content-Type: application/json" -d "$(probe "$slug")")
+            echo "  $slug → HTTP $CODE"
+            case "$CODE" in
+              5*|000) echo "::error::$slug unhealthy (HTTP $CODE)"; exit 1 ;;
+            esac
+          done
+
+      - name: Workspace cleanup
+        if: always()
+        run: rm -rf test-results playwright-report coverage .next || true
+
+  ai-nightly-review:
+    name: AI Review (last 24h)
+    runs-on: [self-hosted, linux, ARM64]
+    needs: [compatibility]
+    if: always() && needs.compatibility.result == 'success'
+    continue-on-error: true # advisory — model output never fails the run
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 50 # enough history for a 24h diff window
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Groq review of last 24h
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: |
+          SINCE=$(date -u -d '-1 day' +%Y-%m-%dT%H:%M:%S 2>/dev/null || date -v-1d +%Y-%m-%dT%H:%M:%S)
+          node scripts/ai-review.mjs --since "$SINCE"
+
+      - name: Z.ai second opinion
+        env:
+          ZAI_API_KEY: ${{ secrets.ZAI_API_KEY }}
+        run: |
+          SINCE=$(date -u -d '-1 day' +%Y-%m-%dT%H:%M:%S 2>/dev/null || date -v-1d +%Y-%m-%dT%H:%M:%S)
+          node scripts/ai-review.mjs --provider zai --since "$SINCE"
