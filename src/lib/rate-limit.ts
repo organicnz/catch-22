@@ -14,24 +14,28 @@ const MAX_TRACKED_KEYS = 5000;
 export function rateLimit(
   key: string,
   limit: number,
-  windowMs: number
+  windowMs: number,
+  now: () => number = Date.now
 ): { ok: boolean; retryAfterSec: number } {
-  const now = Date.now();
-  const hits = (buckets.get(key) ?? []).filter((t) => now - t < windowMs);
+  const current = now();
+  const hits = (buckets.get(key) ?? []).filter((t) => current - t < windowMs);
 
   if (hits.length >= limit) {
     buckets.set(key, hits);
-    const oldest = hits[0] ?? now;
-    return { ok: false, retryAfterSec: Math.max(1, Math.ceil((windowMs - (now - oldest)) / 1000)) };
+    const oldest = hits[0] ?? current;
+    return {
+      ok: false,
+      retryAfterSec: Math.max(1, Math.ceil((windowMs - (current - oldest)) / 1000)),
+    };
   }
 
-  hits.push(now);
+  hits.push(current);
   buckets.set(key, hits);
 
   // Opportunistic GC so long-lived isolates don't accumulate dead keys.
   if (buckets.size > MAX_TRACKED_KEYS) {
     for (const [k, v] of buckets) {
-      if (v.every((t) => now - t >= windowMs)) buckets.delete(k);
+      if (v.every((t) => current - t >= windowMs)) buckets.delete(k);
       if (buckets.size <= MAX_TRACKED_KEYS / 2) break;
     }
   }

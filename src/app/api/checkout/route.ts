@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { getStripeShippingOptions } from '@/config/shipping';
+import { validateCartItems, validatePromoCode } from '@/lib/checkout-validation';
 import { env } from '@/lib/env';
 import { clientKey, rateLimit } from '@/lib/rate-limit';
 import { createServerClient } from '@/lib/supabase-server';
@@ -47,33 +48,17 @@ export async function POST(req: Request) {
     });
 
     const body = await req.json();
-    const { items, promoCode } = body;
+    const { items: rawItems, promoCode } = body;
 
-    if (!items || !Array.isArray(items) || items.length === 0) {
-      return NextResponse.json({ error: 'No items in cart' }, { status: 400 });
+    const cartCheck = validateCartItems(rawItems);
+    if (!cartCheck.ok) {
+      return NextResponse.json({ error: cartCheck.failure.message }, { status: 400 });
     }
+    const items = cartCheck.items;
 
-    // Validate item structure
-    for (const item of items) {
-      if (!item.id || typeof item.id !== 'number') {
-        return NextResponse.json({ error: 'Invalid item: id must be a number' }, { status: 400 });
-      }
-      if (
-        !item.quantity ||
-        typeof item.quantity !== 'number' ||
-        item.quantity < 1 ||
-        item.quantity > 999 ||
-        !Number.isInteger(item.quantity)
-      ) {
-        return NextResponse.json(
-          { error: 'Invalid item: quantity must be an integer between 1 and 999' },
-          { status: 400 }
-        );
-      }
-    }
-
-    if (promoCode !== undefined && (typeof promoCode !== 'string' || promoCode.length > 50)) {
-      return NextResponse.json({ error: 'Invalid promo code' }, { status: 400 });
+    const promoCheck = validatePromoCode(promoCode);
+    if (!promoCheck.ok) {
+      return NextResponse.json({ error: promoCheck.failure.message }, { status: 400 });
     }
 
     const supabase = await createServerClient();
