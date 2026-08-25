@@ -16,7 +16,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   lint:
     name: Lint & Type Check
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, ARM64]
     steps:
       - uses: actions/checkout@v5
 
@@ -49,7 +49,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   test:
     name: Tests
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, ARM64]
     steps:
       - uses: actions/checkout@v5
 
@@ -84,7 +84,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   build:
     name: Production Build
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, ARM64]
     env:
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
@@ -122,7 +122,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   e2e:
     name: Instant Navigation E2E
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, ARM64]
     needs: [build]
     timeout-minutes: 15
     env:
@@ -168,7 +168,7 @@ jobs:
 
   supabase:
     name: Supabase (Migrations + Edge Functions)
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, ARM64]
     needs: [lint, test, build]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     timeout-minutes: 20
