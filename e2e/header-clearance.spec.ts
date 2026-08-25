@@ -26,16 +26,22 @@ const guardedRoutes: Route[] = [
 ];
 
 async function expectHeadingClearOfHeader(page: import('@playwright/test').Page) {
+  // Dynamic routes stream their body; measure only once the stream has settled
+  // so we never capture a half-painted layout.
+  await page.waitForLoadState('networkidle');
+
   const header = await page.locator('header').first().boundingBox();
-  const h1 = await page.locator('h1').first().boundingBox({ timeout: 15_000 });
+  const h1 = page.locator('h1').first();
+  await expect(h1).toBeVisible();
+  const h1Box = await h1.boundingBox();
 
   expect(header, 'header must render').toBeTruthy();
-  expect(h1, 'page must have an h1').toBeTruthy();
+  expect(h1Box, 'page must have an h1').toBeTruthy();
 
   // Allow 2px tolerance for sub-pixel rounding.
   expect(
-    h1!.y,
-    `h1 at y=${h1!.y} overlaps fixed header ending at y=${header!.y + header!.height}`
+    h1Box!.y,
+    `h1 at y=${h1Box!.y} overlaps fixed header ending at y=${header!.y + header!.height}`
   ).toBeGreaterThanOrEqual(header!.y + header!.height - 2);
 }
 

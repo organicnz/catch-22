@@ -35,7 +35,7 @@ export function SustainableSection() {
 
             <div className="flex flex-col sm:flex-row gap-6">
               <Link
-                href="/products/catch-22-sustainable-fishing-bumper-sticker"
+                href="/products/catch-22-bumper-sticker"
                 className="inline-block bg-secondary text-white font-black py-6 px-10 rounded-2xl transition-all uppercase tracking-[0.2em] text-xs hover:bg-primary hover:text-secondary text-center"
               >
                 Get Your Sticker Today

@@ -6,6 +6,24 @@ import { createServerClient } from '@/lib/supabase-server';
 
 const STRIPE_API_VERSION = '2026-07-29.dahlia' as const;
 
+/**
+ * Success/cancel redirects must be absolute HTTPS URLs or the Stripe SDK
+ * rejects the session ("An explicit scheme must be provided"). The Origin
+ * header is unreliable (proxies, privacy modes, non-browser clients), so
+ * validate it against known-good hosts and fall back to the canonical site.
+ */
+function resolveReturnOrigin(req: Request): string {
+  const raw = req.headers.get('origin');
+  if (
+    raw &&
+    (/^https:\/\/([\w-]+\.)*catch-22\.co\.nz$/.test(raw) ||
+      /^https:\/\/[\w-]+\.vercel\.app$/.test(raw))
+  ) {
+    return raw;
+  }
+  return env.NEXT_PUBLIC_SITE_URL || 'https://catch-22.co.nz';
+}
+
 export async function POST(req: Request) {
   try {
     const stripeKey = env.STRIPE_SECRET_KEY;
@@ -113,8 +131,8 @@ export async function POST(req: Request) {
       adaptive_pricing: {
         enabled: false,
       },
-      success_url: `${req.headers.get('origin')}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.get('origin')}/cart`,
+      success_url: `${resolveReturnOrigin(req)}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${resolveReturnOrigin(req)}/cart`,
       shipping_address_collection: {
         allowed_countries: ['NZ'],
       },
