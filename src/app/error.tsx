@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect } from 'react';
+import { reportClientError } from '@/lib/error-report';
 
 export default function RouteError({
   error,
@@ -11,7 +12,7 @@ export default function RouteError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error(error);
+    reportClientError(error, { digest: error.digest });
   }, [error]);
 
   return (
