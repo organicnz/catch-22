@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { cacheLife } from 'next/cache';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -7,67 +6,18 @@ import { Suspense } from 'react';
 import { AddToCartButton } from '@/components/checkout/AddToCartButton';
 import { ProductSlider } from '@/components/products/ProductSlider';
 import { WishlistButton } from '@/components/products/WishlistButton';
+import {
+  getAllProductSlugs,
+  getProductDetail,
+  getProductMeta,
+  getRelatedProducts,
+} from '@/lib/queries/products';
 import { sanitizeWPContent } from '@/lib/sanitize';
 import { getStorageUrl } from '@/lib/supabase';
-import { createPublicClient } from '@/lib/supabase-server';
 import type { Json } from '@/types/supabase';
 
-async function getProductMeta(slug: string) {
-  'use cache';
-  cacheLife('minutes');
-  const supabase = createPublicClient();
-  const { data } = await supabase
-    .from('products')
-    .select('name, short_description, description, image_url')
-    .eq('slug', slug)
-    .single();
-  return data;
-}
-
-async function getProductDetail(slug: string) {
-  'use cache';
-  cacheLife('minutes');
-  const supabase = createPublicClient();
-  const { data, error } = await supabase
-    .from('products')
-    .select(`
-      *,
-      product_categories (
-        category_id
-      ),
-      product_variations (*)
-    `)
-    .eq('slug', slug)
-    .single();
-  return error ? null : data;
-}
-
-async function getRelatedProducts(productId: number, categoryIds: number[]) {
-  'use cache';
-  cacheLife('minutes');
-  const supabase = createPublicClient();
-  const { data: related } = await supabase
-    .from('products')
-    .select(`
-      id, name, slug, price, image_url, stock_status,
-      product_categories!inner (category_id)
-    `)
-    .in('product_categories.category_id', categoryIds)
-    .neq('id', productId)
-    .eq('stock_status', 'instock')
-    .limit(4);
-
-  if (!related) return [];
-
-  // Filter duplicates locally if the query returns multiple due to multiple categories
-  const uniqueIds = new Set();
-  return related.filter((p) => {
-    if (!uniqueIds.has(p.id)) {
-      uniqueIds.add(p.id);
-      return true;
-    }
-    return false;
-  });
+export async function generateStaticParams() {
+  return getAllProductSlugs();
 }
 
 export async function generateMetadata({
@@ -139,6 +89,32 @@ async function ProductDetailsBody({ params }: { params: Promise<{ slug: string }
     return notFound();
   }
 
+  const productUrl = `https://catch-22.co.nz/products/${slug}`;
+  const price = Number(product.sale_price ?? product.price ?? 0);
+  const inStock = product.stock_status === 'instock';
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    description:
+      sanitizeWPContent(
+        (product.short_description || product.description || '').replace(/<[^>]*>?/gm, ' ')
+      )
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 300) || undefined,
+    image: product.image_url ? [getStorageUrl(product.image_url)] : undefined,
+    sku: String(product.id),
+    offers: {
+      '@type': 'Offer',
+      url: productUrl,
+      priceCurrency: 'NZD',
+      price: price.toFixed(2),
+      availability: inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      itemCondition: 'https://schema.org/NewCondition',
+    },
+  };
+
   // Fetch related products from the same category
   interface RelatedProduct {
     id: number;
@@ -158,6 +134,11 @@ async function ProductDetailsBody({ params }: { params: Promise<{ slug: string }
 
   return (
     <div className="bg-white min-h-screen">
+      <script
+        type="application/ld+json"
+        // Structured data, not WP content: sanitizeWPContent intentionally not applied
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-(--header-h) pb-12 sm:py-20">
         <div className="lg:grid lg:grid-cols-2 lg:gap-x-12 xl:gap-x-16">
           {/* Image gallery */}
