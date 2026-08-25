@@ -71,28 +71,52 @@ describe('errorFingerprint', () => {
 });
 
 describe('reportClientError', () => {
-  const fetchMock = vi.fn();
+  // Runner-neutral global stub: works under vitest AND `bun test`, which
+  // lacks vi.stubGlobal/unstubAllGlobals.
+  const originalFetch = globalThis.fetch;
+  const fetchCalls: { url: unknown; init: RequestInit | undefined }[] = [];
+  let fetchResponse: Response | null = null;
+  let shouldReject = false;
+
+  const fetchMock = Object.assign(
+    (url: unknown, init?: RequestInit) => {
+      fetchCalls.push({ url, init });
+      if (shouldReject) return Promise.reject(new TypeError('network down'));
+      return Promise.resolve(fetchResponse ?? new Response(null, { status: 204 }));
+    },
+    {
+      mockResolvedValue(res: Response) {
+        fetchResponse = res;
+      },
+      mockReset() {
+        fetchCalls.length = 0;
+        fetchResponse = null;
+        shouldReject = false;
+      },
+    }
+  );
 
   beforeEach(() => {
-    vi.stubGlobal('fetch', fetchMock);
+    fetchMock.mockReset();
+    globalThis.fetch = fetchMock as typeof fetch;
   });
 
   afterEach(() => {
-    vi.unstubAllGlobals();
-    fetchMock.mockReset();
+    globalThis.fetch = originalFetch;
   });
 
   it('posts a schema-shaped payload to the beacon endpoint', () => {
     fetchMock.mockResolvedValue(new Response(null, { status: 204 }));
     reportClientError(new Error('Cart blew up'), { digest: 'd1' });
 
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    const [url, init] = fetchMock.mock.calls[0];
+    expect(fetchCalls).toHaveLength(1);
+    const url = String(fetchCalls[0].url);
+    const init = fetchCalls[0].init as RequestInit;
     expect(url).toBe('/api/report-error');
     expect(init.method).toBe('POST');
     expect(init.keepalive).toBe(true);
 
-    const body = JSON.parse(init.body);
+    const body = JSON.parse(init.body as string);
     expect(body.message).toBe('Cart blew up');
     expect(body.digest).toBe('d1');
     expect(typeof body.stack).toBe('string');
@@ -100,18 +124,19 @@ describe('reportClientError', () => {
 
   it('drops payloads that fail schema validation without calling fetch', () => {
     reportClientError(new Error('x'.repeat(ERROR_MESSAGE_MAX + 5)));
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(fetchCalls).toHaveLength(0);
   });
 
   it('swallows network failures silently', () => {
-    fetchMock.mockRejectedValue(new Error('offline'));
+    shouldReject = true;
     expect(() => reportClientError(new Error('Boom'))).not.toThrow();
   });
 
   it('accepts plain strings as the message', () => {
     fetchMock.mockResolvedValue(new Response(null, { status: 204 }));
     reportClientError('String crash');
-    const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+    const init = fetchCalls[0].init as RequestInit;
+    const body = JSON.parse(init.body as string);
     expect(body.message).toBe('String crash');
   });
 });

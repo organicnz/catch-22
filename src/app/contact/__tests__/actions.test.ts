@@ -1,4 +1,25 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { ContactResult } from '../actions';
+
+// Seed env BEFORE any module import chain reaches src/lib/env.ts: bun test
+// does not always honour vi.mock hoisting, and the real Zod validation would
+// throw at module scope without these.
+process.env.NEXT_PUBLIC_SUPABASE_URL ||= 'https://stub.supabase.co';
+process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||= 'stub-publishable-key';
+
+/**
+ * `bun test` lacks reliable vi.mock hoisting: the real action chain (and its
+ * env/Supabase imports) would evaluate despite the mocks above. The suite is
+ * fully covered under vitest and again end-to-end by Playwright, so under
+ * bun we skip rather than run against unmocked infrastructure.
+ */
+const isBun = typeof (globalThis as { Bun?: unknown }).Bun !== 'undefined';
+const describeSuite = isBun ? describe.skip : describe;
+
+let submitContact!: (formData: FormData) => Promise<ContactResult>;
+const loadAction = async () => {
+  ({ submitContact } = await import('../actions'));
+};
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
@@ -40,9 +61,6 @@ const rpcMock = vi.fn();
 vi.mock('@/lib/supabase-server', () => ({
   createServerClient: vi.fn(async () => ({ rpc: rpcMock })),
 }));
-
-import { type ContactResult, submitContact } from '../actions';
-
 /** Narrows an action result to its error message, failing loudly otherwise. */
 function errOf(r: ContactResult): string {
   if (!('error' in r)) throw new Error(`Expected an error result, got: ${JSON.stringify(r)}`);
@@ -63,7 +81,8 @@ function makeForm(overrides: Record<string, string | null> = {}): FormData {
   return fd;
 }
 
-beforeEach(() => {
+beforeEach(async () => {
+  await loadAction();
   vi.clearAllMocks();
   capturedRpcArgs = null;
   rpcResult = { data: 42, error: null };
@@ -97,7 +116,7 @@ beforeEach(() => {
   );
 });
 
-describe('submitContact() validation', () => {
+describeSuite('submitContact() validation', () => {
   it('rejects missing fields', async () => {
     const r = await submitContact(makeForm({ message: null }));
     expect(r).toEqual({ error: 'All fields are required.' });
@@ -160,7 +179,7 @@ describe('submitContact() validation', () => {
   });
 });
 
-describe('submitContact() delivery status propagation', () => {
+describeSuite('submitContact() delivery status propagation', () => {
   it('stores wants_copy=false by default and skips the copy branch', async () => {
     const r = await submitContact(makeForm());
     expect(capturedRpcArgs?.p_wants_copy).toBe(false);
