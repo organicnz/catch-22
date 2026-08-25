@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { getStripeShippingOptions } from '@/config/shipping';
 import { env } from '@/lib/env';
+import { clientKey, rateLimit } from '@/lib/rate-limit';
 import { createServerClient } from '@/lib/supabase-server';
 
 const STRIPE_API_VERSION = '2026-07-29.dahlia' as const;
@@ -25,6 +26,16 @@ function resolveReturnOrigin(req: Request): string {
 }
 
 export async function POST(req: Request) {
+  // 10 checkout sessions / minute / IP — session creation is not free
+  // (Stripe API quota + email/payment pressure). In-memory per isolate.
+  const gate = rateLimit(clientKey(req.headers, 'checkout'), 10, 60_000);
+  if (!gate.ok) {
+    return NextResponse.json(
+      { error: 'Too many checkout attempts. Please wait a moment.' },
+      { status: 429, headers: { 'Retry-After': String(gate.retryAfterSec) } }
+    );
+  }
+
   try {
     const stripeKey = env.STRIPE_SECRET_KEY;
     if (!stripeKey) {
