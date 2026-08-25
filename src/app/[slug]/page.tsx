@@ -1,22 +1,12 @@
 import type { Metadata } from 'next';
-import { cacheLife } from 'next/cache';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
+import { getAllPublishedSlugs, getPublishedContent } from '@/lib/queries/content';
 import { sanitizeWPContent } from '@/lib/sanitize';
-import { createPublicClient } from '@/lib/supabase-server';
 
-async function getPublishedContent(slug: string) {
-  'use cache';
-  cacheLife('hours');
-  const supabase = createPublicClient();
-  const { data } = await supabase
-    .from('content')
-    .select('*')
-    .eq('slug', slug)
-    .eq('status', 'publish')
-    .single();
-  return data;
+export async function generateStaticParams() {
+  return getAllPublishedSlugs();
 }
 
 export async function generateMetadata({
@@ -84,8 +74,28 @@ async function ContentBody({ params }: { params: Promise<{ slug: string }> }) {
 
   const cleanBody = sanitizeWPContent(content.body || '');
 
+  const jsonLd =
+    content.type === 'post'
+      ? {
+          '@context': 'https://schema.org',
+          '@type': 'Article',
+          headline: content.title,
+          datePublished: content.created_at ?? undefined,
+          dateModified: content.created_at ?? undefined,
+          author: { '@type': 'Organization', name: 'Catch-22' },
+          publisher: { '@type': 'Organization', name: 'Catch-22' },
+        }
+      : null;
+
   return (
     <div className="bg-white min-h-screen pt-(--header-h) pb-16 px-4 sm:px-6 lg:px-8">
+      {jsonLd && (
+        <script
+          type="application/ld+json"
+          // Structured data, not WP content: sanitizeWPContent intentionally not applied
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
       <div className="max-w-4xl mx-auto">
         <div className="flex flex-col mb-12">
           <h1 className="text-4xl md:text-5xl font-black tracking-tight text-secondary uppercase mb-4 leading-tight">
