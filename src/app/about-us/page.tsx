@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { getStorageUrl } from '@/lib/supabase';
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/about-us' },
   title: 'About Us - Catch-22',
   description:
     'Learn about Catch-22, our products, and our mission to provide top-of-the-line fishing gear.',

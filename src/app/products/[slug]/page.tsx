@@ -41,6 +41,7 @@ export async function generateMetadata({
     cleanDescription.length > 150 ? `${cleanDescription.substring(0, 147)}...` : cleanDescription;
 
   return {
+    alternates: { canonical: `/products/${slug}` },
     title: `${product.name} | Catch-22 Gear`,
     description: description,
     openGraph: {
@@ -114,6 +115,20 @@ async function ProductDetailsBody({ params }: { params: Promise<{ slug: string }
       itemCondition: 'https://schema.org/NewCondition',
     },
   };
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.catch-22.co.nz/' },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Shop',
+        item: 'https://www.catch-22.co.nz/products',
+      },
+      { '@type': 'ListItem', position: 3, name: product.name, item: productUrl },
+    ],
+  };
 
   // Fetch related products from the same category
   interface RelatedProduct {
@@ -137,7 +152,7 @@ async function ProductDetailsBody({ params }: { params: Promise<{ slug: string }
       <script
         type="application/ld+json"
         // Structured data, not WP content: sanitizeWPContent intentionally not applied
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify([jsonLd, breadcrumbLd]) }}
       />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-(--header-h) pb-12 sm:py-20">
         <div className="lg:grid lg:grid-cols-2 lg:gap-x-12 xl:gap-x-16">

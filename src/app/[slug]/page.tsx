@@ -29,6 +29,7 @@ export async function generateMetadata({
   const description = rawText.length > 150 ? `${rawText.substring(0, 147)}...` : rawText;
 
   return {
+    alternates: { canonical: `/${slug}` },
     title: `${content.title} | Catch-22`,
     description: description,
     openGraph: {

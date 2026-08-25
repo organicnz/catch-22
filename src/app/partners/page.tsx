@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { getStorageUrl } from '@/lib/supabase';
 
 export const metadata: Metadata = {
+  alternates: { canonical: '/partners' },
   title: 'Our Partners | Catch-22 New Zealand',
   description:
     'Meet the fishing guides, charters, and conservation organisations that test and trust Catch-22 gear in the harshest New Zealand conditions.',
