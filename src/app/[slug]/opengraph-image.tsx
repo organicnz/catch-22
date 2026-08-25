@@ -8,9 +8,16 @@ export const alt = 'Catch-22 content page';
 export default async function ContentOgImage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const content = await getPublishedContent(slug);
-  const title = content?.title ?? 'Catch-22';
+
+  // Unknown/fuzzed slugs must not pay for a satori render — fail fast so
+  // bot crawls can't burn function CPU generating garbage images.
+  if (!content) {
+    return new Response('Not Found', { status: 404 });
+  }
+
+  const title = content.title;
   const description =
-    content?.body?.replace(/<[^>]*>?/gm, '').slice(0, 140) ??
+    content.body?.replace(/<[^>]*>?/gm, '').slice(0, 140) ??
     'Built for the Elements — premium fishing gear tested in the harshest NZ conditions.';
 
   return new ImageResponse(
