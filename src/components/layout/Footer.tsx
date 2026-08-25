@@ -22,6 +22,7 @@ export function Footer() {
                 width={212}
                 height={150}
                 className="h-20 w-auto"
+                unoptimized
               />
             </Link>
             <p className="mt-6 text-sm text-slate-300 leading-relaxed">

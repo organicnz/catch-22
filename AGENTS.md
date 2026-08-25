@@ -62,6 +62,15 @@ Update with `npx skills update`; restore with `npx skills experimental_install`.
 - **TypeScript 6**: bridge release only (deprecations); no value while blocked on 7.
 - Revisit after the Next.js 16.3.x line announces native-TS builds.
 
+### Vercel Free-Tier Conservation Mode
+The team shares one Fluid Active CPU pool (4 hrs / rolling 30 days) across all projects. Deliberate posture — do not revert without checking the Usage dashboard:
+- All catalog/content `cacheLife` profiles are **`hours`** (not `minutes`) to minimize background renders; price/stock edits propagate within the hour.
+- Middleware runs **only** on `/account`, `/admin`, `/login`.
+- Image transforms: 31-day cache, slim variant grids, logo served unoptimized, qualities locked to 75.
+- Sitemap is fully static (`○`). Fuzzed content OG slugs fail fast with 404.
+- Rate limits: checkout 10/min/IP, contact 3/10min/IP.
+When the store generates revenue, move to Pro and revisit TTLs (`minutes`) for price freshness.
+
 ---
 
 ## 🗺 Migration Roadmap
