@@ -98,3 +98,17 @@
 .border-primary {
   border-color: var(--primary);
 }
+
+/* Reduced-motion safety net: users who opt out of animation get instant,
+   static transitions everywhere — including Tailwind transitions and
+   framer-motion CSS-driven effects. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

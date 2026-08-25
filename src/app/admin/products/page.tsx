@@ -119,7 +119,7 @@ export default async function AdminProductsPage({
             name="q"
             defaultValue={q}
             placeholder="Search products…"
-            className="bg-transparent text-sm font-bold text-secondary outline-none placeholder:text-slate-400 w-56"
+            className="bg-transparent text-sm font-bold text-secondary outline-none focus:ring-2 focus:ring-primary rounded-md placeholder:text-slate-400 w-56"
           />
         </form>
       </div>

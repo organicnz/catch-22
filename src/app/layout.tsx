@@ -72,11 +72,19 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} ${outfit.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-white text-secondary font-sans selection:bg-primary selection:text-secondary">
         <Providers>
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[200] focus:bg-primary focus:text-secondary focus:font-black focus:uppercase focus:tracking-widest focus:text-xs focus:px-4 focus:py-2 focus:rounded-full"
+          >
+            Skip to content
+          </a>
           <Suspense fallback={null}>
             <SettingsLoader />
           </Suspense>
           <Header />
-          <main className="flex-grow flex flex-col">{children}</main>
+          <main id="main-content" className="flex-grow flex flex-col">
+            {children}
+          </main>
           <Footer />
         </Providers>
         <Toaster position="bottom-right" richColors theme="light" />

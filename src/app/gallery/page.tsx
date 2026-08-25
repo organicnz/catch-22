@@ -238,7 +238,12 @@ export default function GalleryPage() {
 
       {/* Lightbox Modal */}
       {selectedImage && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10">
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10 overscroll-contain"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Gallery image viewer"
+        >
           <button
             type="button"
             className="absolute inset-0 bg-secondary/98 backdrop-blur-2xl cursor-default"
