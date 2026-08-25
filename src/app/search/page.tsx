@@ -1,7 +1,22 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ProductCard } from '@/components/products/ProductCard';
+import {
+  normalizeSearchQuery,
+  type RankedContentRow,
+  type RankedProductRow,
+  searchContentRanked,
+  searchProductsRanked,
+} from '@/lib/queries/search';
 import { isSpamContent } from '@/lib/sanitize';
 import { createPublicClient } from '@/lib/supabase-server';
+
+// Search results are per-user request-time views — never index them.
+export const metadata: Metadata = {
+  title: 'Search — Catch-22',
+  description: 'Search gear, logbook stories and pages across Catch-22.',
+  robots: { index: false, follow: true },
+};
 
 // Deliberate Cache Components opt-out (Block): results derive from
 // request-time searchParams; nothing to prerender.
@@ -14,37 +29,44 @@ export default async function SearchPage({
 }) {
   const supabase = createPublicClient();
   const resolvedParams = await searchParams;
-  const q = typeof resolvedParams.q === 'string' ? resolvedParams.q : '';
+  const q = typeof resolvedParams.q === 'string' ? normalizeSearchQuery(resolvedParams.q) : '';
 
-  let products: React.ComponentProps<typeof ProductCard>['product'][] = [];
-  let posts: {
-    id: number;
-    title: string;
-    slug: string;
-    type: string | null;
-    created_at: string | null;
-  }[] = [];
+  let products: RankedProductRow[] = [];
+  let posts: RankedContentRow[] = [];
 
   if (q) {
-    // 1. Search Products
-    const { data: prodData } = await supabase
-      .from('products')
-      .select('id, name, slug, price, regular_price, sale_price, image_url, stock_status')
-      .ilike('name', `%${q}%`)
-      .eq('stock_status', 'instock')
-      .order('created_at', { ascending: false });
+    const [rankedProducts, rankedContent] = await Promise.all([
+      searchProductsRanked(supabase, q),
+      searchContentRanked(supabase, q),
+    ]);
 
-    products = prodData || [];
+    if (rankedProducts && rankedContent) {
+      // Primary path: Postgres full-text search with relevance ranking.
+      products = rankedProducts;
+      posts = rankedContent;
+    } else {
+      // Fallback for schemas whose migrations have not applied yet
+      // (fresh preview environments): the legacy ILIKE scan.
+      const { data: prodData } = await supabase
+        .from('products')
+        .select('id, name, slug, price, regular_price, sale_price, image_url, stock_status')
+        .ilike('name', `%${q}%`)
+        .eq('stock_status', 'instock')
+        .order('created_at', { ascending: false })
+        .limit(24);
 
-    // 2. Search Content (Posts/Pages)
-    const { data: contentData } = await supabase
-      .from('content')
-      .select('id, title, slug, type, created_at')
-      .or(`title.ilike.%${q}%,body.ilike.%${q}%`)
-      .eq('status', 'publish')
-      .limit(10);
+      const { data: contentData } = await supabase
+        .from('content')
+        .select('id, title, slug, type, created_at')
+        .or(`title.ilike.%${q}%,body.ilike.%${q}%`)
+        .eq('status', 'publish')
+        .limit(10);
 
-    posts = contentData?.filter((item) => !isSpamContent(item.title)) || [];
+      products = prodData || [];
+      posts = contentData || [];
+    }
+
+    posts = posts.filter((item) => !isSpamContent(item.title));
   }
 
   return (
@@ -56,7 +78,7 @@ export default async function SearchPage({
           </h1>
           <div className="h-1.5 w-24 bg-primary mt-3" />
           <p className="mt-4 text-slate-500 font-bold uppercase tracking-widest text-xs">
-            Results for <span className="text-primary">&ldquo;{q}&rdquo;</span>
+            Results for <span className="text-primary-ink">&ldquo;{q}&rdquo;</span>
           </p>
         </div>
 
