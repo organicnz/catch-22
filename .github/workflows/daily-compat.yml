@@ -21,6 +21,15 @@ jobs:
     name: Build · Test · E2E · Prod probes
     runs-on: [self-hosted, linux, ARM64]
     timeout-minutes: 45
+    env:
+      # Mirror deploy.yml's build contract — the validated env layer refuses
+      # to parse without these.
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+      NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+      STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+      SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
     steps:
       - uses: actions/checkout@v4
 
@@ -57,8 +66,6 @@ jobs:
           [ "$CODE" = "200" ]
 
       - name: Probe edge functions boot
-        env:
-          PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
         run: |
           probe() {
             case "$1" in
