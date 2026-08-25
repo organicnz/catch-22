@@ -91,11 +91,21 @@ When the store generates revenue, move to Pro and revisit TTLs (`minutes`) for p
 - [x] **Asset Hardening**: Mapping partner logos, community gallery images, and "Sledger Rigs" content.
 - [x] **Legal**: Terms of Service, Privacy Policy, and Shipping/Returns.
 
-### Phase 4: Production Hardening (Current)
+### Phase 4: Production Hardening (Completed)
 - [x] **Documentation**: Finalizing README, AGENTS, and CLAUDE guides.
 - [x] **Sensory Design**: Full hardening of ProductCard and Gallery components.
 - [x] **Final QA**: End-to-end checkout flow validation and cross-device testing.
 - [x] **Stripe Production**: Transitioning from test keys to live environment.
+
+### Phase 5: Stack Hardening Round (Current)
+- [x] **Error Telemetry**: Supabase-native error beacon — `error_reports` table (anon insert-only RLS), rate-limited `/api/report-error`, wired into `error.tsx` / `global-error.tsx`.
+- [x] **Full-Text Search**: Weighted `tsvector` generated columns + GIN indexes + ranked RPCs (`search_products`, `search_content`); `/search` uses ranked FTS with ILIKE fallback for un-migrated previews.
+- [x] **A11y Regression Gate**: `@axe-core/playwright` suite (`e2e/a11y.spec.ts`) over 8 public routes; serious/critical violations fail CI.
+- [x] **Contrast Remediation**: `--primary-ink` (#5c7500) token for lime-on-light text; lime-bg CTAs use dark text; slate-300/400 grays lifted on light surfaces. Raw lime reserved for dark surfaces/non-text accents.
+- [x] **Bundle Hygiene**: Removed dead `mime-types`; React Query devtools dev-only gated; patch bumps.
+- [x] **Cart Route Crash Fix**: `/cart` rendered the error boundary in production — `env.ts` validated `{ ...process.env }`, which bundlers cannot statically inline on the client (empty stub → ZodError at module scope via `StripeExpressCheckout`). Public vars are now picked as dotted accesses (inlined); spreads remain server-only.
+- [x] **Contact Email Delivery**: `contact_submissions` had no consumer (messages invisible). New `20260825140000_contact_notification.sql` + `notify-contact` Edge Function: pg_net AFTER-INSERT trigger dispatches `{ id }` only; the function re-reads the row via service role, atomically claims it (`email_sent_at` — exactly one email per row, ever, replay-proof under `--no-verify-jwt`), then sends via Resend using existing function secrets, plus an opt-in sender copy (`wants_copy`, recipient locked to the row's own address — cannot relay to third parties). No secrets in SQL, no Vault step. SQL-side 6-per-10-min throttle caps anon-key mail-bombing; fire-and-forget, never fails the submit.
+- Migration note: `20260825120000_error_reports.sql` + `20260825130000_fts_search.sql` apply via CI db push on merge to main.
 
 ---
 
