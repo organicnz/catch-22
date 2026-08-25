@@ -2,6 +2,7 @@ import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { env } from '@/lib/env';
+import { buildOrderItems } from '@/lib/stripe-order-items';
 import { createAdminClient } from '@/lib/supabase-server';
 
 const STRIPE_API_VERSION = '2026-07-29.dahlia' as const;
@@ -55,6 +56,19 @@ export async function POST(req: Request) {
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, stripe: Stripe) {
   const supabase = await createAdminClient();
 
+  // Idempotency guard: Stripe retries deliveries and may emit duplicate events.
+  // Skip if this session already produced an order. The unique index on
+  // stripe_session_id (migration 20260824000000) backstops concurrent races.
+  const { data: existing } = await supabase
+    .from('orders')
+    .select('id')
+    .eq('stripe_session_id', session.id)
+    .maybeSingle();
+  if (existing) {
+    console.log(`⏭️ Order for session ${session.id} already exists — skipping duplicate delivery`);
+    return;
+  }
+
   // 1. Get line items with product details
   const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
     expand: ['data.price.product'],
@@ -105,19 +119,23 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, 
     .select()
     .single();
 
-  if (orderError) throw orderError;
+  if (orderError) {
+    // Concurrent duplicate delivery lost the race to the unique index —
+    // treat as success so Stripe stops retrying.
+    if (
+      typeof orderError === 'object' &&
+      orderError !== null &&
+      'code' in orderError &&
+      (orderError as { code?: string }).code === '23505'
+    ) {
+      console.log(`⏭️ Order for session ${session.id} already exists (unique index) — skipping`);
+      return;
+    }
+    throw orderError;
+  }
 
   // 4. Create order items
-  const orderItems = lineItems.data.map((item: Stripe.LineItem) => {
-    const product = item.price?.product as Stripe.Product;
-    return {
-      order_id: order.id,
-      product_id: product?.metadata?.id ? Number.parseInt(product.metadata.id, 10) : null,
-      product_name: product?.name || item.description,
-      quantity: item.quantity || 1,
-      total: (item.amount_total || 0) / 100,
-    };
-  });
+  const orderItems = buildOrderItems(order.id, lineItems.data);
 
   const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
   if (itemsError) throw itemsError;
