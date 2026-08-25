@@ -132,6 +132,21 @@ export default function ContactPage() {
             />
           </div>
 
+          <div className="flex items-start gap-3">
+            <input
+              type="checkbox"
+              name="sendCopy"
+              id="sendCopy"
+              className="mt-0.5 h-4 w-4 rounded border-slate-300 accent-primary"
+            />
+            <label
+              htmlFor="sendCopy"
+              className="text-xs font-bold text-slate-600 uppercase tracking-wider cursor-pointer select-none"
+            >
+              Send me a copy of this message
+            </label>
+          </div>
+
           <button
             type="submit"
             disabled={status === 'loading'}

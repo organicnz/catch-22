@@ -22,9 +22,20 @@ export async function submitContact(formData: FormData) {
     return { error: 'All fields are required.' };
   }
 
+  // Control characters have no business in identity fields (header-injection
+  // defense); messages may contain newlines and are JSON-transported anyway.
+  const controlChars = /\p{C}/u;
+  if (controlChars.test(name)) return { error: 'Name contains invalid characters.' };
+  if (controlChars.test(email)) return { error: 'Email contains invalid characters.' };
+
   if (name.length < 2) return { error: 'Name is too short.' };
   if (message.length < 10) return { error: 'Message is too short.' };
   if (!email.includes('@')) return { error: 'Invalid email address.' };
+
+  // Upper bounds keep payloads sane for PostgREST and Resend alike.
+  if (name.length > 100) return { error: 'Name is too long.' };
+  if (email.length > 254) return { error: 'Email is too long.' };
+  if (message.length > 5000) return { error: 'Message is too long (5000 characters max).' };
 
   // 3. Spam keyword check for content
   const spamKeywords = ['casino', 'slot', 'judi', 'togel', 'crypto', 'loan'];
@@ -44,6 +55,7 @@ export async function submitContact(formData: FormData) {
     name,
     email,
     message,
+    wants_copy: formData.get('sendCopy') === 'on',
   });
 
   if (error) {
