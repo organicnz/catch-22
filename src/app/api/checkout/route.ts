@@ -56,7 +56,7 @@ export async function POST(req: Request) {
     const productIds = items.map((item) => item.id);
     const { data: dbProducts, error: dbError } = await supabase
       .from('products')
-      .select('id, name, price, slug')
+      .select('id, name, price, slug, stock_status')
       .in('id', productIds);
 
     if (dbError || !dbProducts) {
@@ -67,10 +67,17 @@ export async function POST(req: Request) {
     // Map database products for easy lookup
     const productMap = new Map(dbProducts.map((p) => [p.id, p]));
 
-    // Validate all requested products exist before building line items
+    // Validate all requested products exist and are purchasable
     for (const item of items) {
-      if (!productMap.has(item.id)) {
+      const dbProduct = productMap.get(item.id);
+      if (!dbProduct) {
         return NextResponse.json({ error: `Product not found: ${item.id}` }, { status: 400 });
+      }
+      if (dbProduct.stock_status !== 'instock') {
+        return NextResponse.json(
+          { error: `Out of stock: ${dbProduct.name}`, productId: item.id },
+          { status: 409 }
+        );
       }
     }
 
@@ -86,6 +93,8 @@ export async function POST(req: Request) {
             name: dbProduct.name,
             metadata: {
               slug: dbProduct.slug,
+              // The webhook maps line items back to catalog rows via this id.
+              id: String(dbProduct.id),
             },
           },
           unit_amount: Math.round(dbProduct.price * 100), // Convert to cents
