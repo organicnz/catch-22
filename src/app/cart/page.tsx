@@ -3,21 +3,27 @@
 import { ArrowRight, Minus, Plus, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 import { toast } from 'sonner';
 import { StripeExpressCheckout } from '@/components/checkout/StripeExpressCheckout';
 import { SHIPPING_RATES } from '@/config/shipping';
 import { MAX_ITEM_QUANTITY, useCartStore } from '@/lib/store/cart';
 import { getStorageUrl } from '@/lib/supabase';
 
+/** No-op store subscription: hydration state never changes after mount. */
+const emptySubscribe = () => () => {};
+
 export default function CartPage() {
   const { items, removeItem, updateQuantity, totalPrice } = useCartStore();
   const [isLoading, setIsLoading] = useState(false);
   const [promoCode, setPromoCode] = useState('');
-  // Persisted store rehydrates after mount — render the shell first to avoid
-  // an SSR/client mismatch flash of an empty cart.
-  const [hydrated, setHydrated] = useState(useCartStore.persist.hasHydrated());
-  useEffect(() => useCartStore.persist.onFinishHydration(() => setHydrated(true)), []);
+  // Persisted cart rehydrates client-side only; render the skeleton on the
+  // server/first paint to avoid an empty-cart mismatch flash.
+  const hydrated = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
 
   const handleCheckout = async () => {
     setIsLoading(true);
