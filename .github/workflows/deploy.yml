@@ -161,7 +161,9 @@ jobs:
     name: Instant Navigation E2E
     runs-on: [self-hosted, linux, ARM64]
     needs: [preflight, build]
-    timeout-minutes: 15
+    # 15m was cancelled mid cold-cache production build on the shared
+    # self-hosted runner; 30m covers worst-case install+build+suite.
+    timeout-minutes: 30
     env:
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
