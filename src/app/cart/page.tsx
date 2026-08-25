@@ -3,16 +3,21 @@
 import { ArrowRight, Minus, Plus, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { StripeExpressCheckout } from '@/components/checkout/StripeExpressCheckout';
 import { SHIPPING_RATES } from '@/config/shipping';
-import { useCartStore } from '@/lib/store/cart';
+import { MAX_ITEM_QUANTITY, useCartStore } from '@/lib/store/cart';
 import { getStorageUrl } from '@/lib/supabase';
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, totalPrice } = useCartStore();
   const [isLoading, setIsLoading] = useState(false);
   const [promoCode, setPromoCode] = useState('');
+  // Persisted store rehydrates after mount — render the shell first to avoid
+  // an SSR/client mismatch flash of an empty cart.
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
 
   const handleCheckout = async () => {
     setIsLoading(true);
@@ -26,24 +31,53 @@ export default function CartPage() {
           items: items.map((item) => ({
             id: item.id,
             quantity: item.quantity,
-            name: item.name,
-            price: item.price,
           })),
           promoCode: promoCode.trim(),
         }),
       });
       const data = await response.json();
+
       if (data.url) {
         window.location.href = data.url;
-      } else {
-        alert(data.error || 'Something went wrong');
+        return;
       }
+
+      // Out-of-stock (409): drop the dead line from the cart so retry works.
+      if (response.status === 409 && data.productId) {
+        removeItem(data.productId);
+        toast.error(data.error || 'An item sold out and was removed from your cart.');
+        return;
+      }
+
+      // Rate limited (429): surface the wait instead of a generic failure.
+      if (response.status === 429) {
+        const retry = Number(response.headers.get('Retry-After')) || 30;
+        toast.error(`Too many attempts — try again in ${retry}s.`);
+        return;
+      }
+
+      toast.error(data.error || 'Something went wrong starting checkout.');
     } catch {
-      alert('Checkout failed');
+      toast.error('Checkout failed — check your connection and try again.');
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (!hydrated) {
+    return (
+      <div className="bg-white min-h-screen pt-(--header-h) pb-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-pulse">
+          <div className="h-10 w-48 bg-slate-100 rounded mb-8" />
+          <div className="space-y-4">
+            {['tall', 'medium', 'short'].map((row) => (
+              <div key={row} className="h-28 bg-slate-50 rounded-3xl border border-slate-100" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (items.length === 0) {
     return (
@@ -127,7 +161,13 @@ export default function CartPage() {
                           </span>
                           <button
                             type="button"
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                            onClick={() =>
+                              updateQuantity(
+                                item.id,
+                                Math.min(item.quantity + 1, MAX_ITEM_QUANTITY)
+                              )
+                            }
+                            disabled={item.quantity >= MAX_ITEM_QUANTITY}
                             className="p-2 text-secondary hover:text-primary transition-colors"
                             aria-label="Increase quantity"
                           >
