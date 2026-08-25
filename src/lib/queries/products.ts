@@ -3,7 +3,7 @@ import { createPublicClient } from '@/lib/supabase-server';
 
 export async function getAllProductSlugs() {
   'use cache';
-  cacheLife('minutes');
+  cacheLife('hours');
   const supabase = createPublicClient();
   const { data } = await supabase.from('products').select('slug').eq('stock_status', 'instock');
   return (data ?? []).map((row) => ({ slug: row.slug }));
@@ -11,7 +11,7 @@ export async function getAllProductSlugs() {
 
 export async function getProductMeta(slug: string) {
   'use cache';
-  cacheLife('minutes');
+  cacheLife('hours');
   const supabase = createPublicClient();
   const { data } = await supabase
     .from('products')
@@ -23,7 +23,7 @@ export async function getProductMeta(slug: string) {
 
 export async function getProductDetail(slug: string) {
   'use cache';
-  cacheLife('minutes');
+  cacheLife('hours');
   const supabase = createPublicClient();
   const { data, error } = await supabase
     .from('products')
@@ -43,7 +43,7 @@ export async function getProductDetail(slug: string) {
 
 export async function getRelatedProducts(productId: number, categoryIds: number[]) {
   'use cache';
-  cacheLife('minutes');
+  cacheLife('hours');
   const supabase = createPublicClient();
   const { data: related } = await supabase
     .from('products')
