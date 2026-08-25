@@ -7,8 +7,11 @@ on:
     branches: [main]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: $${{ github.workflow }}-${{ github.ref }}
+  # Never cancel in-flight main runs: a rapid second merge used to murder
+  # the first run's E2E mid-flight (all steps frozen at null). Queuing is
+  # cheap at this repo's traffic; a murdered prod-validation signal is not.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   # ─────────────────────────────────────────────────────────────────────────────
