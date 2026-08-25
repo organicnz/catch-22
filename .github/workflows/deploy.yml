@@ -194,8 +194,13 @@ jobs:
           NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
           NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
 
+      # Single worker: the shared self-hosted ARM64 runner times out
+      # timing-sensitive instant() guards under parallel load, and the same
+      # tree has flipped green/red between runs. The suite is ~30s serial.
       - name: Run instant() navigation guards
-        run: bunx playwright test
+        run: |
+          bunx playwright test --workers=1 --retries=2 2>&1 | tee playwright-run.log
+          exit ${PIPESTATUS[0]}
 
       - name: Upload Playwright report on failure
         if: failure()
@@ -203,6 +208,16 @@ jobs:
         with:
           name: playwright-report
           path: playwright-report/
+
+      # This runner's log blob upload is unreliable (BlobNotFound on every
+      # API fetch) — persist stdout as an artifact so failures always leave
+      # evidence.
+      - name: Upload Playwright stdout
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-stdout
+          path: playwright-run.log
           retention-days: 7
 
   supabase:
