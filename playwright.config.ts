@@ -12,6 +12,7 @@ try {
 }
 
 const PORT = 3100;
+const MOCK_PORT = 3101;
 
 export default defineConfig({
   testDir: './e2e',
@@ -24,10 +25,25 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
-  webServer: {
-    command: `bunx next start -p ${PORT}`,
-    url: `http://localhost:${PORT}/robots.txt`,
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  webServer: [
+    {
+      command: `bunx next start -p ${PORT}`,
+      url: `http://localhost:${PORT}/robots.txt`,
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+      env: {
+        // Route contact notifications at the controllable mock so e2e can
+        // assert real delivery-status UI without sending actual email.
+        CONTACT_FUNCTION_URL: `http://127.0.0.1:${MOCK_PORT}/notify-contact`,
+        // The suite submits the form many times from one IP; keep prod's 3/10min out of the way.
+        CONTACT_RATE_LIMIT_MAX: '1000',
+      },
+    },
+    {
+      command: `node scripts/mock-notify-contact.mjs ${MOCK_PORT}`,
+      url: `http://127.0.0.1:${MOCK_PORT}/__health`,
+      reuseExistingServer: !process.env.CI,
+      timeout: 30_000,
+    },
+  ],
 });

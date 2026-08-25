@@ -1,23 +1,46 @@
 'use client';
 
 import { useState } from 'react';
-import { submitContact } from './actions';
+import { type ContactResult, type EmailStatus, submitContact } from './actions';
+
+type FormStatus = 'idle' | 'loading' | 'success' | 'partial-copy' | 'partial-notify' | 'error';
 
 export default function ContactPage() {
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [status, setStatus] = useState<FormStatus>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+  const [senderEmail, setSenderEmail] = useState('');
+  const [copyStatus, setCopyStatus] = useState<EmailStatus>('not-requested');
+
+  const statusMessageId =
+    status === 'success'
+      ? 'form-success-message'
+      : status === 'partial-copy' || status === 'partial-notify'
+        ? 'form-partial-message'
+        : status === 'error'
+          ? 'form-error-message'
+          : undefined;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setStatus('loading');
 
     const formData = new FormData(e.currentTarget);
-    const result = await submitContact(formData);
+    setSenderEmail(String(formData.get('email') ?? ''));
+    setCopyStatus('not-requested');
+    const result: ContactResult = await submitContact(formData);
 
-    if (result.error) {
+    if ('error' in result) {
       setErrorMessage(result.error);
       setStatus('error');
+      return;
+    }
+
+    if (result.emailStatus === 'failed') {
+      setStatus('partial-notify');
+    } else if (result.copyStatus === 'failed') {
+      setStatus('partial-copy');
     } else {
+      setCopyStatus(result.copyStatus);
       setStatus('success');
       (e.target as HTMLFormElement).reset();
     }
@@ -48,6 +71,44 @@ export default function ContactPage() {
             className="block mb-8 p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl font-bold text-sm uppercase tracking-wider text-center"
           >
             ✅ Message sent successfully! We will be in touch soon.
+            {senderEmail && copyStatus === 'sent' && (
+              <span className="block mt-1 normal-case tracking-normal font-medium text-emerald-600">
+                A confirmation copy is on its way to {senderEmail}.
+              </span>
+            )}
+          </output>
+        )}
+
+        {status === 'partial-copy' && (
+          <output
+            id="form-partial-message"
+            // biome-ignore lint/a11y/noRedundantRoles: Chromium does not expose <output>'s implicit status role to AT or testing queries
+            role="status"
+            className="block mb-8 p-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-2xl font-bold text-sm uppercase tracking-wider text-center"
+          >
+            ⚠️ Message sent! We will be in touch soon.
+            <span className="block mt-1 normal-case tracking-normal font-medium text-amber-700">
+              The copy to your inbox could not be delivered — but your message reached us and we
+              will reply to you directly.
+            </span>
+          </output>
+        )}
+
+        {status === 'partial-notify' && (
+          <output
+            id="form-partial-message"
+            // biome-ignore lint/a11y/noRedundantRoles: Chromium does not expose <output>'s implicit status role to AT or testing queries
+            role="status"
+            className="block mb-8 p-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-2xl font-bold text-sm uppercase tracking-wider text-center"
+          >
+            ⚠️ Message received and saved — but our notification email failed.
+            <span className="block mt-1 normal-case tracking-normal font-medium text-amber-700">
+              For a faster reply, please email us directly at{' '}
+              <a href="mailto:Catch-22NZ@hotmail.com" className="underline">
+                Catch-22NZ@hotmail.com
+              </a>
+              .
+            </span>
           </output>
         )}
 
@@ -61,17 +122,7 @@ export default function ContactPage() {
           </div>
         )}
 
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-6"
-          aria-describedby={
-            status === 'success'
-              ? 'form-success-message'
-              : status === 'error'
-                ? 'form-error-message'
-                : undefined
-          }
-        >
+        <form onSubmit={handleSubmit} className="space-y-6" aria-describedby={statusMessageId}>
           {/* Honeypot field for anti-spam */}
           <div className="hidden" aria-hidden="true">
             <label htmlFor="website">Leave this field empty</label>

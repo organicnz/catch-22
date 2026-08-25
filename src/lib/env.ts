@@ -20,6 +20,9 @@ const serverSchema = publicSchema.extend({
   // Preview environment has no secrets (production-only env vars).
   STRIPE_SECRET_KEY: z.string().min(1).optional().catch(undefined),
   STRIPE_WEBHOOK_SECRET: z.string().min(1).optional().catch(undefined),
+  // Contact notifications: test/ops overrides (defaults are derived in-code).
+  CONTACT_FUNCTION_URL: z.string().url().optional(),
+  CONTACT_RATE_LIMIT_MAX: z.coerce.number().int().positive().optional(),
 });
 
 const schema = isClient ? publicSchema : serverSchema;

@@ -503,6 +503,15 @@ export type Database = {
         Args: { new_base: string; old_base: string }
         Returns: undefined
       }
+      submit_contact_submission: {
+        Args: {
+          p_email: string
+          p_message: string
+          p_name: string
+          p_wants_copy?: boolean
+        }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
