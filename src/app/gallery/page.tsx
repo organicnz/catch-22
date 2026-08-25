@@ -189,12 +189,9 @@ export default function GalleryPage() {
         {/* Masonry-style Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           {snaps.map((snap, index) => (
-            <button
+            <div
               key={snap.id}
-              type="button"
-              className="group relative aspect-[4/5] bg-white/5 rounded-[3rem] overflow-hidden cursor-pointer shadow-2xl hover:shadow-primary/10 transition-all duration-700 hover:-translate-y-2 border border-white/5 text-left"
-              onClick={() => setSelectedIndex(index)}
-              aria-label={`View ${snap.caption} from ${snap.location}`}
+              className="group relative aspect-[4/5] bg-white/5 rounded-[3rem] overflow-hidden shadow-2xl hover:shadow-primary/10 transition-all duration-700 hover:-translate-y-2 border border-white/5"
             >
               <Image
                 src={snap.url.startsWith('/') ? snap.url : getStorageUrl(snap.url)}
@@ -204,7 +201,7 @@ export default function GalleryPage() {
               />
 
               {/* Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-secondary/90 via-secondary/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col justify-end p-10">
+              <div className="absolute inset-0 bg-gradient-to-t from-secondary/90 via-secondary/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col justify-end p-10 pointer-events-none">
                 <div className="flex items-center gap-2 mb-4">
                   <MapPin className="w-4 h-4 text-primary" />
                   <span className="text-primary font-black uppercase tracking-widest text-[10px]">
@@ -217,21 +214,26 @@ export default function GalleryPage() {
                 <p className="text-white/60 text-sm font-bold">{snap.author}</p>
 
                 <div className="mt-8 pt-8 border-t border-white/10 flex items-center justify-between">
-                  <button
-                    type="button"
-                    className="flex items-center gap-2 text-white hover:text-primary transition-colors"
-                    onClick={() => setSelectedIndex(index)}
-                    aria-label={`Enlarge ${snap.caption}`}
-                  >
+                  <span className="flex items-center gap-2 text-white">
                     <Maximize2 className="w-5 h-5" />
                     <span className="text-[10px] font-black uppercase tracking-widest">
                       Enlarge
                     </span>
-                  </button>
+                  </span>
                   <Share2 className="w-5 h-5 text-white/40" />
                 </div>
               </div>
-            </button>
+
+              {/* Single interactive control per card — the whole card opens the
+                  lightbox. Keeps axe's nested-interactive rule satisfied while
+                  preserving the hover-reveal caption overlay. */}
+              <button
+                type="button"
+                className="absolute inset-0 z-20 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+                onClick={() => setSelectedIndex(index)}
+                aria-label={`View ${snap.caption} from ${snap.location}`}
+              />
+            </div>
           ))}
         </div>
       </div>

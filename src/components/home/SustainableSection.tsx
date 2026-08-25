@@ -20,11 +20,11 @@ export function SustainableSection() {
           </div>
 
           <div className="lg:w-1/2 order-2 lg:order-2">
-            <span className="text-primary font-black uppercase tracking-[0.4em] text-[10px] mb-6 block">
+            <span className="text-primary-ink font-black uppercase tracking-[0.4em] text-[10px] mb-6 block">
               Our Commitment
             </span>
             <h2 className="text-5xl md:text-7xl font-black text-secondary uppercase tracking-tighter leading-[0.9] mb-10">
-              Be Proud To Be A <br /> <span className="text-slate-300">Sustainable</span> <br />{' '}
+              Be Proud To Be A <br /> <span className="text-slate-500">Sustainable</span> <br />{' '}
               Fisherman
             </h2>
             <p className="text-slate-500 text-xl font-medium leading-relaxed mb-12">

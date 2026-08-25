@@ -136,10 +136,10 @@ async function DealOfTheDay() {
 
               <div className="flex items-center gap-8 mb-12">
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
                     RRP
                   </span>
-                  <span className="text-2xl text-slate-500 line-through font-bold">
+                  <span className="text-2xl text-slate-400 line-through font-bold">
                     ${dealProduct.regular_price?.toFixed(2)}
                   </span>
                 </div>
@@ -249,11 +249,11 @@ export default async function Home() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
         <div className="flex flex-col md:flex-row items-end justify-between mb-24 gap-8">
           <div className="max-w-xl text-left">
-            <span className="text-primary font-black uppercase tracking-[0.4em] text-[10px] mb-4 block">
+            <span className="text-primary-ink font-black uppercase tracking-[0.4em] text-[10px] mb-4 block">
               Store Selection
             </span>
             <h2 className="text-5xl md:text-7xl font-black text-secondary uppercase tracking-tighter leading-[0.9]">
-              Best <br /> <span className="text-slate-300">Sellers</span>
+              Best <br /> <span className="text-slate-500">Sellers</span>
             </h2>
           </div>
           <Link
@@ -280,7 +280,7 @@ export default async function Home() {
       <section className="bg-white py-40 text-center overflow-hidden relative">
         <div className="max-w-5xl mx-auto px-4 relative z-10">
           <h3 className="text-5xl md:text-8xl font-black text-secondary uppercase mb-12 tracking-tighter leading-[0.85]">
-            Gear up and <br /> <span className="text-primary drop-shadow-sm">Join the Crew</span>
+            Gear up and <br /> <span className="text-primary-ink">Join the Crew</span>
           </h3>
           <p className="text-slate-500 text-xl font-medium leading-relaxed max-w-2xl mx-auto mb-16">
             Join thousands of NZ anglers who trust Catch-22 for their most demanding expeditions.
@@ -290,21 +290,21 @@ export default async function Home() {
           <div className="flex flex-wrap justify-center gap-12 md:gap-24 mb-20">
             <div className="flex flex-col items-center">
               <div className="text-4xl font-black text-secondary">4.9/5</div>
-              <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">
+              <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-2">
                 Verified Anglers
               </div>
             </div>
             <div className="w-px h-16 bg-slate-100 hidden md:block" />
             <div className="flex flex-col items-center">
               <div className="text-4xl font-black text-secondary tracking-tighter">FAST</div>
-              <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">
+              <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-2">
                 NZ Wide Delivery
               </div>
             </div>
             <div className="w-px h-16 bg-slate-100 hidden md:block" />
             <div className="flex flex-col items-center">
               <div className="text-4xl font-black text-secondary tracking-tighter">FREE</div>
-              <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">
+              <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-2">
                 Returns Policy
               </div>
             </div>

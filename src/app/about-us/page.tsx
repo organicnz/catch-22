@@ -36,7 +36,7 @@ export default function AboutPage() {
           <section className="flex flex-col md:flex-row gap-12 items-center">
             <div className="flex-1">
               <h2 className="text-3xl font-black text-secondary uppercase mb-6 tracking-tight italic">
-                Who <span className="text-primary not-italic">We Are</span>
+                Who <span className="text-primary-ink not-italic">We Are</span>
               </h2>
               <p className="text-slate-600 text-lg font-medium leading-relaxed">
                 Here at Catch-22 we are dedicated to providing top of the line products so
@@ -58,7 +58,7 @@ export default function AboutPage() {
           <section className="bg-slate-50 p-10 sm:p-16 rounded-[3rem] border border-slate-100 shadow-sm relative overflow-hidden">
             <div className="relative z-10">
               <h2 className="text-3xl font-black text-secondary uppercase mb-6 tracking-tight text-center italic">
-                Our <span className="text-primary not-italic">Products</span>
+                Our <span className="text-primary-ink not-italic">Products</span>
               </h2>
               <p className="text-slate-600 text-lg font-medium leading-relaxed text-center max-w-2xl mx-auto">
                 All our braid products are made with 100% quality Japanese fibre, ready to be
@@ -80,7 +80,7 @@ export default function AboutPage() {
             </div>
             <div className="flex-1">
               <h2 className="text-3xl font-black text-secondary uppercase mb-6 tracking-tight italic">
-                How <span className="text-primary not-italic">We Work</span>
+                How <span className="text-primary-ink not-italic">We Work</span>
               </h2>
               <p className="text-slate-600 text-lg font-medium leading-relaxed">
                 Our gear is tested down at Bay of Plenty Boat Hire by none other than Charles of the

@@ -130,7 +130,7 @@ export function Footer() {
           </div>
           <div className="flex gap-6">
             {/* Placeholder for social icons */}
-            <span className="text-xs text-slate-500 font-bold uppercase tracking-widest">
+            <span className="text-xs text-slate-400 font-bold uppercase tracking-widest">
               Follow our catch
             </span>
           </div>
