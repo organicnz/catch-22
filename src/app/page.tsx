@@ -45,7 +45,7 @@ export const metadata: Metadata = {
 
 async function BestSellers() {
   'use cache';
-  cacheLife('minutes');
+  cacheLife('hours');
   const supabase = createPublicClient();
 
   // Fetch featured products (Best Sellers)
@@ -82,7 +82,7 @@ function BestSellersLoading() {
 
 async function DealOfTheDay() {
   'use cache';
-  cacheLife('minutes');
+  cacheLife('hours');
   const supabase = createPublicClient();
 
   // Fetch a deal product (using the first product with a sale price)
