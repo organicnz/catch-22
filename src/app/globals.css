@@ -5,6 +5,9 @@
   --foreground: #0f172a;
   --primary: #d1ff00;
   --primary-dark: #b8d600;
+  /* Readable lime for TEXT on light surfaces (#5c7500 = 5.25:1 vs white).
+     Raw #d1ff00 is reserved for dark surfaces and non-text accents. */
+  --primary-ink: #5c7500;
   --secondary: #0f172a;
   --accent: #dfb178;
 
@@ -24,6 +27,7 @@
   --color-foreground: var(--foreground);
   --color-primary: var(--primary);
   --color-primary-dark: var(--primary-dark);
+  --color-primary-ink: var(--primary-ink);
   --color-secondary: var(--secondary);
   --color-accent: var(--accent);
   --font-sans: var(--font-inter);

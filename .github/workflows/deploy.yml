@@ -161,7 +161,9 @@ jobs:
     name: Instant Navigation E2E
     runs-on: [self-hosted, linux, ARM64]
     needs: [preflight, build]
-    timeout-minutes: 15
+    # 15m was cancelled mid cold-cache production build on the shared
+    # self-hosted runner; 30m covers worst-case install+build+suite.
+    timeout-minutes: 30
     env:
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
@@ -439,7 +441,7 @@ jobs:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
         run: |
-          for slug in webhook checkout; do
+          for slug in webhook checkout notify-contact; do
             for attempt in 1 2 3; do
               echo "── deploy $slug (attempt $attempt/3) ──"
               if supabase functions deploy "$slug" --project-ref "$PROJECT_REF" --no-verify-jwt; then
@@ -462,7 +464,7 @@ jobs:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
           PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
         run: |
-          for slug in webhook checkout; do
+          for slug in webhook checkout notify-contact; do
             STATUS=$(curl -s "https://api.supabase.com/v1/projects/$PROJECT_REF/functions/$slug" \
               -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
               | python3 -c "import json,sys; print(json.load(sys.stdin).get('status','UNKNOWN'))")
@@ -472,7 +474,7 @@ jobs:
               exit 1
             fi
           done
-          echo "✅ Both functions ACTIVE"
+          echo "✅ All functions ACTIVE"
 
       - name: Verify functions boot in production
         env:
@@ -484,13 +486,16 @@ jobs:
           # creating a Stripe session or an order.
           # webhook probe: unsigned {} is rejected at the first gate
           # (missing stripe-signature header) with 400 — proof it booted.
+          # notify-contact probe: id=0 fails payload validation with 400 —
+          # proof it booted, no email touched.
           probe() {
             case "$1" in
-              checkout) echo '{"items":[{"id":2147483647,"quantity":1}]}' ;;
-              webhook)  echo '{}' ;;
+              checkout)       echo '{"items":[{"id":2147483647,"quantity":1}]}' ;;
+              webhook)        echo '{}' ;;
+              notify-contact) echo '{"id":0}' ;;
             esac
           }
-          for slug in webhook checkout; do
+          for slug in webhook checkout notify-contact; do
             for attempt in 1 2 3 4 5; do
               RESP=$(curl -s -w "\n%{http_code}" \
                 -X POST "https://$PROJECT_REF.supabase.co/functions/v1/$slug" \

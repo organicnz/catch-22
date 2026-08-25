@@ -62,7 +62,18 @@ async function satisfiedBy(range, installedPkg) {
   };
 
   for (const clause of range.split('||')) {
-    const ranges = clause.trim().split(/\s+/).filter(Boolean);
+    const rawTokens = clause.trim().split(/\s+/).filter(Boolean);
+    // Reattach operators separated from their version by whitespace
+    // (e.g. ">= 1.0.0" arrives as [">=", "1.0.0"]).
+    const ranges = [];
+    for (let i = 0; i < rawTokens.length; i++) {
+      if (/^(<=|>=|<|>|\^|~)$/.test(rawTokens[i])) {
+        ranges.push(rawTokens[i] + (rawTokens[i + 1] ?? ''));
+        i++;
+      } else {
+        ranges.push(rawTokens[i]);
+      }
+    }
     let ok = true;
     for (const bound of ranges) {
       const m = bound.match(/^(<=|>=|<|>|\^|~)?(\d+)\.(\d+)(\.(\d+))?$/);

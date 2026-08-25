@@ -151,7 +151,7 @@ export default function PartnersPage() {
           </h3>
           <Link
             href="/contact"
-            className="text-primary font-black uppercase tracking-widest border-b-2 border-primary hover:text-secondary hover:border-secondary transition-all"
+            className="text-primary-ink font-black uppercase tracking-widest border-b-2 border-primary-ink hover:text-secondary hover:border-secondary transition-all"
           >
             Get in touch today
           </Link>
