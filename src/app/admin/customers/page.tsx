@@ -72,7 +72,7 @@ export default async function AdminCustomersPage({
           name="q"
           defaultValue={q}
           placeholder="Search customers…"
-          className="bg-transparent text-sm font-bold text-secondary outline-none placeholder:text-slate-400"
+          className="bg-transparent text-sm font-bold text-secondary outline-none focus:ring-2 focus:ring-primary rounded-md placeholder:text-slate-400"
         />
       </form>
 

@@ -115,7 +115,10 @@ export default async function ProductsPage({
     .order('name');
 
   if (categoriesError) {
-    console.error('[ProductsPage] Categories query failed:', categoriesError.message);
+    // Prerender-phase rejection of the shell fetch — retried at request time.
+    if (!(categoriesError instanceof Error) || !/prerender/i.test(categoriesError.message)) {
+      console.error('[ProductsPage] Categories query failed:', categoriesError.message);
+    }
     // Continue rendering — categories sidebar will be empty but page won't crash
   }
 

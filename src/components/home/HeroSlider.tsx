@@ -1,5 +1,6 @@
 'use client';
 
+import { useReducedMotion } from 'motion/react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -62,17 +63,27 @@ const slides = [
 
 export function HeroSlider() {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
+    // WCAG 2.3.3: autoplay motion must stop for users who opt out of
+    // animation; also pause on hover/focus so readers can finish a slide.
+    if (reducedMotion || paused) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, SLIDE_DURATION);
     return () => clearInterval(timer);
-  }, []);
+  }, [reducedMotion, paused]);
 
   return (
     <section
       aria-label="Hero — Explore our World"
+      aria-roledescription="carousel"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocus={() => setPaused(true)}
+      onBlur={() => setPaused(false)}
       className="relative h-screen min-h-screen h-[100dvh] w-full flex items-center overflow-hidden bg-secondary"
     >
       {/* Background Images */}

@@ -107,8 +107,11 @@ export default function ContactPage() {
               name="email"
               id="email"
               required
-              placeholder="your@email.com"
-              className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all font-bold text-secondary"
+              autoComplete="email"
+              inputMode="email"
+              spellCheck={false}
+              placeholder="your@email.com…"
+              className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-colors font-bold text-secondary"
             />
           </div>
 
