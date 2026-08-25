@@ -57,6 +57,7 @@ const nextConfig: NextConfig = {
     // Slim variant grids: fewer distinct widths = fewer cached transforms.
     deviceSizes: [640, 828, 1080, 1200, 1920],
     imageSizes: [64, 128, 256, 384],
+    qualities: [75],
     remotePatterns: [
       {
         protocol: 'https',

@@ -37,6 +37,7 @@ function HeaderFallback() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         <Image
           src={getStorageUrl('site/logo.png')}
+          unoptimized
           alt="CATCH-22"
           width={319}
           height={225}
@@ -146,6 +147,7 @@ function HeaderInner() {
           <Link href="/" className="flex items-center gap-4 group">
             <Image
               src={getStorageUrl('site/logo.png')}
+              unoptimized
               alt="CATCH-22"
               width={319}
               height={225}
