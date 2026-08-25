@@ -1,21 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-// zustand/persist touches localStorage on every state write; jsdom in this
-// project doesn't provide one. Stub before the store module is imported.
-vi.hoisted(() => {
-  const map = new Map<string, string>();
-  globalThis.localStorage = {
-    getItem: (k: string) => map.get(k) ?? null,
-    setItem: (k: string, v: string) => void map.set(k, v),
-    removeItem: (k: string) => void map.delete(k),
-    clear: () => map.clear(),
-    key: (i: number) => [...map.keys()][i] ?? null,
-    get length() {
-      return map.size;
-    },
-  } as Storage;
-});
-
+import { beforeEach, describe, expect, it } from 'vitest';
+import './localstorage-shim';
 import { MAX_ITEM_QUANTITY, useCartStore } from '@/lib/store/cart';
 
 const reset = () => useCartStore.setState({ items: [] });
