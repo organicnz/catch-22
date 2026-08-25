@@ -90,7 +90,7 @@ export default function FAQPage() {
             <section key={group.category} aria-labelledby={`faq-category-${group.category}`}>
               <h2
                 id={`faq-category-${group.category}`}
-                className="text-xl font-black text-primary uppercase tracking-widest mb-6 border-b border-slate-100 pb-2"
+                className="text-xl font-black text-primary-ink uppercase tracking-widest mb-6 border-b border-slate-100 pb-2"
               >
                 {group.category}
               </h2>
@@ -124,7 +124,7 @@ export default function FAQPage() {
           </p>
           <Link
             href="/contact"
-            className="inline-block bg-primary hover:bg-primary-dark text-white font-black py-5 px-12 rounded-full transition-all uppercase tracking-[0.2em] text-sm"
+            className="inline-block bg-primary hover:bg-primary-dark text-secondary font-black py-5 px-12 rounded-full transition-all uppercase tracking-[0.2em] text-sm"
           >
             Contact Our Team
           </Link>

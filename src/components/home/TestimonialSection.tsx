@@ -36,11 +36,11 @@ export function TestimonialSection() {
     <section className="py-40 bg-white relative overflow-hidden">
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-xl mb-24">
-          <span className="text-primary font-black uppercase tracking-[0.4em] text-[10px] mb-4 block">
+          <span className="text-primary-ink font-black uppercase tracking-[0.4em] text-[10px] mb-4 block">
             Proven Performance
           </span>
           <h2 className="text-5xl md:text-7xl font-black text-secondary uppercase tracking-tighter leading-[0.9]">
-            Trusted By <br /> <span className="text-slate-300">The Pros</span>
+            Trusted By <br /> <span className="text-slate-500">The Pros</span>
           </h2>
         </div>
 
@@ -82,7 +82,7 @@ export function TestimonialSection() {
                 <h4 className="font-black text-secondary uppercase tracking-[0.2em] text-xs">
                   {t.name}
                 </h4>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-2">
                   {t.role}
                 </p>
               </div>
