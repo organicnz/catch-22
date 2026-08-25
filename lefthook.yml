@@ -5,7 +5,7 @@
 # Skip one command     : LEFTHOOK_EXCLUDE=<name> git <action>
 #
 # ── Baseline metrics (update when intentionally changed) ─────────────────────
-# suppress-count baseline: 5   (checked in pre-push)
+# suppress-count baseline: 7   (checked in pre-push; +2 contact a11y ignores)
 # coverage threshold     : 90% (checked in pre-push + vitest.config.ts)
 # env contract           : every code-referenced env var exists in .env.example
 # lockfile contract      : package.json and bun.lock must move together
@@ -767,13 +767,16 @@ pre-push:
 
     # ── 4. Suppression count gate ─────────────────────────────────────────────
     # Tracks @ts-ignore / biome-ignore / eslint-disable across all of src/.
-    # Baseline is 5 (from audit). Fails if the count grows.
+    # Baseline is 7 (5 from audit + 2 deliberate a11y ignores on the contact
+    # form's <output role="status"> banners: Chromium does not expose
+    # <output>'s implicit status role to assistive tech or testing queries).
+    # Fails if the count grows.
     # To raise the baseline: update the BASELINE value here AND in the comment
     # at the top of this file with a chore commit explaining why.
     suppress-count:
       priority: 4
       run: |
-        BASELINE=5
+        BASELINE=7
         COUNT=$(grep -rn "@ts-ignore\|@ts-nocheck\|biome-ignore\|eslint-disable" \
           src --include="*.ts" --include="*.tsx" 2>/dev/null \
           | grep -v "__tests__" | wc -l | tr -d ' ')
