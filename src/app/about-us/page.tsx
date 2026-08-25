@@ -96,7 +96,7 @@ export default function AboutPage() {
                   </p>
                 </div>
                 <Link
-                  href="/products/catch-22-sustainable-fishing-bumper-sticker"
+                  href="/products/catch-22-bumper-sticker"
                   className="inline-block bg-secondary hover:bg-primary text-white hover:text-secondary font-black py-4 px-6 rounded-2xl transition-all uppercase tracking-wider text-xs shadow-lg text-center whitespace-nowrap"
                 >
                   Get Your Sticker Today
