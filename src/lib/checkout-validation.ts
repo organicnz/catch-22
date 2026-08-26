@@ -53,7 +53,12 @@ export function validatePromoCode(
   raw: unknown
 ): { ok: true } | { ok: false; failure: ValidationFailure } {
   if (raw === undefined) return { ok: true };
-  if (typeof raw !== 'string' || raw.length > 50 || raw.trim().length === 0) {
+  if (typeof raw !== 'string') {
+    return { ok: false, failure: { field: 'promoCode', message: 'Invalid promo code' } };
+  }
+  // The cart always sends the field; empty means "no promo applied".
+  if (raw.trim().length === 0) return { ok: true };
+  if (raw.length > 50) {
     return { ok: false, failure: { field: 'promoCode', message: 'Invalid promo code' } };
   }
   return { ok: true };

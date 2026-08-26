@@ -41,9 +41,13 @@ describe('validatePromoCode()', () => {
     expect(validatePromoCode(undefined)).toEqual({ ok: true });
   });
 
-  it('rejects non-strings, empties, and oversized codes', () => {
+  it('treats empty and whitespace-only strings as "no promo" (cart always sends the field)', () => {
+    expect(validatePromoCode('')).toEqual({ ok: true });
+    expect(validatePromoCode('   ')).toEqual({ ok: true });
+  });
+
+  it('rejects non-strings and oversized codes', () => {
     expect(validatePromoCode(42).ok).toBe(false);
-    expect(validatePromoCode('').ok).toBe(false);
     expect(validatePromoCode('x'.repeat(51)).ok).toBe(false);
     expect(validatePromoCode('SAVE10').ok).toBe(true);
   });
