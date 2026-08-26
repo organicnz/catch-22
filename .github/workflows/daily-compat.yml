@@ -103,16 +103,16 @@ jobs:
 
       - uses: oven-sh/setup-bun@v2
 
-      - name: Groq review of last 24h
+      # Either provider satisfying the review counts as delivered: Groq's
+      # free tier exhausts fast (200k tokens/day), so Z.ai is the fallback,
+      # not a duplicate opinion.
+      - name: AI review of last 24h (Groq, falling back to Z.ai)
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-        run: |
-          SINCE=$(date -u -d '-1 day' +%Y-%m-%dT%H:%M:%S 2>/dev/null || date -v-1d +%Y-%m-%dT%H:%M:%S)
-          node scripts/ai-review.mjs --since "$SINCE"
-
-      - name: Z.ai second opinion
-        env:
           ZAI_API_KEY: ${{ secrets.ZAI_API_KEY }}
         run: |
           SINCE=$(date -u -d '-1 day' +%Y-%m-%dT%H:%M:%S 2>/dev/null || date -v-1d +%Y-%m-%dT%H:%M:%S)
-          node scripts/ai-review.mjs --provider zai --since "$SINCE"
+          if ! node scripts/ai-review.mjs --provider groq --since "$SINCE"; then
+            echo "::warning::Groq unavailable — falling back to Z.ai"
+            node scripts/ai-review.mjs --provider zai --since "$SINCE"
+          fi
