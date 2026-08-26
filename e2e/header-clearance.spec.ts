@@ -28,7 +28,8 @@ const guardedRoutes: Route[] = [
 async function expectHeadingClearOfHeader(page: import('@playwright/test').Page) {
   // Dynamic routes stream their body; measure only once the stream has settled
   // so we never capture a half-painted layout.
-  await page.waitForLoadState('networkidle');
+  // networkidle hangs on hosted runners (persistent sockets); load suffices.
+  await page.waitForLoadState('load');
 
   const header = await page.locator('header').first().boundingBox();
   const h1 = page.locator('h1').first();
