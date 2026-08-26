@@ -51,7 +51,16 @@ export async function submitContact(formData: FormData): Promise<ContactResult> 
   // 1. Honeypot check (bots often fill all fields)
   const honeypot = formData.get('website') as string;
   if (honeypot) {
-    // Silently reject by pretending it worked
+    // Silently reject by pretending it worked — but leave an ops trail so a
+    // real user whose password manager autofilled this field can be diagnosed
+    // from Vercel logs against their report of "sent but nothing happened".
+    const hint = String(formData.get('email') ?? '');
+    // Hashed: enough to correlate a user report with logs, no raw PII.
+    const hintHash = [...hint]
+      .reduce((a, c) => (a * 31 + c.charCodeAt(0)) | 0, 7)
+      .toString(16)
+      .slice(0, 8);
+    console.warn(`[contact] honeypot hit (email hash ${hintHash || 'none'})`);
     return { success: true, emailStatus: 'sent', copyStatus: 'not-requested' };
   }
 
