@@ -94,6 +94,21 @@ jobs:
         run: bunx playwright install chromium --with-deps && bunx playwright test
 
       # ── Production probes: boot-level only, no side effects ────────────────
+      - name: Purge e2e contact rows from prod table
+        if: always()
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+        run: |
+          # The e2e suite writes real rows (mock covers only the email hop).
+          # Keep the production table clean instead of accumulating test data.
+          # Scoped by a literal test-only email predicate — this cannot touch
+          # customer rows even if the token were compromised.
+          curl -s -X POST "https://api.supabase.com/v1/projects/$PROJECT_REF/database/query" \
+            -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"query":"delete from public.contact_submissions where email = '"'"'e2e-tester@catch-22.co.nz'"'"'"}' >/dev/null && echo "e2e rows purged"
+
       - name: Workspace cleanup
         if: always()
         run: rm -rf test-results playwright-report coverage .next || true
