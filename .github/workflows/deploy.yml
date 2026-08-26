@@ -13,6 +13,13 @@ concurrency:
   # cheap at this repo's traffic; a murdered prod-validation signal is not.
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+# Runner selection: repo VARIABLE CI_RUNNER_LABEL (default ubuntu-latest).
+# History: jobs ran on a self-hosted linux/ARM64 box; it spent a day dying
+# mid-job (disk full, DNS failures, broken log/artifact blobs), so CI moved
+# to ephemeral GitHub-hosted runners. To return after repairing that box:
+#   gh variable set CI_RUNNER_LABEL --body "[self-hosted, linux, ARM64]"
+# No code changes required — every job reads the same variable.
+
 jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   # 0. Runner disk guard — self-hosted runners die silently when the disk
@@ -20,7 +27,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   preflight:
     name: Runner Disk Guard
-    runs-on: [self-hosted, linux, ARM64]
+    runs-on: ${{ vars.CI_RUNNER_LABEL || 'ubuntu-latest' }}
     steps:
       - name: Verify free disk space (fail under 2 GB)
         run: |
@@ -38,7 +45,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   cleanup:
     name: Workspace Cleanup
-    runs-on: [self-hosted, linux, ARM64]
+    runs-on: ${{ vars.CI_RUNNER_LABEL || 'ubuntu-latest' }}
     needs: [lint, test, build, e2e, supabase]
     if: always()
     steps:
@@ -54,7 +61,7 @@ jobs:
   lint:
     needs: [preflight]
     name: Lint & Type Check
-    runs-on: [self-hosted, linux, ARM64]
+    runs-on: ${{ vars.CI_RUNNER_LABEL || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v5
 
@@ -87,7 +94,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   test:
     name: Tests
-    runs-on: [self-hosted, linux, ARM64]
+    runs-on: ${{ vars.CI_RUNNER_LABEL || 'ubuntu-latest' }}
     needs: [preflight]
     steps:
       - uses: actions/checkout@v5
@@ -123,7 +130,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   build:
     name: Production Build
-    runs-on: [self-hosted, linux, ARM64]
+    runs-on: ${{ vars.CI_RUNNER_LABEL || 'ubuntu-latest' }}
     needs: [preflight]
     env:
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
@@ -162,7 +169,7 @@ jobs:
   # ─────────────────────────────────────────────────────────────────────────────
   e2e:
     name: Instant Navigation E2E
-    runs-on: [self-hosted, linux, ARM64]
+    runs-on: ${{ vars.CI_RUNNER_LABEL || 'ubuntu-latest' }}
     needs: [preflight, build]
     # 15m was cancelled mid cold-cache production build on the shared
     # self-hosted runner; 30m covers worst-case install+build+suite.
@@ -240,7 +247,7 @@ jobs:
 
   supabase:
     name: Supabase (Migrations + Edge Functions)
-    runs-on: [self-hosted, linux, ARM64]
+    runs-on: ${{ vars.CI_RUNNER_LABEL || 'ubuntu-latest' }}
     needs: [preflight, lint, test, build]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     timeout-minutes: 20
