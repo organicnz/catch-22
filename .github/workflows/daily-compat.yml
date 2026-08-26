@@ -19,7 +19,7 @@ concurrency:
 jobs:
   compatibility:
     name: Build · Test · E2E · Prod probes
-    runs-on: [self-hosted, linux, ARM64]
+    runs-on: ${{ vars.CI_RUNNER_LABEL || 'ubuntu-latest' }}
     timeout-minutes: 45
     env:
       # Mirror deploy.yml's build contract — the validated env layer refuses
@@ -115,7 +115,7 @@ jobs:
 
   ai-nightly-review:
     name: AI Review (last 24h)
-    runs-on: [self-hosted, linux, ARM64]
+    runs-on: ${{ vars.CI_RUNNER_LABEL || 'ubuntu-latest' }}
     needs: [compatibility]
     if: always() && needs.compatibility.result == 'success'
     continue-on-error: true # advisory — model output never fails the run
