@@ -65,6 +65,14 @@ jobs:
         run: |
           set +e
           FAILURES=0
+          HOST="$SUPABASE_PROJECT_REF.supabase.co"
+
+          # Resolver-path insurance: if system DNS cannot answer for the host
+          # (observed once on hosted runners), fall back to DoH-pinned IP.
+          IP=$(curl -s --max-time 10 "https://dns.google/resolve?name=$HOST&type=A" | jq -r "[.Answer // [] | .[] | select(.type == 1) | .data] | first // empty")
+          PIN=""
+          [ -n "$IP" ] && PIN="--resolve $HOST:443:$IP"
+
           for slug in webhook checkout notify-contact; do
             case "$slug" in
               checkout)       BODY='{"items":[{"id":2147483647,"quantity":1}]}' ;;
@@ -72,8 +80,8 @@ jobs:
               notify-contact) BODY='{"id":0}' ;;
             esac
             echo "probing $slug ..."
-            CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 20 \
-              -X POST "https://$PROJECT_REF.supabase.co/functions/v1/$slug" \
+            CODE=$(curl -s $PIN -o /dev/null -w "%{http_code}" --max-time 20 \
+              -X POST "https://$HOST/functions/v1/$slug" \
               -H "Content-Type: application/json" -d "$BODY")
             CURL_RC=$?
             echo "  $slug → HTTP ${CODE:-none} (curl rc=$CURL_RC)"
