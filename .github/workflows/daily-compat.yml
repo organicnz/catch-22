@@ -50,15 +50,9 @@ jobs:
       - name: Production build
         run: bun run build
 
-      # Mock-backed by default via playwright.config webServer env:
-      # CONTACT_FUNCTION_URL points at scripts/mock-notify-contact.mjs, so no
-      # real email leaves. CONTACT_RATE_LIMIT_MAX is raised for the suite.
-      - name: E2E suite
-        run: bunx playwright install chromium --with-deps && bunx playwright test
-
-      # ── Production probes: boot-level only, no side effects ────────────────
       - name: Probe site health
         run: |
+          df -h / | tail -1 # disk exhaustion mid-job kills later steps silently
           # NEXT_PUBLIC_SITE_URL is the bare apex (catch-22.co.nz), which 308s
           # to www — follow redirects and judge the destination.
           CODE=$(curl -sL -o /dev/null -w "%{http_code}" --max-time 20 \
@@ -85,6 +79,14 @@ jobs:
             esac
           done
 
+
+      # Mock-backed by default via playwright.config webServer env:
+      # CONTACT_FUNCTION_URL points at scripts/mock-notify-contact.mjs, so no
+      # real email leaves. CONTACT_RATE_LIMIT_MAX is raised for the suite.
+      - name: E2E suite
+        run: bunx playwright install chromium --with-deps && bunx playwright test
+
+      # ── Production probes: boot-level only, no side effects ────────────────
       - name: Workspace cleanup
         if: always()
         run: rm -rf test-results playwright-report coverage .next || true
