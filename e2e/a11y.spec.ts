@@ -26,7 +26,15 @@ const PAGES: { path: string; name?: string }[] = [
 
 for (const { path, name } of PAGES) {
   test(`a11y: ${name ?? path} has no serious axe violations`, async ({ page }) => {
-    await page.goto(path, { waitUntil: 'networkidle' });
+    // Two determinism guards:
+    //  - networkidle hangs on hosted runners (long-lived analytics sockets);
+    //    load + a settle beat is enough for an axe scan.
+    //  - Animations sampled mid-flight fake color-contrast violations (hero
+    //    fades/moves); the app honours prefers-reduced-motion, so scans run
+    //    against settled final-state rendering.
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto(path, { waitUntil: 'load' });
+    await page.waitForTimeout(500);
 
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
@@ -41,7 +49,15 @@ for (const { path, name } of PAGES) {
       .map((v) => `[${v.impact}] ${v.id}: ${v.help} (${v.nodes.length} nodes)`)
       .join('\n');
     if (summary) {
-      console.log(`\naxe findings on ${path}:\n${summary}`);
+      const detail = results.violations
+        .filter((violation) => ['serious', 'critical'].includes(violation.impact ?? ''))
+        .map((v) =>
+          v.nodes
+            .map((n) => `  ${v.id} → ${n.target.join(' ')} :: ${n.html.slice(0, 140)}`)
+            .join('\n')
+        )
+        .join('\n');
+      console.log(`\naxe findings on ${path}:\n${summary}${detail ? `\n${detail}` : ''}`);
     }
 
     expect(serious, `serious a11y violations on ${path}`).toEqual([]);
