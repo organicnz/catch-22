@@ -61,23 +61,30 @@ jobs:
           [ "$CODE" = "200" ]
 
       - name: Probe edge functions boot
+        shell: bash {0} # no errexit: emit per-probe evidence even when curl fails
         run: |
-          probe() {
-            case "$1" in
-              checkout)       echo '{"items":[{"id":2147483647,"quantity":1}]}' ;;
-              webhook)        echo '{}' ;;
-              notify-contact) echo '{"id":0}' ;;
-            esac
-          }
+          set +e
+          FAILURES=0
           for slug in webhook checkout notify-contact; do
+            case "$slug" in
+              checkout)       BODY='{"items":[{"id":2147483647,"quantity":1}]}' ;;
+              webhook)        BODY='{}' ;;
+              notify-contact) BODY='{"id":0}' ;;
+            esac
+            echo "probing $slug ..."
             CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 20 \
               -X POST "https://$PROJECT_REF.supabase.co/functions/v1/$slug" \
-              -H "Content-Type: application/json" -d "$(probe "$slug")")
-            echo "  $slug → HTTP $CODE"
-            case "$CODE" in
-              5*|000) echo "::error::$slug unhealthy (HTTP $CODE)"; exit 1 ;;
-            esac
+              -H "Content-Type: application/json" -d "$BODY")
+            CURL_RC=$?
+            echo "  $slug → HTTP ${CODE:-none} (curl rc=$CURL_RC)"
+            if [ "$CURL_RC" -ne 0 ] || [[ "$CODE" =~ ^5 ]] || [ "$CODE" = "000" ]; then
+              echo "::error::$slug unhealthy (HTTP ${CODE:-none}, curl rc=$CURL_RC)"
+              FAILURES=$((FAILURES+1))
+            fi
           done
+          if [ "$FAILURES" -gt 0 ]; then exit 1; fi
+          echo "✅ all edge functions booted"
+
 
 
       # Mock-backed by default via playwright.config webServer env:
