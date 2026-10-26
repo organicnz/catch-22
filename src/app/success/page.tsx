@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 // Request-time receipt lookup — nothing here is prerenderable.
 export const instant = false;
 
-const STRIPE_API_VERSION = '2026-07-29.dahlia' as const;
+const STRIPE_API_VERSION = '2026-08-26.dahlia' as const;
 
 type OrderSummary = {
   id: number;
