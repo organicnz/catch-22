@@ -66,6 +66,59 @@ bun run build        # production build
 - Push to `main` → CI gates (lint, types, unit, build, e2e, Supabase migrations) → Vercel auto-deploys production.
 - Dependency health runs nightly: drift audit, vulnerability scan, safe-upgrade proposals.
 
+## 💳 Payment Configuration
+
+The store supports two checkout paths: **Stripe** (card/Apple Pay/Google Pay) and **Bank Transfer** (direct deposit, NZ only).
+
+### Bank Transfer — Configuration
+
+Bank transfer config is stored in the **Supabase Vault** (Edge Function secrets), which is the canonical store for all runtime config. The Next.js server action also reads these via `process.env`, so they must be mirrored in Vercel too.
+
+**Step 1 — Set in Supabase Vault (CLI):**
+```bash
+supabase secrets set \
+  BANK_TRANSFER_BANK_NAME="ANZ" \
+  BANK_TRANSFER_ACCOUNT_NAME="Account Name" \
+  BANK_TRANSFER_ACCOUNT_NUMBER="06-XXXX-XXXXXXX-XX"
+```
+
+Verify with `supabase secrets list`. See `supabase/functions/.env.example` for the full secrets manifest.
+
+**Step 2 — Mirror in Vercel** (required for the Next.js server action):
+
+Bank transfer checkout **will not work in production** unless these three variables are also set in the Vercel dashboard. Without them, the checkout refuses to create orders rather than showing a wrong account number to customers.
+
+Go to: Vercel Dashboard → `catch-22` project → Settings → Environment Variables → Add to **Production**
+
+| Variable | Value |
+|---|---|
+| `BANK_TRANSFER_BANK_NAME` | `ANZ` |
+| `BANK_TRANSFER_ACCOUNT_NAME` | `Account Name` |
+| `BANK_TRANSFER_ACCOUNT_NUMBER` | `06-XXXX-XXXXXXX-XX` |
+
+After adding all three, trigger a redeployment (Settings → Deployments → Redeploy, or push a commit).
+
+### Bank Transfer — Email Notifications
+
+When a bank transfer order is placed, two emails are sent via [Resend](https://resend.com): a customer confirmation with payment instructions, and an admin alert. These are already in the Supabase Vault — verify with `supabase secrets list`:
+
+| Secret | Value |
+|---|---|
+| `RESEND_API_KEY` | Your Resend API key |
+| `ADMIN_ORDER_EMAIL` | Email to receive order alerts |
+| `RESEND_FROM_EMAIL` | Verified sender domain |
+
+They must also be set as Vercel environment variables (same values) so the Next.js server action can send emails directly. Use `onboarding@resend.dev` as `RESEND_FROM_EMAIL` for initial testing (no domain setup needed), then switch to `orders@catch-22.co.nz` once that domain is verified in Resend.
+
+Email failures are non-fatal — the order saves to the database regardless.
+
+### Bank Transfer — Order Workflow
+
+1. Customer places order → status is set to `on-hold` in the Supabase `orders` table
+2. Customer pays into the ANZ account with the reference `CATCH22-{order-id}`
+3. Owner confirms payment received → marks order as `completed` in the admin UI
+4. Customer receives dispatch confirmation
+
 ## 📖 Documentation
 For more detailed information, please refer to:
 - **[AGENTS.md](./AGENTS.md)**: Technical migration status, architectural decisions, and deferred upgrades.
