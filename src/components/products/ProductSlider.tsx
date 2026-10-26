@@ -32,7 +32,7 @@ export function ProductSlider({ products }: ProductSliderProps) {
       window.removeEventListener('resize', checkScroll);
     };
     // re-check arrows when products list changes (DOM may resize)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps — product list is memoized and stable; re-running effect on every render would cause infinite loop
   }, [products]);
 
   const scroll = (direction: 'left' | 'right') => {
