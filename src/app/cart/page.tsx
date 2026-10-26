@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowRight, Minus, Plus, Trash2 } from 'lucide-react';
+import { ArrowRight, Banknote, Minus, Plus, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useSyncExternalStore } from 'react';
@@ -273,9 +273,22 @@ export default function CartPage() {
                 disabled={isLoading}
                 className="w-full bg-secondary text-white rounded-full py-5 px-6 text-sm font-black uppercase tracking-[0.2em] hover:bg-primary transition-all shadow-xl shadow-secondary/10 flex justify-center items-center disabled:opacity-50"
               >
-                {isLoading ? 'Processing...' : 'Proceed to Checkout'}
+                {isLoading ? 'Processing...' : 'Pay by Card'}
                 {!isLoading && <ArrowRight className="ml-3" size={20} strokeWidth={3} />}
               </button>
+            </div>
+
+            <div className="mt-4">
+              <Link
+                href="/checkout/bank-transfer"
+                className="w-full inline-flex justify-center items-center bg-white border-2 border-secondary text-secondary rounded-full py-4 px-6 text-sm font-black uppercase tracking-[0.2em] hover:bg-secondary hover:text-white transition-all"
+              >
+                <Banknote className="mr-3" size={20} strokeWidth={3} />
+                Pay by Bank Transfer
+              </Link>
+              <p className="mt-3 text-center text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-relaxed">
+                No card needed — we&apos;ll show our bank details after you place the order.
+              </p>
             </div>
 
             <div className="mt-6">
