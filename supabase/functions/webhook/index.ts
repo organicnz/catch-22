@@ -37,6 +37,15 @@ function supabaseAdmin() {
   return createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 }
 
+// Storage host for email assets (logo) — derived so a project fork needs no code change.
+const SUPABASE_HOST = (() => {
+  try {
+    return new URL(SUPABASE_URL).hostname
+  } catch {
+    return 'wcoaqlglwxwceqktpckt.supabase.co'
+  }
+})()
+
 // PostgreSQL unique-violation error code (used for race-safe idempotency)
 const PG_UNIQUE_VIOLATION = '23505'
 
@@ -520,7 +529,7 @@ async function sendAdminNotification(
       <table width="560" cellpadding="0" cellspacing="0" style="background:#0A472E;border-radius:16px;overflow:hidden;max-width:560px;width:100%;">
         <tr>
           <td style="padding:32px 40px;text-align:center;border-bottom:1px solid rgba(209,255,0,0.2);">
-            <img src="https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/media/wp-content/uploads/2021/10/logo.png" alt="Catch-22" width="160" style="display:block;margin:0 auto;" />
+            <img src="https://${SUPABASE_HOST}/storage/v1/object/public/media/wp-content/uploads/2021/10/logo.png" alt="Catch-22" width="160" style="display:block;margin:0 auto;" />
           </td>
         </tr>
         <tr>
