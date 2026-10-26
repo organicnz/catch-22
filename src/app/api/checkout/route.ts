@@ -1,10 +1,14 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { getStripeShippingOptions } from '@/config/shipping';
+import { roundMoney } from '@/lib/bank-transfer-order';
 import { validateCartItems, validatePromoCode } from '@/lib/checkout-validation';
 import { env } from '@/lib/env';
+import type { ResolvedPromo } from '@/lib/promo';
+import { resolvePromoCode } from '@/lib/promo';
 import { clientKey, rateLimit } from '@/lib/rate-limit';
-import { createServerClient } from '@/lib/supabase-server';
+import { getOrCreateStripeCoupon } from '@/lib/stripe-coupons';
+import { createAdminClient, createServerClient } from '@/lib/supabase-server';
 
 const STRIPE_API_VERSION = '2026-07-29.dahlia' as const;
 
@@ -66,7 +70,7 @@ export async function POST(req: Request) {
       data: { user },
     } = await supabase.auth.getUser();
 
-    // Fetch product details from Supabase to ensure price integrity
+    // Fetch product details from Supabase to ensure price integrity.
     const productIds = items.map((item) => item.id);
     const { data: dbProducts, error: dbError } = await supabase
       .from('products')
@@ -78,10 +82,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Failed to verify products' }, { status: 500 });
     }
 
-    // Map database products for easy lookup
-    const productMap = new Map(dbProducts.map((p) => [p.id, p]));
+    const productMap = new Map(dbProducts.map((product) => [product.id, product]));
 
-    // Validate all requested products exist and are purchasable
+    // Validate every requested product exists and is purchasable.
     for (const item of items) {
       const dbProduct = productMap.get(item.id);
       if (!dbProduct) {
@@ -95,7 +98,38 @@ export async function POST(req: Request) {
       }
     }
 
-    // Build line items for Stripe
+    const subtotal = roundMoney(
+      items.reduce((sum, item) => {
+        const dbProduct = productMap.get(item.id);
+        return sum + Number(dbProduct?.price ?? 0) * item.quantity;
+      }, 0)
+    );
+
+    // ── Promo code: resolved against the catalog, never trusted from the cart
+    //    preview. The cart sends only the code the customer applied.
+    let promo: ResolvedPromo | null = null;
+    let stripeCouponId: string | null = null;
+
+    if (promoCode && String(promoCode).trim().length > 0) {
+      const admin = await createAdminClient();
+      const resolved = await resolvePromoCode(admin, String(promoCode), subtotal);
+      if (!resolved.ok) {
+        return NextResponse.json({ error: resolved.error }, { status: 400 });
+      }
+      promo = resolved.promo;
+
+      try {
+        stripeCouponId = await getOrCreateStripeCoupon(stripe, admin, promo.coupon);
+      } catch (couponError) {
+        console.error('[checkout] Could not create Stripe coupon:', couponError);
+        return NextResponse.json(
+          { error: 'Could not apply that promo code. Remove it and try again.' },
+          { status: 500 }
+        );
+      }
+    }
+
+    // Build line items for Stripe.
     const lineItems = items.map((item) => {
       const dbProduct = productMap.get(item.id);
       if (!dbProduct) throw new Error(`Product not found: ${item.id}`);
@@ -117,36 +151,74 @@ export async function POST(req: Request) {
       };
     });
 
-    // Create Stripe Checkout Session
+    const origin = resolveReturnOrigin(req);
+    const itemCount = items.reduce((count, item) => count + item.quantity, 0);
+
+    // Create a polished Stripe Checkout Session. The hosted page is the most
+    // trusted, highest-converting surface: it renders Apple Pay / Google Pay /
+    // Link automatically for card payments, handles 3-D Secure and SCA, and
+    // keeps the storefront out of PCI scope.
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
       currency: 'nzd',
-      locale: 'en',
+      locale: 'auto',
+      submit_type: 'pay',
       adaptive_pricing: {
         enabled: false,
       },
-      success_url: `${resolveReturnOrigin(req)}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${resolveReturnOrigin(req)}/cart`,
+      // NZ-wide shipping; rural addresses choose their own rate.
       shipping_address_collection: {
         allowed_countries: ['NZ'],
       },
+      // Billing address is prefilled from the card where available. Asking for
+      // it again adds friction without improving fraud outcomes for NZ cards.
+      billing_address_collection: 'auto',
+      phone_number_collection: { enabled: true },
       shipping_options: getStripeShippingOptions(),
-      // Allow promo codes if needed
-      allow_promotion_codes: true,
+      // Promo codes are applied in the cart against the `coupons` table. We do
+      // not allow Stripe's own code field: it would bypass expiry/DB checks and
+      // leave the order without a recorded coupon.
+      allow_promotion_codes: false,
+      ...(stripeCouponId ? { discounts: [{ coupon: stripeCouponId }] } : {}),
+      success_url: `${origin}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/cancel`,
       client_reference_id: user?.id,
       customer_email: user?.email || undefined,
+      customer_creation: 'if_required',
+      invoice_creation: { enabled: true },
+      custom_text: {
+        shipping_address: {
+          message:
+            'We ship NZ-wide from Auckland. Choose rural delivery if you are outside a courier town.',
+        },
+        submit: {
+          message:
+            'Secure checkout powered by Stripe. 2.5% of every order supports NZ Sea Cleaners.',
+        },
+      },
+      payment_intent_data: {
+        description: `Catch-22 order — ${itemCount} item${itemCount === 1 ? '' : 's'}`,
+        receipt_email: user?.email || undefined,
+        metadata: {
+          promoCode: promo?.code ?? '',
+        },
+      },
       metadata: {
-        promoCode: promoCode || '',
+        promoCode: promo?.code ?? '',
         userId: user?.id || '',
+        itemCount: String(itemCount),
       },
     });
 
     return NextResponse.json({ url: session.url });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Internal Server Error';
+    // Log the real cause; never show Stripe's internals to a shopper.
     console.error('Checkout error:', error);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Could not start secure checkout. Please try again in a moment.' },
+      { status: 500 }
+    );
   }
 }
