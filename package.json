@@ -17,7 +17,8 @@
     "test:e2e": "playwright test",
     "test:watch": "bun vitest",
     "test:coverage": "bun vitest run --coverage",
-    "types:generate": "bun x supabase@latest gen types typescript --project-id wcoaqlglwxwceqktpckt > /tmp/supabase-types.ts && mv /tmp/supabase-types.ts src/types/supabase.ts"
+    "typecheck": "tsrs --noEmit",
+    "types:generate": "node scripts/gen-types.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.23",
