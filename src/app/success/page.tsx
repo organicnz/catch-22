@@ -141,16 +141,22 @@ export default async function SuccessPage({
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
         {/* Confirmation header */}
         <header className="text-center mb-10 print:mb-6">
-          <div
-            className={`w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner ${isPending ? 'bg-amber-100' : 'bg-emerald-100'
-              }`}
-          >
-            {isPending ? (
+          {/* Celebratory ring burst */}
+          {isPaid && (
+            <div className="relative w-32 h-32 mx-auto mb-6">
+              <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping" style={{ animationDuration: '2s', animationIterationCount: 1 }} />
+              <div className="absolute inset-2 rounded-full bg-primary/10" />
+              <div className="absolute inset-0 rounded-full bg-emerald-100 flex items-center justify-center shadow-inner">
+                <CheckCircle2 className="w-14 h-14 text-emerald-600" strokeWidth={2} />
+              </div>
+            </div>
+          )}
+          {isPending && (
+            <div className="w-24 h-24 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-6 shadow-inner">
               <Clock3 className="w-12 h-12 text-amber-600" strokeWidth={2.5} />
-            ) : (
-              <CheckCircle2 className="w-12 h-12 text-emerald-600" strokeWidth={2.5} />
-            )}
-          </div>
+            </div>
+          )}
+
           <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-2">
             {isPending ? 'Payment processing' : 'Payment received'}
           </p>
@@ -163,6 +169,16 @@ export default async function SuccessPage({
               ? "We've got your order. Your bank is still confirming the payment — we'll email you the moment it clears."
               : "Thanks for choosing Catch-22. We're packing your gear and will email tracking as soon as it leaves the dock."}
           </p>
+
+          {/* Sea Cleaners badge */}
+          {isPaid && (
+            <div className="inline-flex items-center gap-2 mt-6 px-4 py-2 bg-emerald-50 border border-emerald-200 rounded-full">
+              <span className="text-emerald-600 text-lg">🌊</span>
+              <span className="text-[10px] font-black text-emerald-700 uppercase tracking-wider">
+                2.5% of this order goes to NZ Sea Cleaners
+              </span>
+            </div>
+          )}
         </header>
 
         {/* Receipt card */}
