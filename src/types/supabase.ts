@@ -98,6 +98,7 @@ export type Database = {
           body: string | null
           created_at: string | null
           id: number
+          search_vector: unknown
           slug: string
           status: string | null
           title: string
@@ -108,6 +109,7 @@ export type Database = {
           body?: string | null
           created_at?: string | null
           id?: number
+          search_vector?: unknown
           slug: string
           status?: string | null
           title: string
@@ -118,6 +120,7 @@ export type Database = {
           body?: string | null
           created_at?: string | null
           id?: number
+          search_vector?: unknown
           slug?: string
           status?: string | null
           title?: string
@@ -153,6 +156,42 @@ export type Database = {
           id?: number
           stripe_coupon_id?: string | null
           wp_id?: number | null
+        }
+        Relationships: []
+      }
+      error_reports: {
+        Row: {
+          component_stack: string | null
+          created_at: string
+          digest: string | null
+          fingerprint: string
+          id: number
+          message: string
+          path: string | null
+          stack: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          component_stack?: string | null
+          created_at?: string
+          digest?: string | null
+          fingerprint: string
+          id?: never
+          message: string
+          path?: string | null
+          stack?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          component_stack?: string | null
+          created_at?: string
+          digest?: string | null
+          fingerprint?: string
+          id?: never
+          message?: string
+          path?: string | null
+          stack?: string | null
+          user_agent?: string | null
         }
         Relationships: []
       }
@@ -352,6 +391,7 @@ export type Database = {
           price: number
           regular_price: number | null
           sale_price: number | null
+          search_vector: unknown
           short_description: string | null
           sku: string | null
           slug: string
@@ -372,6 +412,7 @@ export type Database = {
           price: number
           regular_price?: number | null
           sale_price?: number | null
+          search_vector?: unknown
           short_description?: string | null
           sku?: string | null
           slug: string
@@ -392,6 +433,7 @@ export type Database = {
           price?: number
           regular_price?: number | null
           sale_price?: number | null
+          search_vector?: unknown
           short_description?: string | null
           sku?: string | null
           slug?: string
@@ -502,6 +544,31 @@ export type Database = {
       replace_media_urls: {
         Args: { new_base: string; old_base: string }
         Returns: undefined
+      }
+      search_content: {
+        Args: { max_rows?: number; search_query: string }
+        Returns: {
+          created_at: string
+          id: number
+          rank: number
+          slug: string
+          title: string
+          type: string
+        }[]
+      }
+      search_products: {
+        Args: { max_rows?: number; search_query: string }
+        Returns: {
+          id: number
+          image_url: string
+          name: string
+          price: number
+          rank: number
+          regular_price: number
+          sale_price: number
+          slug: string
+          stock_status: string
+        }[]
       }
       submit_contact_submission: {
         Args: {
