@@ -5,7 +5,7 @@ import { env } from '@/lib/env';
 import { buildOrderItems } from '@/lib/stripe-order-items';
 import { createAdminClient } from '@/lib/supabase-server';
 
-const STRIPE_API_VERSION = '2026-07-29.dahlia' as const;
+const STRIPE_API_VERSION = '2026-08-26.dahlia' as const;
 
 function getStripe() {
   if (!env.STRIPE_SECRET_KEY) {
