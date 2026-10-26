@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { headers } from 'next/headers';
 import { env } from '@/lib/env';
 import { clientKey, rateLimit } from '@/lib/rate-limit';
+import { SPAM_KEYWORDS } from '@/lib/sanitize';
 import { createServerClient } from '@/lib/supabase-server';
 
 export type EmailStatus = 'sent' | 'failed' | 'not-requested';
@@ -90,8 +91,7 @@ export async function submitContact(formData: FormData): Promise<ContactResult> 
   if (message.length > 5000) return { error: 'Message is too long (5000 characters max).' };
 
   // Keyword screen for drive-by link spam.
-  const spamKeywords = ['casino', 'slot', 'judi', 'togel', 'crypto', 'loan'];
-  if (spamKeywords.some((kw) => message.toLowerCase().includes(kw))) {
+  if (SPAM_KEYWORDS.some((kw) => message.toLowerCase().includes(kw))) {
     return { error: 'Message flagged as potential spam. Please revise.' };
   }
 
