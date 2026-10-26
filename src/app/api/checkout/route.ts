@@ -158,8 +158,11 @@ export async function POST(req: Request) {
     // trusted, highest-converting surface: it renders Apple Pay / Google Pay /
     // Link automatically for card payments, handles 3-D Secure and SCA, and
     // keeps the storefront out of PCI scope.
+    // afterpay_clearpay: NZ-supported BNPL — customers split into 4 interest-
+    // free fortnightly payments. Domestic-only (NZ → NZ), which matches our
+    // shipping_address_collection restriction. No extra Stripe config needed.
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
+      payment_method_types: ['card', 'afterpay_clearpay'],
       line_items: lineItems,
       mode: 'payment',
       currency: 'nzd',
@@ -172,9 +175,9 @@ export async function POST(req: Request) {
       shipping_address_collection: {
         allowed_countries: ['NZ'],
       },
-      // Billing address is prefilled from the card where available. Asking for
-      // it again adds friction without improving fraud outcomes for NZ cards.
-      billing_address_collection: 'auto',
+      // Billing address is required by Afterpay; prefilled from card where
+      // available for card-only checkouts. No friction trade-off for NZ.
+      billing_address_collection: 'required',
       phone_number_collection: { enabled: true },
       shipping_options: getStripeShippingOptions(),
       // Promo codes are applied in the cart against the `coupons` table. We do
