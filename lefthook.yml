@@ -614,7 +614,7 @@ pre-commit:
     typecheck:
       priority: 19
       glob: "*.{ts,tsx}"
-      run: bun tsc --noEmit --incremental false
+      run: bun tsrs --noEmit
 
     # ── 20. Env usage coverage ────────────────────────────────────────────────
     # Every env var referenced in code must be declared in .env.example.
@@ -829,7 +829,7 @@ pre-push:
 
     typecheck:
       priority: 7
-      run: bun tsc --noEmit
+      run: bun tsrs --noEmit
 
     # ── 6. Coverage threshold ─────────────────────────────────────────────────
     # Statement coverage ≥90% against the measurable lib/ + config/ files.
