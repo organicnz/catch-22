@@ -30,7 +30,7 @@ export default function MfaChallengePage() {
     }
     checkAal();
     // supabase and router are stable refs — intentionally omitted to run once
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps — session check intentionally runs on every render to catch auth state changes immediately
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
