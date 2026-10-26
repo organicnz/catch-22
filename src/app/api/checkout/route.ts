@@ -10,7 +10,7 @@ import { clientKey, rateLimit } from '@/lib/rate-limit';
 import { getOrCreateStripeCoupon } from '@/lib/stripe-coupons';
 import { createAdminClient, createServerClient } from '@/lib/supabase-server';
 
-const STRIPE_API_VERSION = '2026-07-29.dahlia' as const;
+const STRIPE_API_VERSION = '2026-08-26.dahlia' as const;
 
 /**
  * Success/cancel redirects must be absolute HTTPS URLs or the Stripe SDK
