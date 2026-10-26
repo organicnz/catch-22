@@ -56,16 +56,34 @@ export async function POST(req: Request) {
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, stripe: Stripe) {
   const supabase = await createAdminClient();
 
-  // Idempotency guard: Stripe retries deliveries and may emit duplicate events.
-  // Skip if this session already produced an order. The unique index on
-  // stripe_session_id (migration 20260824000000) backstops concurrent races.
+  // ── Idempotency: handle retries + concurrent deliveries ────────────────
+  // Edge function (supabase/functions/webhook) is the primary fulfilment
+  // path; this Next route is the Vercel-hosted fallback. Both must converge
+  // to a complete order even when a previous attempt left an orphan row
+  // (order without items). The unique index on stripe_session_id handles
+  // races; the item-count check heals partial failures on retry.
   const { data: existing } = await supabase
     .from('orders')
     .select('id')
     .eq('stripe_session_id', session.id)
     .maybeSingle();
   if (existing) {
-    console.log(`⏭️ Order for session ${session.id} already exists — skipping duplicate delivery`);
+    const { count } = await supabase
+      .from('order_items')
+      .select('id', { count: 'exact', head: true })
+      .eq('order_id', existing.id);
+    if (count && count > 0) {
+      console.log(`⏭️ Order for session ${session.id} already exists — skipping duplicate delivery`);
+      return;
+    }
+    // Orphan order from a partially-failed earlier delivery — backfill items.
+    console.log(`⏭️ Order #${existing.id} exists without items — backfilling`);
+    const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
+      expand: ['data.price.product'],
+    });
+    const orderItems = buildOrderItems(existing.id, lineItems.data);
+    const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
+    if (itemsError) throw itemsError;
     return;
   }
 
@@ -92,7 +110,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, 
       query.eq('email', email);
     }
 
-    const { data: profile } = await query.single();
+    const { data: profile } = await query.maybeSingle();
     if (profile) {
       profileId = profile.id;
     }
@@ -121,13 +139,32 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, 
 
   if (orderError) {
     // Concurrent duplicate delivery lost the race to the unique index —
-    // treat as success so Stripe stops retrying.
+    // backfill items if the winner left an orphan row, then treat as success.
     if (
       typeof orderError === 'object' &&
       orderError !== null &&
       'code' in orderError &&
       (orderError as { code?: string }).code === '23505'
     ) {
+      const { data: raced } = await supabase
+        .from('orders')
+        .select('id')
+        .eq('stripe_session_id', session.id)
+        .maybeSingle();
+      if (raced) {
+        const { count } = await supabase
+          .from('order_items')
+          .select('id', { count: 'exact', head: true })
+          .eq('order_id', raced.id);
+        if (!count || count === 0) {
+          const racedItems = await stripe.checkout.sessions.listLineItems(session.id, {
+            expand: ['data.price.product'],
+          });
+          const orderItems = buildOrderItems(raced.id, racedItems.data);
+          const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
+          if (itemsError) throw itemsError;
+        }
+      }
       console.log(`⏭️ Order for session ${session.id} already exists (unique index) — skipping`);
       return;
     }
