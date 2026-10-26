@@ -21,7 +21,7 @@ export function WishlistButton({ product, showText = false }: WishlistButtonProp
   const active = isMounted && isInWishlist(product.id);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect — initial mount syncs persisted wishlist state from localStorage; safe one-time set
     setIsMounted(true);
   }, []);
 
