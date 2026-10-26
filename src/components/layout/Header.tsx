@@ -78,7 +78,7 @@ function HeaderInner() {
   const isTransparentPage = pathname === '/' || pathname === '/gallery';
 
   useEffect(() => {
-    // eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps — mount flag must be set once after effect registration; no deps needed
     setIsMounted(true);
 
     const handleScroll = () => {
