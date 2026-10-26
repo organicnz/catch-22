@@ -3,7 +3,10 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    environment: 'jsdom',
+    // Default environment is node — pure logic tests run without DOM overhead.
+    // Tests that need browser APIs (cart store, rate-limit) declare their own
+    // environment via the `// @vitest-environment jsdom` file-level docblock.
+    environment: 'node',
     globals: true,
     setupFiles: [],
     exclude: [
@@ -71,5 +74,9 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
+    // Zod 4 exports `"types"` before `"import"` in its package.json conditions.
+    // Vitest's SSR module resolver picks `types` (the .d.cts stub) first, making
+    // `z` undefined at runtime. Force the standard ESM condition order instead.
+    conditions: ['import', 'module', 'browser', 'default'],
   },
 });
