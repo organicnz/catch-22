@@ -7,12 +7,13 @@ export function CharitySection() {
     <section className="py-32 bg-secondary border-t border-white/5 overflow-hidden">
       <div className="container mx-auto px-4">
         <div className="flex flex-col lg:flex-row items-center gap-20 lg:gap-32">
+          {/* Image */}
           <div className="lg:w-1/2 relative">
             <div className="relative aspect-video rounded-[3rem] overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] z-10 border border-white/10 bg-black group flex items-center justify-center p-8 sm:p-16">
               <div className="relative w-full h-full">
                 <Image
                   src="/seacleaners-logos.png"
-                  alt="Sea Cleaners NZ"
+                  alt="NZ Sea Cleaners — Catch-22 charity partner"
                   fill
                   sizes="(max-width: 1024px) 100vw, 50vw"
                   className="object-contain group-hover:scale-105 transition-transform duration-[2000ms] ease-out"
@@ -20,11 +21,17 @@ export function CharitySection() {
               </div>
               <div className="absolute inset-0 bg-linear-to-t from-secondary/40 via-transparent to-transparent opacity-60 pointer-events-none" />
             </div>
-            {/* Decorative background element */}
+            {/* 2.5% callout — floats over the image corner */}
+            <div className="absolute -bottom-6 -right-6 z-20 bg-primary text-secondary rounded-3xl px-6 py-5 shadow-2xl shadow-primary/30 border-4 border-secondary">
+              <p className="text-4xl font-black leading-none tracking-tighter">2.5%</p>
+              <p className="text-[10px] font-black uppercase tracking-widest mt-1 opacity-70">
+                Of every order
+              </p>
+            </div>
             <div className="absolute -top-10 -left-10 w-40 h-40 bg-primary opacity-10 rounded-full blur-3xl z-0" />
-            <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-primary opacity-5 rounded-full blur-3xl z-0" />
           </div>
 
+          {/* Copy */}
           <div className="lg:w-1/2 max-w-2xl">
             <div className="inline-flex items-center gap-3 px-4 py-2 bg-primary/10 border border-primary/20 rounded-full mb-10">
               <Heart className="w-3 h-3 text-primary fill-primary" />
@@ -37,28 +44,37 @@ export function CharitySection() {
               Protecting Our <br /> <span className="text-primary italic">Playground</span>
             </h2>
 
-            <p className="text-slate-400 text-lg md:text-xl font-medium mb-12 leading-relaxed">
-              At Catch-22, we believe in preserving the rugged beauty of the New Zealand coast. A
-              portion of every purchase goes directly to{' '}
+            <p className="text-slate-400 text-lg md:text-xl font-medium mb-6 leading-relaxed">
+              Every purchase you make directly funds the cleanup of the coastlines we fish. 2.5% of
+              every Catch-22 order goes straight to{' '}
               <a
                 href="https://www.seacleaners.com/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-white hover:text-primary font-black italic underline decoration-primary decoration-4 underline-offset-8 transition-colors"
               >
-                Sea Cleaners
-              </a>
-              , helping remove plastic and debris from our oceans to ensure future generations can
-              experience the same thrill of the chase.
+                NZ Sea Cleaners
+              </a>{' '}
+              — the people removing plastic from our oceans so future generations can experience the
+              same thrill of the chase.
             </p>
+
+            {/* Impact stat */}
+            <div className="bg-white/5 border border-white/10 rounded-2xl px-6 py-5 mb-10 flex items-center gap-4">
+              <div className="text-4xl font-black text-primary tracking-tighter shrink-0">🌊</div>
+              <p className="text-slate-300 text-sm font-medium leading-relaxed">
+                <span className="text-white font-black">Buy gear. Clean beaches.</span> It&apos;s
+                that simple — no opt-in required, it happens with every order.
+              </p>
+            </div>
 
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 sm:gap-10">
               <Link
                 href="/about-us"
-                className="group inline-flex items-center gap-6 text-white font-black uppercase tracking-[0.4em] text-[10px] hover:text-primary transition-all whitespace-nowrap"
+                className="group inline-flex items-center gap-4 text-white font-black uppercase tracking-[0.4em] text-[10px] hover:text-primary transition-all whitespace-nowrap"
               >
-                Learn about our mission{' '}
-                <span className="text-2xl group-hover:translate-x-4 transition-transform text-primary">
+                Learn more{' '}
+                <span className="text-xl group-hover:translate-x-3 transition-transform text-primary">
                   &rarr;
                 </span>
               </Link>
@@ -66,9 +82,9 @@ export function CharitySection() {
                 href="https://givealittle.co.nz/org/SEACLEANERS"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group inline-flex items-center gap-3 bg-primary hover:bg-white text-secondary font-black py-4 px-6 rounded-2xl transition-all uppercase tracking-[0.2em] text-[10px] shadow-lg shadow-primary/25 hover:shadow-white/20 whitespace-nowrap"
+                className="group inline-flex items-center gap-3 bg-primary hover:bg-white text-secondary font-black py-4 px-6 rounded-2xl transition-all duration-300 uppercase tracking-[0.2em] text-[10px] shadow-lg shadow-primary/25 whitespace-nowrap"
               >
-                Make A Donation{' '}
+                Donate directly{' '}
                 <Heart className="w-3.5 h-3.5 text-secondary fill-secondary group-hover:scale-110 transition-transform duration-300" />
               </a>
             </div>
