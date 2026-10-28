@@ -71,7 +71,18 @@ bun run build        # production build
 
 ## 💳 Payment Configuration
 
-The store supports two checkout paths: **Stripe** (card/Apple Pay/Google Pay) and **Bank Transfer** (direct deposit, NZ only).
+The store supports three comprehensive payment options tailored for New Zealand customers:
+
+1. **Credit / Debit Cards & Digital Wallets**: Visa, Mastercard, Amex, Apple Pay, Google Pay, and Stripe Link via Stripe Hosted Checkout.
+2. **Afterpay (Buy Now, Pay Later)**: 4 interest-free fortnightly instalments via Stripe (`afterpay_clearpay`). Dynamic 4-instalment breakdown badges are rendered across all catalog product cards, product detail pages, and the cart.
+3. **Direct Bank Transfer (NZ Direct Deposit)**: Zero-card payment path directly into direct deposit account with automatic `on-hold` order reservation, unique `CATCH22-<id>` payment reference, and Resend email dispatches.
+
+### Afterpay (BNPL) — Configuration
+
+Afterpay is integrated directly into Stripe Checkout (`payment_method_types: ['card', 'afterpay_clearpay']`):
+- **Stripe Dashboard**: Ensure **Afterpay / Clearpay** is toggled ON in **Settings → Payment methods**.
+- **Domestic NZ Requirement**: Afterpay requires NZD currency and NZ shipping/billing addresses (enforced in `src/app/api/checkout/route.ts`).
+- **Catalog Visibility**: Product cards and detail views automatically calculate and display the 4-payment breakdown.
 
 ### Bank Transfer — Configuration
 

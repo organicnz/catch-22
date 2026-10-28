@@ -203,14 +203,14 @@ async function ProductDetailsBody({ params }: { params: Promise<{ slug: string }
               <nav className="flex mb-4" aria-label="Breadcrumb">
                 <ol className="flex items-center space-x-2 text-xs font-bold uppercase tracking-widest text-slate-400">
                   <li>
-                    <Link href="/products" className="hover:text-primary transition-colors">
+                    <Link href="/products" className="hover:text-primary-ink transition-colors">
                       Gear
                     </Link>
                   </li>
                   <li>
                     <span className="mx-1">/</span>
                   </li>
-                  <li className="text-primary truncate">{product.name}</li>
+                  <li className="text-secondary truncate">{product.name}</li>
                 </ol>
               </nav>
               <h1 className="text-4xl font-black tracking-tight text-secondary uppercase leading-tight mb-4">
@@ -218,7 +218,9 @@ async function ProductDetailsBody({ params }: { params: Promise<{ slug: string }
               </h1>
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-3">
-                  <p className="text-3xl font-black text-primary">${product.price.toFixed(2)}</p>
+                  <p className="text-3xl font-black text-primary-ink">
+                    ${product.price.toFixed(2)}
+                  </p>
                   {product.sale_price &&
                     product.regular_price &&
                     (product.regular_price as number) > product.price && (

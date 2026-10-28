@@ -197,11 +197,48 @@ describe('computeOrderTotals()', () => {
     const totals = computeOrderTotals([25.5], 0, null, now);
     expect(totals).toEqual({ subtotal: 25.5, shipping: 0, discount: 0, total: 25.5 });
   });
+
+  it('calculates high-ticket multi-spool braid orders accurately with rural shipping', () => {
+    // 3 x $75 1000m spools ($225.00) + rural shipping $12.00 (1200 cents)
+    const totals = computeOrderTotals([75, 75, 75], 1200, null, now);
+    expect(totals).toEqual({
+      subtotal: 225,
+      shipping: 12,
+      discount: 0,
+      total: 237,
+    });
+  });
+
+  it('calculates bulk braid club orders with percentage discounts and courier shipping', () => {
+    // 10 x $50 500m spools ($500.00) with 10% promo discount ($50.00) + standard courier ($8.00)
+    const totals = computeOrderTotals(
+      Array(10).fill(50),
+      800,
+      { amount: 10, discount_type: 'percent' },
+      now
+    );
+    expect(totals).toEqual({
+      subtotal: 500,
+      shipping: 8,
+      discount: 50,
+      total: 458,
+    });
+  });
 });
 
 describe('orderReference()', () => {
   it('is short enough for a NZ bank reference field', () => {
     expect(orderReference(1234)).toBe('CATCH22-1234');
     expect(orderReference(1234).length).toBeLessThanOrEqual(12);
+  });
+
+  it('generates bank references matching NZ banking constraints without illegal characters', () => {
+    for (const id of [1, 42, 999, 1234, 99999]) {
+      const ref = orderReference(id);
+      expect(ref).toBe(`CATCH22-${id}`);
+      // NZ bank references must be alphanumeric or hyphen, no spaces or control chars
+      expect(/^[A-Z0-9-]+$/.test(ref)).toBe(true);
+      expect(ref.length).toBeGreaterThanOrEqual(9);
+    }
   });
 });
