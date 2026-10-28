@@ -20,9 +20,14 @@ import { toast } from 'sonner';
 import { type BankTransferSuccess, createBankTransferOrder } from '@/app/checkout/actions';
 import { NZBankQuickLauncher, NZBankSelector } from '@/components/checkout/NZBankSelector';
 import { NZCheckoutConfidence } from '@/components/checkout/NZCheckoutConfidence';
+import { NZMobileBankingHandoff } from '@/components/checkout/NZMobileBankingHandoff';
 import { NZPaymentOptionsGuide } from '@/components/checkout/NZPaymentOptionsGuide';
-import { NZRuralDeliveryAssistant } from '@/components/checkout/NZRuralDeliveryAssistant';
+import {
+  isNZRuralAddress,
+  NZRuralDeliveryAssistant,
+} from '@/components/checkout/NZRuralDeliveryAssistant';
 import { SHIPPING_RATES } from '@/config/shipping';
+import { getNZDeliveryEstimate, inferNZRegion, type NZDeliveryEstimate } from '@/lib/nz-regions';
 import { useCartStore } from '@/lib/store/cart';
 
 /** No-op store subscription: hydration state never changes after mount. */
@@ -132,7 +137,13 @@ function ShareOrderButton({ reference, total }: { reference: string; total: numb
   );
 }
 
-function SuccessPanel({ result }: { result: BankTransferSuccess }) {
+function SuccessPanel({
+  result,
+  deliveryEstimate,
+}: {
+  result: BankTransferSuccess;
+  deliveryEstimate?: NZDeliveryEstimate | null;
+}) {
   const isPickup = result.paymentOption === 'pay_on_pickup';
 
   return (
@@ -317,184 +328,194 @@ function SuccessPanel({ result }: { result: BankTransferSuccess }) {
               </div>
             </section>
           ) : (
-            <section aria-labelledby="bank-details-heading" className="mb-8">
-              <h2
-                id="bank-details-heading"
-                className="text-sm font-black text-secondary uppercase tracking-[0.2em] mb-4 flex items-center gap-2"
-              >
-                <Banknote size={18} className="text-primary-ink" strokeWidth={2.5} />
-                NZ Internet Banking Details
-              </h2>
-              <div className="bg-slate-900 text-white rounded-3xl p-6 sm:p-8 border border-primary/20 shadow-xl space-y-6">
-                <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/10">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">🇳🇿</span>
-                    <span className="text-xs font-black uppercase tracking-wider text-primary">
-                      Direct NZ Bank Transfer
+            <>
+              <section aria-labelledby="bank-details-heading" className="mb-8">
+                <h2
+                  id="bank-details-heading"
+                  className="text-sm font-black text-secondary uppercase tracking-[0.2em] mb-4 flex items-center gap-2"
+                >
+                  <Banknote size={18} className="text-primary-ink" strokeWidth={2.5} />
+                  NZ Internet Banking Details
+                </h2>
+                <div className="bg-slate-900 text-white rounded-3xl p-6 sm:p-8 border border-primary/20 shadow-xl space-y-6">
+                  <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/10">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">🇳🇿</span>
+                      <span className="text-xs font-black uppercase tracking-wider text-primary">
+                        Direct NZ Bank Transfer
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-400 bg-white/5 px-2.5 py-1 rounded-full border border-white/10">
+                      Zero Surcharge · All NZ Banks
                     </span>
                   </div>
-                  <span className="text-[10px] font-bold text-slate-400 bg-white/5 px-2.5 py-1 rounded-full border border-white/10">
-                    Zero Surcharge · All NZ Banks
-                  </span>
-                </div>
 
-                <dl className="grid gap-4 sm:grid-cols-2">
-                  <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
-                    <dt className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
-                      Bank
-                    </dt>
-                    <dd className="text-base font-black text-white">{result.bank.bankName}</dd>
-                  </div>
-                  <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
-                    <dt className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
-                      Account name
-                    </dt>
-                    <dd className="flex items-center justify-between gap-2">
-                      <span className="text-base font-black text-white">
-                        {result.bank.accountName}
-                      </span>
-                      <CopyButton value={result.bank.accountName} label="account name" />
-                    </dd>
-                  </div>
-                  <div className="sm:col-span-2 bg-white/10 p-5 rounded-2xl border border-primary/30 shadow-inner">
-                    <dt className="text-[10px] font-black text-primary uppercase tracking-widest mb-1">
-                      Account number
-                    </dt>
-                    <dd className="flex items-center justify-between gap-3">
-                      <span className="text-xl sm:text-2xl font-black text-white tracking-wider font-mono">
-                        {result.bank.accountNumber}
-                      </span>
-                      <CopyButton value={result.bank.accountNumber} label="account number" />
-                    </dd>
+                  <dl className="grid gap-4 sm:grid-cols-2">
+                    <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                      <dt className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                        Bank
+                      </dt>
+                      <dd className="text-base font-black text-white">{result.bank.bankName}</dd>
+                    </div>
+                    <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                      <dt className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                        Account name
+                      </dt>
+                      <dd className="flex items-center justify-between gap-2">
+                        <span className="text-base font-black text-white">
+                          {result.bank.accountName}
+                        </span>
+                        <CopyButton value={result.bank.accountName} label="account name" />
+                      </dd>
+                    </div>
+                    <div className="sm:col-span-2 bg-white/10 p-5 rounded-2xl border border-primary/30 shadow-inner">
+                      <dt className="text-[10px] font-black text-primary uppercase tracking-widest mb-1">
+                        Account number
+                      </dt>
+                      <dd className="flex items-center justify-between gap-3">
+                        <span className="text-xl sm:text-2xl font-black text-white tracking-wider font-mono">
+                          {result.bank.accountNumber}
+                        </span>
+                        <CopyButton value={result.bank.accountNumber} label="account number" />
+                      </dd>
 
-                    {/* Segmented for NZ Bank Apps */}
-                    <div className="mt-4 pt-3 border-t border-white/10">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-[9px] font-black uppercase tracking-wider text-slate-300">
-                          NZ Bank App Separate Inputs
-                        </span>
-                        <span className="text-[9px] font-bold text-primary">
-                          1-click copy each part
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-4 gap-2">
-                        {(() => {
-                          const parts = result.bank.accountNumber.split('-');
-                          const bankCode = parts[0] || '06';
-                          const branchCode = parts[1] || '0241';
-                          const accountCode = parts[2] || '0897724';
-                          const suffixCode = parts[3] || '00';
-                          return (
-                            <>
-                              <div className="bg-black/20 p-2 rounded-xl border border-white/10 text-center">
-                                <span className="block text-[8px] font-black uppercase tracking-wider text-slate-400">
-                                  Bank
-                                </span>
-                                <span className="font-mono font-bold text-xs text-white">
-                                  {bankCode}
-                                </span>
-                                <div className="mt-1 flex justify-center">
-                                  <CopyButton value={bankCode} label="bank code" />
+                      {/* Segmented for NZ Bank Apps */}
+                      <div className="mt-4 pt-3 border-t border-white/10">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-[9px] font-black uppercase tracking-wider text-slate-300">
+                            NZ Bank App Separate Inputs
+                          </span>
+                          <span className="text-[9px] font-bold text-primary">
+                            1-click copy each part
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-4 gap-2">
+                          {(() => {
+                            const parts = result.bank.accountNumber.split('-');
+                            const bankCode = parts[0] || '06';
+                            const branchCode = parts[1] || '0241';
+                            const accountCode = parts[2] || '0897724';
+                            const suffixCode = parts[3] || '00';
+                            return (
+                              <>
+                                <div className="bg-black/20 p-2 rounded-xl border border-white/10 text-center">
+                                  <span className="block text-[8px] font-black uppercase tracking-wider text-slate-400">
+                                    Bank
+                                  </span>
+                                  <span className="font-mono font-bold text-xs text-white">
+                                    {bankCode}
+                                  </span>
+                                  <div className="mt-1 flex justify-center">
+                                    <CopyButton value={bankCode} label="bank code" />
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="bg-black/20 p-2 rounded-xl border border-white/10 text-center">
-                                <span className="block text-[8px] font-black uppercase tracking-wider text-slate-400">
-                                  Branch
-                                </span>
-                                <span className="font-mono font-bold text-xs text-white">
-                                  {branchCode}
-                                </span>
-                                <div className="mt-1 flex justify-center">
-                                  <CopyButton value={branchCode} label="branch code" />
+                                <div className="bg-black/20 p-2 rounded-xl border border-white/10 text-center">
+                                  <span className="block text-[8px] font-black uppercase tracking-wider text-slate-400">
+                                    Branch
+                                  </span>
+                                  <span className="font-mono font-bold text-xs text-white">
+                                    {branchCode}
+                                  </span>
+                                  <div className="mt-1 flex justify-center">
+                                    <CopyButton value={branchCode} label="branch code" />
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="bg-black/20 p-2 rounded-xl border border-white/10 text-center">
-                                <span className="block text-[8px] font-black uppercase tracking-wider text-slate-400">
-                                  Account
-                                </span>
-                                <span className="font-mono font-bold text-xs text-white">
-                                  {accountCode}
-                                </span>
-                                <div className="mt-1 flex justify-center">
-                                  <CopyButton value={accountCode} label="account digits" />
+                                <div className="bg-black/20 p-2 rounded-xl border border-white/10 text-center">
+                                  <span className="block text-[8px] font-black uppercase tracking-wider text-slate-400">
+                                    Account
+                                  </span>
+                                  <span className="font-mono font-bold text-xs text-white">
+                                    {accountCode}
+                                  </span>
+                                  <div className="mt-1 flex justify-center">
+                                    <CopyButton value={accountCode} label="account digits" />
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="bg-black/20 p-2 rounded-xl border border-white/10 text-center">
-                                <span className="block text-[8px] font-black uppercase tracking-wider text-slate-400">
-                                  Suffix
-                                </span>
-                                <span className="font-mono font-bold text-xs text-white">
-                                  {suffixCode}
-                                </span>
-                                <div className="mt-1 flex justify-center">
-                                  <CopyButton value={suffixCode} label="suffix" />
+                                <div className="bg-black/20 p-2 rounded-xl border border-white/10 text-center">
+                                  <span className="block text-[8px] font-black uppercase tracking-wider text-slate-400">
+                                    Suffix
+                                  </span>
+                                  <span className="font-mono font-bold text-xs text-white">
+                                    {suffixCode}
+                                  </span>
+                                  <div className="mt-1 flex justify-center">
+                                    <CopyButton value={suffixCode} label="suffix" />
+                                  </div>
                                 </div>
-                              </div>
-                            </>
-                          );
-                        })()}
+                              </>
+                            );
+                          })()}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </dl>
+                  </dl>
 
-                {/* NZ 3-field payment references */}
-                <div className="pt-4 border-t border-white/10">
-                  <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-3">
-                    Enter in your bank app (ANZ, ASB, BNZ, Westpac, Kiwibank):
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="bg-white/5 p-3 rounded-xl border border-white/10">
-                      <p className="text-[9px] font-black uppercase tracking-wider text-slate-400 mb-1">
-                        Particulars
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <span className="font-mono font-bold text-sm text-white">Order</span>
-                        <CopyButton value="Order" label="particulars" />
+                  {/* NZ 3-field payment references */}
+                  <div className="pt-4 border-t border-white/10">
+                    <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-3">
+                      Enter in your bank app (ANZ, ASB, BNZ, Westpac, Kiwibank):
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="bg-white/5 p-3 rounded-xl border border-white/10">
+                        <p className="text-[9px] font-black uppercase tracking-wider text-slate-400 mb-1">
+                          Particulars
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <span className="font-mono font-bold text-sm text-white">Order</span>
+                          <CopyButton value="Order" label="particulars" />
+                        </div>
+                      </div>
+                      <div className="bg-white/5 p-3 rounded-xl border border-white/10">
+                        <p className="text-[9px] font-black uppercase tracking-wider text-slate-400 mb-1">
+                          Code
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <span className="font-mono font-bold text-sm text-white">Catch22</span>
+                          <CopyButton value="Catch22" label="code" />
+                        </div>
+                      </div>
+                      <div className="bg-primary/10 p-3 rounded-xl border border-primary/40">
+                        <p className="text-[9px] font-black uppercase tracking-wider text-primary mb-1">
+                          Reference (Required)
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <span className="font-mono font-black text-sm text-primary">
+                            {result.reference}
+                          </span>
+                          <CopyButton value={result.reference} label="reference" />
+                        </div>
                       </div>
                     </div>
-                    <div className="bg-white/5 p-3 rounded-xl border border-white/10">
-                      <p className="text-[9px] font-black uppercase tracking-wider text-slate-400 mb-1">
-                        Code
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <span className="font-mono font-bold text-sm text-white">Catch22</span>
-                        <CopyButton value="Catch22" label="code" />
-                      </div>
+                    <p className="text-[11px] font-medium text-slate-400 mt-4 leading-relaxed">
+                      💡 <strong className="text-white">Clearance note:</strong> ANZ-to-ANZ
+                      transfers clear instantly. Payments from other NZ banks (ASB, BNZ, Westpac,
+                      Kiwibank) typically clear within 1–2 hours under Payments NZ 365-day
+                      settlement (7 days a week, including weekends).
+                    </p>
+                    <div className="mt-4 pt-4 border-t border-white/10 space-y-3">
+                      <CopyAllBankDetailsButton
+                        bank={result.bank}
+                        reference={result.reference}
+                        total={result.totals.total}
+                      />
+                      <NZBankQuickLauncher
+                        bankId={result.selectedBank}
+                        total={result.totals.total}
+                        reference={result.reference}
+                      />
                     </div>
-                    <div className="bg-primary/10 p-3 rounded-xl border border-primary/40">
-                      <p className="text-[9px] font-black uppercase tracking-wider text-primary mb-1">
-                        Reference (Required)
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <span className="font-mono font-black text-sm text-primary">
-                          {result.reference}
-                        </span>
-                        <CopyButton value={result.reference} label="reference" />
-                      </div>
-                    </div>
-                  </div>
-                  <p className="text-[11px] font-medium text-slate-400 mt-4 leading-relaxed">
-                    💡 <strong className="text-white">Clearance note:</strong> ANZ-to-ANZ transfers
-                    clear instantly. Payments from other NZ banks (ASB, BNZ, Westpac, Kiwibank)
-                    typically clear within 1–2 hours under Payments NZ 365-day settlement (7 days a
-                    week, including weekends).
-                  </p>
-                  <div className="mt-4 pt-4 border-t border-white/10 space-y-3">
-                    <CopyAllBankDetailsButton
-                      bank={result.bank}
-                      reference={result.reference}
-                      total={result.totals.total}
-                    />
-                    <NZBankQuickLauncher
-                      bankId={result.selectedBank}
-                      total={result.totals.total}
-                      reference={result.reference}
-                    />
                   </div>
                 </div>
-              </div>
-            </section>
+              </section>
+              <NZMobileBankingHandoff
+                reference={result.reference}
+                total={result.totals.total}
+                accountNumber={result.bank.accountNumber}
+                accountName={result.bank.accountName}
+                bankName={result.bank.bankName}
+                className="mb-8"
+              />
+            </>
           )}
 
           {/* Instructions */}
@@ -608,10 +629,14 @@ function SuccessPanel({ result }: { result: BankTransferSuccess }) {
                     </p>
                     <div className="flex items-center gap-1.5">
                       <Truck size={12} className="text-primary-ink" />
-                      <span className="text-xs font-black text-secondary">1–4 business days</span>
+                      <span className="text-xs font-black text-secondary">
+                        {deliveryEstimate ? deliveryEstimate.transitDays : '1–4 business days'}
+                      </span>
                     </div>
                     <p className="text-[9px] font-medium text-slate-400 mt-1">
-                      NZ-wide tracked courier from Auckland
+                      {deliveryEstimate
+                        ? deliveryEstimate.summary
+                        : 'NZ-wide tracked courier from Auckland'}
                     </p>
                   </div>
                 </div>
@@ -694,8 +719,27 @@ function BankTransferCheckout() {
   const [address1Val, setAddress1Val] = useState('');
   const [address2Val, setAddress2Val] = useState('');
   const [cityVal, setCityVal] = useState('');
+  const [regionVal, setRegionVal] = useState('');
+  const [postcodeVal, setPostcodeVal] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [result, setResult] = useState<BankTransferSuccess | null>(null);
+
+  const isRural =
+    shippingMethodId.startsWith('rural') ||
+    isNZRuralAddress(`${address1Val} ${address2Val} ${cityVal}`);
+  const deliveryEstimate =
+    postcodeVal.trim().length === 4 ? getNZDeliveryEstimate(postcodeVal, isRural) : null;
+
+  const handlePostcodeChange = (val: string) => {
+    setPostcodeVal(val);
+    const cleaned = val.replace(/\D/g, '').slice(0, 4);
+    if (cleaned.length === 4) {
+      const match = inferNZRegion(cleaned);
+      if (match && !regionVal) {
+        setRegionVal(match);
+      }
+    }
+  };
 
   // The cart links here with an already-validated promo (?promo=CODE). Pre-fill
   // the field so the customer doesn't re-type it; the server action re-validates
@@ -767,7 +811,7 @@ function BankTransferCheckout() {
 
   // Success must be checked before the empty-cart guard: the cart is cleared
   // as soon as the order is created.
-  if (result) return <SuccessPanel result={result} />;
+  if (result) return <SuccessPanel result={result} deliveryEstimate={deliveryEstimate} />;
 
   if (!hydrated) {
     return <CheckoutSkeleton />;
@@ -977,6 +1021,8 @@ function BankTransferCheckout() {
                       placeholder="e.g. Auckland"
                       autoComplete="address-level1"
                       maxLength={100}
+                      value={regionVal}
+                      onChange={(e) => setRegionVal(e.target.value)}
                       className="block w-full px-5 py-3 bg-white border border-slate-200 rounded-full text-sm font-medium focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-inner"
                     />
                     <datalist id="nz-regions">
@@ -1015,6 +1061,8 @@ function BankTransferCheckout() {
                       required
                       autoComplete="postal-code"
                       maxLength={10}
+                      value={postcodeVal}
+                      onChange={(e) => handlePostcodeChange(e.target.value)}
                       className="block w-full px-5 py-3 bg-white border border-slate-200 rounded-full text-sm font-medium focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-inner"
                     />
                   </div>
@@ -1026,6 +1074,36 @@ function BankTransferCheckout() {
                   currentShippingId={shippingMethodId}
                   onSelectShipping={setShippingMethodId}
                 />
+
+                {/* Regional Delivery Estimate Banner */}
+                {deliveryEstimate && shippingMethodId !== 'pickup' && (
+                  <div className="p-4 rounded-2xl bg-primary/10 border border-primary/30 flex items-start sm:items-center justify-between gap-3 text-xs animate-in fade-in duration-200">
+                    <div className="flex items-start sm:items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-primary text-secondary flex items-center justify-center shrink-0">
+                        <Truck size={16} strokeWidth={2.5} />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-black text-secondary uppercase tracking-wider">
+                            Tracked Courier to {deliveryEstimate.region}
+                          </span>
+                          <span className="text-[9px] font-black uppercase tracking-wider bg-white/80 text-secondary px-2 py-0.5 rounded-full border border-slate-200">
+                            {deliveryEstimate.island}
+                          </span>
+                        </div>
+                        <p className="text-[11px] font-medium text-slate-600 mt-0.5">
+                          Dispatched via tracked courier from Auckland &middot; Standard delivery{' '}
+                          {deliveryEstimate.transitDays}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <span className="inline-block font-black text-primary-ink bg-white px-3 py-1 rounded-full border border-primary/20 text-xs shadow-xs">
+                        {deliveryEstimate.transitDays}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             </fieldset>
 
