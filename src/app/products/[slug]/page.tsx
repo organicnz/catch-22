@@ -254,7 +254,7 @@ async function ProductDetailsBody({ params }: { params: Promise<{ slug: string }
                   </div>
                   <div className="inline-flex items-center gap-1.5 text-[11px] font-bold text-slate-500">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    <span>ANZ Bank Deposit Available</span>
+                    <span>NZ Internet Banking & Bank Deposit (0% Surcharge)</span>
                   </div>
                 </div>
               )}
@@ -297,16 +297,24 @@ async function ProductDetailsBody({ params }: { params: Promise<{ slug: string }
               <WishlistButton product={product} showText={true} />
             </div>
 
-            <div className="mt-8 grid grid-cols-2 gap-4">
-              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col items-center text-center">
+            <div className="mt-8 grid grid-cols-3 gap-3">
+              <div className="p-3 sm:p-4 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col items-center text-center">
                 <span className="text-[10px] font-black text-secondary uppercase tracking-widest mb-1">
                   Shipping
                 </span>
                 <span className="text-xs text-slate-500 font-bold uppercase tracking-tight">
-                  NZ Wide Delivery
+                  Tracked Courier
                 </span>
               </div>
-              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col items-center text-center">
+              <div className="p-3 sm:p-4 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col items-center text-center">
+                <span className="text-[10px] font-black text-secondary uppercase tracking-widest mb-1">
+                  Payments
+                </span>
+                <span className="text-xs text-slate-500 font-bold uppercase tracking-tight">
+                  Card · Afterpay · Bank
+                </span>
+              </div>
+              <div className="p-3 sm:p-4 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col items-center text-center">
                 <span className="text-[10px] font-black text-secondary uppercase tracking-widest mb-1">
                   Charity
                 </span>

@@ -603,7 +603,14 @@ function BankTransferCheckout() {
                         onChange={() => setShippingMethodId(rate.id)}
                         className="h-4 w-4 accent-primary"
                       />
-                      <span className="text-sm font-bold text-secondary">{rate.name}</span>
+                      <span className="flex flex-col">
+                        <span className="text-sm font-bold text-secondary">{rate.name}</span>
+                        {rate.displayEstimate && (
+                          <span className="text-[11px] font-medium text-slate-500 mt-0.5">
+                            {rate.displayEstimate}
+                          </span>
+                        )}
+                      </span>
                     </span>
                     <span className="text-sm font-black text-secondary whitespace-nowrap">
                       {rate.displayPrice}
