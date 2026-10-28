@@ -70,7 +70,7 @@ function SuccessPanel({ result }: { result: BankTransferSuccess }) {
           )}
 
           {/* Reference + amount */}
-          <div className="bg-secondary rounded-2xl p-6 sm:p-8 mb-8 print:bg-white print:border print:border-slate-200">
+          <div className="bg-secondary rounded-2xl p-6 sm:p-8 mb-6 print:bg-white print:border print:border-slate-200">
             <div className="grid gap-6 sm:grid-cols-2">
               <div>
                 <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-2 print:text-slate-500">
@@ -90,6 +90,37 @@ function SuccessPanel({ result }: { result: BankTransferSuccess }) {
                 <p className="text-2xl font-black text-white tracking-tight print:text-secondary">
                   {money(result.totals.total)} NZD
                 </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Cost breakdown */}
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-5 mb-8 shadow-xs">
+            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">
+              Order cost breakdown
+            </h3>
+            <div className="space-y-2 text-xs font-bold text-slate-600">
+              <div className="flex justify-between">
+                <span>Subtotal</span>
+                <span className="text-secondary">{money(result.totals.subtotal)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Shipping</span>
+                <span className="text-secondary">
+                  {result.totals.shipping === 0 ? 'Free' : money(result.totals.shipping)}
+                </span>
+              </div>
+              {result.totals.discount > 0 && (
+                <div className="flex justify-between text-primary-ink font-black">
+                  <span>Discount</span>
+                  <span>-{money(result.totals.discount)}</span>
+                </div>
+              )}
+              <div className="flex justify-between items-baseline pt-3 mt-2 border-t border-slate-100 text-sm font-black text-secondary">
+                <span className="uppercase tracking-widest text-[11px]">Total due</span>
+                <span className="text-lg text-primary-ink tabular-nums">
+                  {money(result.totals.total)} NZD
+                </span>
               </div>
             </div>
           </div>

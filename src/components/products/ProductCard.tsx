@@ -123,6 +123,14 @@ export function ProductCard({ product }: ProductCardProps) {
             <p className="text-xl sm:text-2xl font-black text-primary-ink leading-none tabular-nums">
               ${product.price.toFixed(2)}
             </p>
+            {product.price >= 20 && (
+              <div className="flex items-center gap-1 mt-1.5 text-[9px] font-bold text-slate-500">
+                <span>or 4 × ${(product.price / 4).toFixed(2)}</span>
+                <span className="font-black text-[#00a87a] bg-[#B2FCE4]/60 px-1 py-0.5 rounded text-[8px] uppercase tracking-tight">
+                  afterpay
+                </span>
+              </div>
+            )}
           </div>
 
           <Link
