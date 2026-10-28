@@ -2,9 +2,10 @@
 
 import { ArrowLeft, Banknote, CheckCircle, Copy, Loader2, Printer } from 'lucide-react';
 import Link from 'next/link';
-import { useState, useSyncExternalStore } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Suspense, useState, useSyncExternalStore } from 'react';
 import { toast } from 'sonner';
-import { createBankTransferOrder, type BankTransferSuccess } from '@/app/checkout/actions';
+import { type BankTransferSuccess, createBankTransferOrder } from '@/app/checkout/actions';
 import { SHIPPING_RATES } from '@/config/shipping';
 import { useCartStore } from '@/lib/store/cart';
 
@@ -189,12 +190,33 @@ function SuccessPanel({ result }: { result: BankTransferSuccess }) {
   );
 }
 
-export default function BankTransferCheckoutPage() {
+/** Skeleton shared by the pre-hydration paint and the Suspense fallback. */
+function CheckoutSkeleton() {
+  return (
+    <div className="bg-white min-h-screen pt-(--header-h) pb-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-pulse">
+        <div className="h-10 w-64 bg-slate-100 rounded mb-8" />
+        <div className="grid lg:grid-cols-12 gap-12">
+          <div className="lg:col-span-7 h-96 bg-slate-50 rounded-3xl" />
+          <div className="lg:col-span-5 h-64 bg-slate-50 rounded-3xl" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Inner component (uses useSearchParams — must be wrapped in Suspense)
+function BankTransferCheckout() {
   const { items, totalPrice, clearCart } = useCartStore();
   const [shippingMethodId, setShippingMethodId] = useState('standard');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [result, setResult] = useState<BankTransferSuccess | null>(null);
+
+  // The cart links here with an already-validated promo (?promo=CODE). Pre-fill
+  // the field so the customer doesn't re-type it; the server action re-validates
+  // at submit, so a stale or hand-crafted param simply fails there.
+  const promoParam = (useSearchParams().get('promo') ?? '').trim();
 
   // Persisted cart rehydrates client-side only; render the skeleton on the
   // server/first paint to avoid an empty-cart mismatch flash.
@@ -253,17 +275,7 @@ export default function BankTransferCheckoutPage() {
   if (result) return <SuccessPanel result={result} />;
 
   if (!hydrated) {
-    return (
-      <div className="bg-white min-h-screen pt-(--header-h) pb-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 animate-pulse">
-          <div className="h-10 w-64 bg-slate-100 rounded mb-8" />
-          <div className="grid lg:grid-cols-12 gap-12">
-            <div className="lg:col-span-7 h-96 bg-slate-50 rounded-3xl" />
-            <div className="lg:col-span-5 h-64 bg-slate-50 rounded-3xl" />
-          </div>
-        </div>
-      </div>
-    );
+    return <CheckoutSkeleton />;
   }
 
   if (items.length === 0) {
@@ -522,6 +534,7 @@ export default function BankTransferCheckoutPage() {
                 id="promoCode"
                 name="promoCode"
                 type="text"
+                defaultValue={promoParam}
                 maxLength={50}
                 placeholder="ENTER CODE"
                 className="block w-full px-5 py-3 bg-white border border-slate-200 rounded-full text-xs font-black uppercase tracking-widest focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-inner"
@@ -628,5 +641,14 @@ export default function BankTransferCheckoutPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Public export — Suspense required for useSearchParams in App Router
+export default function BankTransferCheckoutPage() {
+  return (
+    <Suspense fallback={<CheckoutSkeleton />}>
+      <BankTransferCheckout />
+    </Suspense>
   );
 }

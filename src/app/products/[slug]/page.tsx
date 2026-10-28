@@ -237,6 +237,25 @@ async function ProductDetailsBody({ params }: { params: Promise<{ slug: string }
                   </span>
                 )}
               </div>
+
+              {/* Flexible payment options (Afterpay & Bank Deposit) */}
+              {product.price > 0 && (
+                <div className="mt-4 pt-4 border-t border-slate-100 flex flex-wrap items-center gap-3 text-xs">
+                  <div className="inline-flex items-center gap-1.5 bg-slate-50 border border-slate-200/70 rounded-xl px-3 py-1.5">
+                    <span className="text-[11px] font-bold text-slate-600">or 4 payments of</span>
+                    <span className="text-[11px] font-black text-secondary">
+                      ${(product.price / 4).toFixed(2)}
+                    </span>
+                    <span className="text-[10px] font-black tracking-tight text-secondary bg-[#B2FCE4] px-1.5 py-0.5 rounded-md uppercase">
+                      afterpay
+                    </span>
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 text-[11px] font-bold text-slate-500">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    <span>ANZ Bank Deposit Available</span>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="prose prose-slate max-w-none">

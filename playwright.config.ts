@@ -40,7 +40,7 @@ export default defineConfig({
       },
     },
     {
-      command: `node scripts/mock-notify-contact.mjs ${MOCK_PORT}`,
+      command: `bun scripts/mock-notify-contact.mjs ${MOCK_PORT}`,
       url: `http://127.0.0.1:${MOCK_PORT}/__health`,
       reuseExistingServer: !process.env.CI,
       timeout: 30_000,

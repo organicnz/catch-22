@@ -12,7 +12,7 @@ import { type CouponLike, discountForCoupon } from '@/lib/bank-transfer-order';
 import { normalizePromoCode, PROMO_CODE_MAX_LENGTH, promoLabel } from '@/lib/promo-code';
 import type { Database } from '@/types/supabase';
 
-export { PROMO_CODE_MAX_LENGTH, normalizePromoCode, promoLabel } from '@/lib/promo-code';
+export { normalizePromoCode, PROMO_CODE_MAX_LENGTH, promoLabel } from '@/lib/promo-code';
 
 export interface PromoCoupon extends CouponLike {
   stripe_coupon_id?: string | null;
@@ -29,9 +29,7 @@ export interface ResolvedPromo {
   coupon: PromoCoupon;
 }
 
-export type PromoResolution =
-  | { ok: true; promo: ResolvedPromo }
-  | { ok: false; error: string };
+export type PromoResolution = { ok: true; promo: ResolvedPromo } | { ok: false; error: string };
 
 /**
  * Looks up a code, checks expiry and computes the discount against a

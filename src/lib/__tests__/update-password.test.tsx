@@ -11,7 +11,7 @@
  * EXPECTED OUTCOME after fix: PASS (module resolves successfully)
  */
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'bun:test';
 
 describe('Bug Condition: /account/update-password returns 404', () => {
   it('UpdatePasswordPage module exists', async () => {

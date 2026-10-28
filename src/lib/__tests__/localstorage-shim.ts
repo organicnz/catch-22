@@ -2,7 +2,7 @@
  * Minimal localStorage shim for test environments (runner-agnostic).
  *
  * zustand/persist writes through localStorage on every state change; some
- * test environments (bun test, bare node) don't provide it. Installs only
+ * test environments (bun test) don't provide it. Installs only
  * when missing so jsdom/browser implementations are never clobbered.
  */
 const map = new Map<string, string>();

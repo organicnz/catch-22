@@ -1,4 +1,3 @@
-// @vitest-environment node
 /**
  * Unit tests for the three sanitize.ts functions not covered by the
  * existing property-based test suite: isSpamContent, sanitizeText,
@@ -7,7 +6,7 @@
  * The PBT suite (sanitize.test.ts) covers sanitizeWPContent exhaustively.
  * These tests cover the deterministic contract of the remaining exports.
  */
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'bun:test';
 import { hasSuspiciousContent, isSpamContent, SPAM_KEYWORDS, sanitizeText } from '@/lib/sanitize';
 
 // ─── isSpamContent ────────────────────────────────────────────────────────────

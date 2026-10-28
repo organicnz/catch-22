@@ -1,4 +1,3 @@
-// @vitest-environment node
 /**
  * Unit tests for src/app/auth/callback/route.ts
  *
@@ -7,7 +6,7 @@
  *  2. Redirects to `next` on success (defaults to /account)
  *  3. Redirects to /login?error=Invalid_Token on failure or missing code
  */
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'bun:test';
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 

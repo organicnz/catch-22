@@ -1,12 +1,20 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { createClient } from '@supabase/supabase-js';
-import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
+try {
+  const raw = readFileSync(resolve('.env.local'), 'utf8');
+  for (const line of raw.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const m = trimmed.match(/^([A-Z0-9_]+)=(.*)$/);
+    if (m && !process.env[m[1]]) {
+      process.env[m[1]] = m[2].trim().replace(/^["']|["']$/g, '');
+    }
+  }
+} catch {
+  // Rely on ambient env
+}
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SECRET_KEY;

@@ -21,7 +21,8 @@
 /build
 
 # misc
-.DS_Store
+.DS_Store*
+._*
 *.pem
 
 # debug
@@ -46,3 +47,6 @@ next-env.d.ts
 # playwright
 /test-results/
 /playwright-report/
+
+# reference assets
+assets/*.html

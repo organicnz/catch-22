@@ -23,13 +23,14 @@ Catch-22 is not just gear; it's an experience. This digital storefront is engine
 - **Verified in CI**: unit suite + Playwright guards for instant navigation, header-clearance geometry, and sitewide link integrity.
 
 ## 🚀 Technical Stack
-- **Frontend**: Next.js 16 (App Router, `cacheComponents`, Turbopack), React 19, TypeScript 5.9
+- **Frontend**: Next.js 16 (App Router, `cacheComponents`, Turbopack), React 19
+- **Type Checking**: `tsrs` (Rust-based TypeScript type checking, `tsrs --noEmit`)
 - **Backend**: Supabase (PostgreSQL, Auth, Storage via `@supabase/ssr`)
-- **Payments**: Stripe Checkout + webhooks (idempotent)
+- **Payments**: Stripe Checkout (Card & Afterpay) + Direct Bank Transfer (NZ ANZ direct deposit)
 - **Styling**: Tailwind CSS 4 ("Sensory Luxury" tokens, native CSS vars)
 - **State**: Zustand (cart/wishlist persistence), TanStack Query
-- **Quality**: Biome 2 + oxlint, Vitest, Playwright (`@next/playwright` instant())
-- **Runtime**: Bun ≥1.4
+- **Quality**: Biome 2.6.3 + Oxlint, Native `bun test`, Playwright (`@next/playwright` instant())
+- **Runtime & Package Manager**: Bun ≥1.4 (zero Node.js, npm, yarn, or pnpm dependencies)
 
 ## 📥 Getting Started
 
@@ -56,7 +57,9 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ### 4. Development
 ```bash
 bun run dev          # dev server (Turbopack)
-bun run test         # vitest unit suite
+bun test             # native Bun unit suite (<300ms)
+bun run typecheck    # tsrs Rust type checking
+bun run lint:check   # Biome + Oxlint code validation
 bun run test:e2e     # Playwright instant-nav + clearance + link-integrity guards
 bun run build        # production build
 ```

@@ -1,5 +1,4 @@
-// @vitest-environment node
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
 import {
   ERROR_MESSAGE_MAX,
   ERROR_STACK_MAX,
@@ -99,7 +98,7 @@ describe('reportClientError', () => {
 
   beforeEach(() => {
     fetchMock.mockReset();
-    globalThis.fetch = fetchMock as typeof fetch;
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
   });
 
   afterEach(() => {

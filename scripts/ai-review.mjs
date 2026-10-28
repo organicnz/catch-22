@@ -1,10 +1,10 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 // AI code reviewer — sends a diff (or explicit files) to an LLM and prints
 // structured findings. Zero dependencies.
 //
 // Usage:
-//   GROQ_API_KEY=... node scripts/ai-review.mjs --since HEAD~1
-//   ZAI_API_KEY=...  node scripts/ai-review.mjs --provider zai --files src/app/contact/actions.ts
+//   GROQ_API_KEY=... bun scripts/ai-review.mjs --since HEAD~1
+//   ZAI_API_KEY=...  bun scripts/ai-review.mjs --provider zai --files src/app/contact/actions.ts
 //
 // Providers:
 //   groq (default) -> Groq OpenAI-compatible API, llama-3.3-70b-versatile

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'bun:test';
 import './localstorage-shim';
 import { MAX_ITEM_QUANTITY, useCartStore } from '@/lib/store/cart';
 

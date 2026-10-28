@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'bun:test';
 import type { ContactResult } from '../actions';
 
 // Seed env BEFORE any module import chain reaches src/lib/env.ts: bun test
@@ -100,20 +100,17 @@ beforeEach(async () => {
     return Promise.resolve(rpcResult);
   });
 
-  vi.stubGlobal(
-    'fetch',
-    vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
-      fetchCalls.push({ url: String(url), init });
-      if (fetchShouldReject) throw new TypeError('network down');
-      return (
-        fetchResponse ?? {
-          ok: false,
-          status: 500,
-          json: () => Promise.resolve({}),
-        }
-      );
-    })
-  );
+  globalThis.fetch = vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
+    fetchCalls.push({ url: String(url), init });
+    if (fetchShouldReject) throw new TypeError('network down');
+    return (
+      fetchResponse ?? {
+        ok: false,
+        status: 500,
+        json: () => Promise.resolve({}),
+      }
+    );
+  }) as unknown as typeof fetch;
 });
 
 describeSuite('submitContact() validation', () => {

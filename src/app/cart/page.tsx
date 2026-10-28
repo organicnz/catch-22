@@ -24,7 +24,7 @@ import { MAX_ITEM_QUANTITY, useCartStore } from '@/lib/store/cart';
 import { getStorageUrl } from '@/lib/supabase';
 
 /** No-op store subscription: hydration state never changes after mount. */
-const emptySubscribe = () => () => { };
+const emptySubscribe = () => () => {};
 
 function AfterpayBadge({ total }: { total: number }) {
   const instalment = total / 4;
@@ -164,9 +164,7 @@ export default function CartPage() {
     <div className="bg-white min-h-screen pt-(--header-h) pb-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col mb-10">
-          <h1 className="text-4xl font-black tracking-tight text-secondary uppercase">
-            Your Cart
-          </h1>
+          <h1 className="text-4xl font-black tracking-tight text-secondary uppercase">Your Cart</h1>
           <div className="h-1.5 w-24 bg-primary mt-3" />
         </div>
 
@@ -213,9 +211,7 @@ export default function CartPage() {
                         <div className="flex items-center bg-slate-50 border border-slate-200 rounded-full w-min p-1 shadow-inner">
                           <button
                             type="button"
-                            onClick={() =>
-                              updateQuantity(item.id, Math.max(1, item.quantity - 1))
-                            }
+                            onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
                             className="p-2 text-secondary hover:text-primary-ink transition-colors"
                             aria-label="Decrease quantity"
                           >
@@ -269,10 +265,7 @@ export default function CartPage() {
           </div>
 
           {/* ── Order Summary ── */}
-          <section
-            aria-label="Order Summary"
-            className="mt-16 lg:mt-0 lg:col-span-5 sticky top-24"
-          >
+          <section aria-label="Order Summary" className="mt-16 lg:mt-0 lg:col-span-5 sticky top-24">
             <div className="bg-slate-50 rounded-3xl px-6 py-8 sm:p-8 border border-slate-100 shadow-sm">
               <h2 className="text-xl font-black text-secondary uppercase tracking-widest mb-6 border-b-2 border-primary pb-3 inline-block">
                 Order Summary
@@ -420,21 +413,27 @@ export default function CartPage() {
                   className="w-full bg-[#B2FCE4] text-[#1a1a1a] rounded-2xl py-5 px-6 font-black uppercase tracking-[0.15em] hover:brightness-95 transition-all duration-300 flex items-center gap-4 disabled:opacity-50 shadow-sm"
                 >
                   <div className="w-10 h-10 rounded-xl bg-black/5 flex items-center justify-center shrink-0">
-                    <svg viewBox="0 0 60 20" className="w-14 h-5" aria-hidden="true">
-                      <text
-                        y="16"
-                        fontFamily="sans-serif"
-                        fontSize="14"
-                        fontWeight="900"
-                        fill="#1a1a1a"
-                        letterSpacing="-0.5"
-                      >
-                        afterpay
-                      </text>
-                    </svg>
+                    {isLoading ? (
+                      <Loader2 size={18} className="animate-spin text-[#1a1a1a]" />
+                    ) : (
+                      <svg viewBox="0 0 60 20" className="w-14 h-5" aria-hidden="true">
+                        <text
+                          y="16"
+                          fontFamily="sans-serif"
+                          fontSize="14"
+                          fontWeight="900"
+                          fill="#1a1a1a"
+                          letterSpacing="-0.5"
+                        >
+                          afterpay
+                        </text>
+                      </svg>
+                    )}
                   </div>
                   <div className="flex-1 text-left">
-                    <div className="text-sm leading-tight">Pay with Afterpay</div>
+                    <div className="text-sm leading-tight">
+                      {isLoading ? 'Processing…' : 'Pay with Afterpay'}
+                    </div>
                     <div className="text-[10px] font-bold opacity-70 mt-0.5 normal-case tracking-normal">
                       <AfterpayBadge total={orderTotal} />
                     </div>

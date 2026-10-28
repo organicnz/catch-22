@@ -29,7 +29,7 @@ export type ErrorReportInput = z.infer<typeof errorReportSchema>;
 /**
  * Groups identical crashes into one triage family: SHA-256 of the message
  * plus the first stack frame (the throw site), hex-truncated to 32 chars.
- * Server-side only (Node runtime): a client-supplied fingerprint would let a
+ * Server-side only: a client-supplied fingerprint would let a
  * bot poison the grouping key with garbage.
  */
 export function errorFingerprint(message: string, stack?: string): string {

@@ -1,4 +1,3 @@
-// @vitest-environment node
 /**
  * Bug Condition Exploration Test: profiles `updated_at` column missing from schema cache
  *
@@ -27,8 +26,8 @@
  * EXPECTED OUTCOME on unfixed code: PASS (confirms baseline behaviour to preserve)
  */
 
+import { beforeEach, describe, expect, it, vi } from 'bun:test';
 import fc from 'fast-check';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 

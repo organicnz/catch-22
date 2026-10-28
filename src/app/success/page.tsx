@@ -1,5 +1,5 @@
-import type { Metadata } from 'next';
 import { CheckCircle2, Clock3, MapPin, Package, Truck } from 'lucide-react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import Stripe from 'stripe';
 import { ClearCartOnMount } from '@/components/checkout/ClearCartOnMount';
@@ -113,7 +113,8 @@ export default async function SuccessPage({
   }
 
   const { session, order } = receipt;
-  const isPaid = session.payment_status === 'paid' || session.payment_status === 'no_payment_required';
+  const isPaid =
+    session.payment_status === 'paid' || session.payment_status === 'no_payment_required';
   const isPending = session.payment_status === 'unpaid';
 
   const reference = order ? `CATCH22-${order.id}` : session.id.slice(-8).toUpperCase();
@@ -144,7 +145,10 @@ export default async function SuccessPage({
           {/* Celebratory ring burst */}
           {isPaid && (
             <div className="relative w-32 h-32 mx-auto mb-6">
-              <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping" style={{ animationDuration: '2s', animationIterationCount: 1 }} />
+              <div
+                className="absolute inset-0 rounded-full bg-primary/20 animate-ping"
+                style={{ animationDuration: '2s', animationIterationCount: 1 }}
+              />
               <div className="absolute inset-2 rounded-full bg-primary/10" />
               <div className="absolute inset-0 rounded-full bg-emerald-100 flex items-center justify-center shadow-inner">
                 <CheckCircle2 className="w-14 h-14 text-emerald-600" strokeWidth={2} />
@@ -206,8 +210,9 @@ export default async function SuccessPage({
             </div>
             <div>
               <span
-                className={`inline-flex items-center rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest ${isPending ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
-                  }`}
+                className={`inline-flex items-center rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest ${
+                  isPending ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
+                }`}
               >
                 {isPending ? 'Processing' : (order?.status ?? 'Processing')}
               </span>
@@ -217,10 +222,7 @@ export default async function SuccessPage({
           {items.length > 0 && (
             <ul className="divide-y divide-slate-200 px-6 sm:px-8" aria-label="Items purchased">
               {items.map((item) => (
-                <li
-                  key={item.id}
-                  className="flex items-start justify-between gap-4 py-4"
-                >
+                <li key={item.id} className="flex items-start justify-between gap-4 py-4">
                   <div className="min-w-0">
                     <p className="text-sm font-black text-secondary uppercase tracking-wide leading-snug">
                       {item.description}
@@ -287,9 +289,7 @@ export default async function SuccessPage({
             <p className="text-sm font-bold text-secondary leading-relaxed">
               {shippingAddress ? formatAddress(shippingAddress) : 'Address confirmed at checkout'}
             </p>
-            {email && (
-              <p className="mt-3 text-xs font-medium text-slate-500 break-all">{email}</p>
-            )}
+            {email && <p className="mt-3 text-xs font-medium text-slate-500 break-all">{email}</p>}
             {estimate && (
               <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-slate-600">
                 <Truck size={12} strokeWidth={2.5} />
@@ -306,15 +306,17 @@ export default async function SuccessPage({
               {timeline.map(({ label, detail, done, icon: Icon }) => (
                 <li key={label} className="flex items-start gap-3">
                   <span
-                    className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${done ? 'bg-primary text-secondary' : 'bg-slate-100 text-slate-400'
-                      }`}
+                    className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${
+                      done ? 'bg-primary text-secondary' : 'bg-slate-100 text-slate-400'
+                    }`}
                   >
                     <Icon size={12} strokeWidth={3} />
                   </span>
                   <span>
                     <span
-                      className={`block text-xs font-black uppercase tracking-wide ${done ? 'text-secondary' : 'text-slate-500'
-                        }`}
+                      className={`block text-xs font-black uppercase tracking-wide ${
+                        done ? 'text-secondary' : 'text-slate-500'
+                      }`}
                     >
                       {label}
                     </span>

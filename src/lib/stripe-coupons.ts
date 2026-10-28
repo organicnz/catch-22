@@ -48,9 +48,9 @@ export async function getOrCreateStripeCoupon(
     ...(coupon.discount_type === 'percent'
       ? { percent_off: Math.min(amount, 100) }
       : {
-        amount_off: Math.round(roundMoney(amount) * 100),
-        currency: 'nzd',
-      }),
+          amount_off: Math.round(roundMoney(amount) * 100),
+          currency: 'nzd',
+        }),
   };
 
   const created = await stripe.coupons.create(params);

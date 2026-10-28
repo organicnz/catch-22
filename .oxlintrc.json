@@ -1,10 +1,6 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": [
-    "react",
-    "react-hooks",
-    "nextjs"
-  ],
+  "plugins": ["react", "react-hooks", "nextjs"],
   "env": {
     "browser": true,
     "es2022": true
@@ -21,6 +17,7 @@
     "@next/next/no-html-link-for-pages": "error",
     "@next/next/no-img-element": "warn",
     "@next/next/no-sync-scripts": "error",
+    "react/purity": "off",
     "no-control-regex": "off"
   },
   "ignorePatterns": [

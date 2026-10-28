@@ -1,13 +1,15 @@
 # Catch-22: Developer Manifesto & Guide
 
 ## ⚡ Quick Start
-- `bun run dev`: Launch local development environment.
+- `bun run dev`: Launch local development environment (Next.js 16 with Turbopack).
 - `bun run build`: Production bundle generation.
-- `bun run lint`: Code quality and syntax validation.
-- `bun run test`: Execute project test suite (if applicable).
+- `bun run typecheck`: Rust-based TypeScript type checking (`tsrs --noEmit`).
+- `bun run lint:check`: Sub-50ms code quality validation via Biome + Oxlint.
+- `bun test`: Native Bun unit test suite (177 tests in <300ms).
+- `bun run format:check`: High-speed Biome formatting validation.
 
 ### Agent Skills (Vercel)
-Vercel-published skills are installed in `.agents/skills/` (symlinked into `.claude/skills/`) and pinned via `skills-lock.json`. Load on demand when the task matches: React/Next.js code (`vercel-react-best-practices`, `vercel-composition-patterns`), UI audits (`web-design-guidelines`), route animations (`vercel-react-view-transitions`), deployments (`deploy-to-vercel`, `vercel-cli-with-tokens`), cost/perf tuning (`vercel-optimize`), prose review (`writing-guidelines`). Full trigger table lives in AGENTS.md. Update with `npx skills update`; never re-install manually.
+Vercel-published skills are installed in `.agents/skills/` (symlinked into `.claude/skills/`) and pinned via `skills-lock.json`. Load on demand when the task matches: React/Next.js code (`vercel-react-best-practices`, `vercel-composition-patterns`), UI audits (`web-design-guidelines`), route animations (`vercel-react-view-transitions`), deployments (`deploy-to-vercel`, `vercel-cli-with-tokens`), cost/perf tuning (`vercel-optimize`), prose review (`writing-guidelines`). Full trigger table lives in AGENTS.md. Update with `bunx skills update`; never re-install manually.
 
 ---
 

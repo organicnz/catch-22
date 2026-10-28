@@ -28,10 +28,13 @@ Transform the legacy WordPress/Elementor ecosystem (catch-22.co.nz) into a moder
 ---
 
 ## 🛠 Working Stack (Simplified)
-- **Runtime**: Bun (Package management & scripts)
+- **Runtime & Package Manager**: Bun (All package management, scripts, runtime, and test execution — zero node/npm/yarn/pnpm dependencies)
+- **Type Checking**: `tsrs` (Rust-based TypeScript type checking, `tsrs --noEmit` — zero legacy `tsc`)
+- **Linting & Formatting**: Biome + Oxlint (Rust-based toolchain with sub-50ms execution)
+- **Git Automation**: Lefthook (Fast Rust/Go git hooks runner)
 - **Frontend**: Next.js 16 (App Router + React 19)
 - **Backend**: Supabase (Database, Auth, Storage via REST client)
-- **Payments**: Stripe (Express Checkout & Webhooks)
+- **Payments**: Stripe (Express Checkout & Webhooks) + Direct Bank Transfer (NZ ANZ direct deposit)
 - **Styling**: Tailwind CSS 4 (Native CSS variables)
 - **State**: Zustand (Persistent cart & wishlist)
 - **Agent Skills**: Vercel agent skills installed via `skills` CLI (see `.agents/skills/`, pinned in `skills-lock.json`)
@@ -39,7 +42,7 @@ Transform the legacy WordPress/Elementor ecosystem (catch-22.co.nz) into a moder
 ---
 
 ## 🧠 Agent Skills (Vercel)
-Installed from `vercel-labs/agent-skills` via `npx skills add`. Load on demand; do not re-install.
+Installed from `vercel-labs/agent-skills` via `bunx skills add`. Load on demand; do not re-install.
 
 | Skill | Use when |
 | --- | --- |
@@ -53,7 +56,7 @@ Installed from `vercel-labs/agent-skills` via `npx skills add`. Load on demand; 
 | `react-native-skills` | Not applicable to this web-only project (installed for reference). |
 | `writing-guidelines` | Docs/prose style review. |
 
-Update with `npx skills update`; restore with `npx skills experimental_install`.
+Update with `bunx skills update`; restore with `bunx skills experimental_install`.
 
 ---
 
@@ -108,6 +111,13 @@ When the store generates revenue, move to Pro and revisit TTLs (`minutes`) for p
 - Migration note: `20260825120000_error_reports.sql` + `20260825130000_fts_search.sql` apply via CI db push on merge to main.
 - [x] **Daily Compatibility Workflow**: `.github/workflows/daily-compat.yml` runs nightly (21:17 UTC) — frozen install, lint/format/types, unit, production build, full mock-backed e2e, live `/api/health` + edge-function boot probes for all three functions. Advisory AI review job (`scripts/ai-review.mjs`, Groq gpt-oss-120b + Z.ai glm-4.6, keys in GH secrets only) reviews the last 24h of diffs with progressive payload truncation for free-tier token caps; model output never gates CI.
 - [x] **RLS Role-Repair Pattern**: project restore/re-provisioning can orphan policy→role OID references (`pg_policies` masks empty polroles as `{public}`) — policies then match nobody and default-deny silently. `20260825160000_contact_rls_role_repair.sql` fixes the incident on `contact_submissions`; recreate-and-rebind is the playbook for any table showing "policy exists but denies everyone".
+- [x] **Direct Bank Transfer (NZ Direct Deposit)**: Enabled direct bank deposit checkout (`ANZ · No card needed`) with account `06-XXXX-XXXXXXX-XX` (`Account Name`). Implemented `/checkout/bank-transfer` route, order management in Supabase (`orders` + `order_items` with status `on-hold`), automated order reference generation (`C22-<id>`), and dual email notifications to client (`orders@catch-22.co.nz`) and customer. Validated catalog inventory (27 spools of braid across 300m, 500m, and 1000m) and verified end-to-end checkout flow.
+- [x] **Pure Bun & Rust-Based Toolchain Hardening**: Fully excised legacy `node` runtime and packages:
+  - Package manager & runtime: Pure `bun` (`engines: { bun: ">=1.4.0" }`, `@types/bun`, zero `@types/node`).
+  - Type checking: Swapped legacy `tsc` (`typescript` devDependency removed) with `tsrs` (`tsrs --noEmit`).
+  - Linting & Formatting: `biome` v2.6.3 + `oxlint` sub-50ms execution, removing legacy ESLint/Prettier.
+  - Test suites: Native runner support (`bun test`), excised all legacy `// @vitest-environment node` docblocks, all 177 unit tests passing clean.
+  - Vercel production deployment verified live on `https://www.catch-22.co.nz`.
 
 ---
 
@@ -124,3 +134,13 @@ The `sanitizeWPContent` helper is critical for brand integrity. It handles:
 2. **SEO First**: Every dynamic page MUST implement `generateMetadata` for unique titles and descriptions.
 3. **Sanitize Everything**: Any data coming from the `content` table in Supabase MUST pass through the sanitization helper.
 4. **Performance Budgets**: Monitor LCP and keep client-side bundles minimal.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

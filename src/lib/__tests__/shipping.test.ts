@@ -1,5 +1,4 @@
-// @vitest-environment node
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'bun:test';
 import { getStripeShippingOptions, SHIPPING_RATES } from '@/config/shipping';
 
 // ─── SHIPPING_RATES data integrity ────────────────────────────────────────────
@@ -83,6 +82,6 @@ describe('getStripeShippingOptions()', () => {
     const options = getStripeShippingOptions();
     const pickupOpt = options[SHIPPING_RATES.indexOf(pickup)];
     // pickup has a stripeDisplayName
-    expect(pickupOpt.shipping_rate_data.display_name).toBe(pickup.stripeDisplayName);
+    expect(pickupOpt.shipping_rate_data.display_name).toBe(pickup.stripeDisplayName ?? '');
   });
 });

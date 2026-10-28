@@ -1,6 +1,5 @@
-// @vitest-environment node
+import { describe, expect, it } from 'bun:test';
 import type Stripe from 'stripe';
-import { describe, expect, it } from 'vitest';
 import { buildOrderItems, type OrderItemRow } from '@/lib/stripe-order-items';
 
 type LineItemOverrides = Partial<

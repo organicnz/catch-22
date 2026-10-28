@@ -1,7 +1,7 @@
 'use client';
 
-import { motion } from 'motion/react';
 import { ShoppingCart } from 'lucide-react';
+import { motion } from 'motion/react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -89,10 +89,11 @@ export function ProductCard({ product }: ProductCardProps) {
           <button
             type="button"
             onClick={handleQuickAdd}
-            className={`w-full flex items-center justify-center gap-2 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all duration-300 shadow-lg ${added
+            className={`w-full flex items-center justify-center gap-2 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all duration-300 shadow-lg ${
+              added
                 ? 'bg-emerald-500 text-white'
                 : 'bg-secondary text-white hover:bg-primary hover:text-secondary'
-              }`}
+            }`}
             aria-label={`Add ${product.name} to cart`}
           >
             <ShoppingCart size={14} strokeWidth={3} />
