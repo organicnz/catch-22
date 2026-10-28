@@ -50,3 +50,7 @@ next-env.d.ts
 
 # reference assets
 assets/*.html
+
+# kiro ide settings (contains local credentials / MCP server tokens)
+.kiro/settings/*
+!.kiro/settings/mcp.example.json

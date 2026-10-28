@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "supabase-catch22": {
+      "command": "bunx",
+      "args": ["-y", "@supabase/mcp-server-supabase"],
+      "env": {
+        "SUPABASE_PROJECT_REF": "wcoaqlglwxwceqktpckt",
+        "SUPABASE_ACCESS_TOKEN": "${SUPABASE_ACCESS_TOKEN}"
+      }
+    }
+  }
+}
