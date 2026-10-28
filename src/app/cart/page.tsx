@@ -5,9 +5,7 @@ import {
   Banknote,
   CheckCircle,
   CreditCard,
-  Heart,
   Loader2,
-  Lock,
   Minus,
   Plus,
   ShoppingBag,
@@ -19,7 +17,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useSyncExternalStore } from 'react';
 import { toast } from 'sonner';
+import { AfterpayInfoModal } from '@/components/checkout/AfterpayInfoModal';
+import { NZCheckoutConfidence } from '@/components/checkout/NZCheckoutConfidence';
+import { NZPaymentOptionsGuide } from '@/components/checkout/NZPaymentOptionsGuide';
 import { AfterpayIcon, PaymentMethodStrip } from '@/components/checkout/PaymentIcons';
+import {
+  PaymentRecommendationBadge,
+  PaymentRecommendationStrip,
+} from '@/components/checkout/PaymentRecommendation';
 import { StripeExpressCheckout } from '@/components/checkout/StripeExpressCheckout';
 import { SHIPPING_RATES } from '@/config/shipping';
 import { previewPromoCodeAction } from '@/lib/actions/promo';
@@ -386,6 +391,16 @@ export default function CartPage() {
                 )}
               </div>
 
+              {/* ── Smart Payment Recommendation ── */}
+              <PaymentRecommendationStrip total={orderTotal} />
+
+              <div className="flex items-center justify-between mb-3 px-1">
+                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                  Choose payment method
+                </span>
+                <NZPaymentOptionsGuide triggerVariant="link" />
+              </div>
+
               {/* ── Payment methods ── */}
               <div className="space-y-3">
                 {/* Card + Digital Wallets via Stripe */}
@@ -403,8 +418,9 @@ export default function CartPage() {
                     )}
                   </div>
                   <div className="flex-1 text-left">
-                    <div className="text-sm leading-tight">
+                    <div className="flex items-center gap-2 text-sm leading-tight">
                       {isLoading ? 'Processing…' : 'Credit or Debit Card'}
+                      <PaymentRecommendationBadge method="card" total={orderTotal} />
                     </div>
                     <div className="text-[10px] font-bold opacity-60 mt-0.5 normal-case tracking-normal">
                       NZ Visa, Mastercard, Amex, Apple Pay, Google Pay
@@ -432,12 +448,11 @@ export default function CartPage() {
                       <span className="text-sm leading-tight">
                         {isLoading ? 'Processing…' : 'Afterpay & Klarna'}
                       </span>
-                      <span className="text-[8px] font-black uppercase tracking-wider bg-black/10 text-black px-1.5 py-0.5 rounded">
-                        4 instalments
-                      </span>
+                      <PaymentRecommendationBadge method="afterpay" total={orderTotal} />
                     </div>
-                    <div className="text-[10px] font-bold opacity-70 mt-0.5 normal-case tracking-normal">
-                      <AfterpayBadge total={orderTotal} /> · Klarna also available
+                    <div className="flex items-center gap-1 text-[10px] font-bold opacity-70 mt-0.5 normal-case tracking-normal">
+                      <AfterpayBadge total={orderTotal} />
+                      <AfterpayInfoModal price={orderTotal} />
                     </div>
                   </div>
                   <ArrowRight size={16} strokeWidth={3} className="opacity-50" />
@@ -454,6 +469,7 @@ export default function CartPage() {
                   <div className="flex-1 text-left">
                     <div className="flex items-center gap-2">
                       <span className="text-sm leading-tight">Bank Transfer / Pay on Pick-up</span>
+                      <PaymentRecommendationBadge method="bank" total={orderTotal} />
                       <span className="text-[8px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded">
                         0% Surcharge
                       </span>
@@ -478,35 +494,10 @@ export default function CartPage() {
                 <StripeExpressCheckout promoCode={promoApplied?.code} />
               </div>
 
-              {/* Trust signals */}
+              {/* Trust signals — NZ Checkout Confidence */}
               <div className="mt-6 pt-6 border-t border-slate-100 space-y-4">
                 <PaymentMethodStrip showBankAndEftpos={true} className="justify-center" />
-                <div className="flex flex-col items-center gap-2">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle size={10} className="text-emerald-600 shrink-0" strokeWidth={3} />
-                    <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">
-                      0% Surcharge · All Cards, Wallets &amp; Bank Deposit
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Lock size={10} className="text-emerald-600 shrink-0" strokeWidth={3} />
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                      Secure NZ Checkout · SSL Encrypted
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs">🇳🇿</span>
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                      100% NZ Owned · Protected by Consumer Guarantees Act
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Heart size={10} className="text-primary-ink fill-primary-ink shrink-0" />
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                      2.5% of every order → NZ Sea Cleaners
-                    </span>
-                  </div>
-                </div>
+                <NZCheckoutConfidence variant="compact" />
               </div>
             </div>
           </section>
@@ -515,44 +506,64 @@ export default function CartPage() {
 
       {/* ── Mobile sticky checkout bar ── */}
       <div className="fixed bottom-0 inset-x-0 z-40 lg:hidden bg-white/95 backdrop-blur-xl border-t border-slate-200 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] px-4 py-3 safe-area-pb">
-        <div className="max-w-lg mx-auto flex items-center gap-3">
-          <div className="flex-1 min-w-0">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-              Order total
-            </p>
-            <p className="text-xl font-black text-secondary tracking-tighter tabular-nums">
-              ${orderTotal.toFixed(2)}
-            </p>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              type="button"
-              onClick={() => handleCheckout('afterpay')}
-              disabled={isLoading}
-              title="Checkout with Afterpay (4 instalments)"
-              className="bg-[#B2FCE4] text-secondary rounded-full py-3 px-3 font-black uppercase text-[10px] tracking-wider hover:brightness-95 transition-all shadow-sm flex items-center gap-1 shrink-0 disabled:opacity-50"
-            >
-              <span className="text-[10px] font-black tracking-tight">afterpay</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleCheckout('card')}
-              disabled={isLoading}
-              className="bg-secondary text-white rounded-full py-3 px-4 sm:px-5 font-black uppercase tracking-[0.1em] text-xs hover:bg-primary hover:text-secondary transition-all duration-500 shadow-lg shadow-secondary/20 disabled:opacity-50 flex items-center gap-2"
-            >
-              {isLoading ? (
-                <Loader2 size={16} className="animate-spin" />
-              ) : (
-                <ShoppingBag size={16} strokeWidth={2.5} />
-              )}
-              {isLoading ? 'Processing…' : 'Checkout'}
-            </button>
+        <div className="max-w-lg mx-auto">
+          {/* Afterpay instalment preview */}
+          {orderTotal >= 50 && orderTotal <= 2000 && (
+            <div className="flex items-center justify-center gap-1.5 mb-2">
+              <span className="text-[9px] font-black text-[#1a1a1a] bg-[#B2FCE4]/50 px-1.5 py-0.5 rounded uppercase tracking-tight">
+                afterpay
+              </span>
+              <span className="text-[9px] font-bold text-slate-500">
+                4 × ${(orderTotal / 4).toFixed(2)} interest-free
+              </span>
+            </div>
+          )}
+          <div className="flex items-center gap-2">
+            <div className="flex-1 min-w-0">
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                Total
+              </p>
+              <p className="text-lg font-black text-secondary tracking-tighter tabular-nums">
+                ${orderTotal.toFixed(2)}
+              </p>
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <Link
+                href={`/checkout/bank-transfer${promoApplied ? `?promo=${promoApplied.code}` : ''}`}
+                title="Bank transfer or Auckland pick-up (0% surcharge)"
+                className="bg-white border border-slate-200 text-secondary rounded-full py-2.5 px-2.5 hover:border-secondary transition-all shadow-sm shrink-0"
+              >
+                <Banknote size={16} strokeWidth={2.5} />
+              </Link>
+              <button
+                type="button"
+                onClick={() => handleCheckout('afterpay')}
+                disabled={isLoading}
+                title="Checkout with Afterpay (4 instalments)"
+                className="bg-[#B2FCE4] text-secondary rounded-full py-2.5 px-3 font-black uppercase text-[9px] tracking-wider hover:brightness-95 transition-all shadow-sm flex items-center gap-1 shrink-0 disabled:opacity-50"
+              >
+                <span className="font-black tracking-tight">afterpay</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleCheckout('card')}
+                disabled={isLoading}
+                className="bg-secondary text-white rounded-full py-2.5 px-4 font-black uppercase tracking-[0.1em] text-xs hover:bg-primary hover:text-secondary transition-all duration-500 shadow-lg shadow-secondary/20 disabled:opacity-50 flex items-center gap-2"
+              >
+                {isLoading ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <ShoppingBag size={16} strokeWidth={2.5} />
+                )}
+                {isLoading ? '…' : 'Pay'}
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Spacer for mobile sticky bar */}
-      <div className="h-24 lg:hidden" />
+      <div className="h-28 lg:hidden" />
     </div>
   );
 }

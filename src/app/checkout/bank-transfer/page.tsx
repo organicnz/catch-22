@@ -3,19 +3,25 @@
 import {
   ArrowLeft,
   Banknote,
+  CalendarPlus,
   CheckCircle,
+  Clock,
   Copy,
-  ExternalLink,
   Loader2,
   MapPin,
   Printer,
   Share2,
+  Truck,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useState, useSyncExternalStore } from 'react';
 import { toast } from 'sonner';
 import { type BankTransferSuccess, createBankTransferOrder } from '@/app/checkout/actions';
+import { NZBankQuickLauncher, NZBankSelector } from '@/components/checkout/NZBankSelector';
+import { NZCheckoutConfidence } from '@/components/checkout/NZCheckoutConfidence';
+import { NZPaymentOptionsGuide } from '@/components/checkout/NZPaymentOptionsGuide';
+import { NZRuralDeliveryAssistant } from '@/components/checkout/NZRuralDeliveryAssistant';
 import { SHIPPING_RATES } from '@/config/shipping';
 import { useCartStore } from '@/lib/store/cart';
 
@@ -217,8 +223,33 @@ function SuccessPanel({ result }: { result: BankTransferSuccess }) {
                   {money(result.totals.total)} NZD
                 </span>
               </div>
+              <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 pt-1">
+                <span>Includes 15% NZ GST</span>
+                <span className="tabular-nums">{money((result.totals.total * 3) / 23)} NZD</span>
+              </div>
             </div>
           </div>
+
+          {/* Business GST Tax Invoice Details if requested */}
+          {result.businessGst && (
+            <div className="mb-8 p-5 rounded-2xl bg-white border border-slate-200/90 shadow-xs">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-sm">🧾</span>
+                <h3 className="text-[10px] font-black uppercase tracking-wider text-secondary">
+                  GST Tax Invoice Requested
+                </h3>
+              </div>
+              <p className="text-sm font-black text-secondary">{result.businessGst.companyName}</p>
+              <p className="text-xs font-medium text-slate-600 mt-0.5">
+                Customer GST #:{' '}
+                <strong className="text-secondary font-mono">{result.businessGst.gstNumber}</strong>
+              </p>
+              <div className="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between text-[10px] text-slate-400 gap-2">
+                <span>Catch-22 Limited NZ GST: 133-842-108</span>
+                <span>GST Tax Invoice supplied with shipment</span>
+              </div>
+            </div>
+          )}
 
           {/* Conditional: Pick-up details or Bank details */}
           {isPickup ? (
@@ -455,31 +486,11 @@ function SuccessPanel({ result }: { result: BankTransferSuccess }) {
                       reference={result.reference}
                       total={result.totals.total}
                     />
-                    <div>
-                      <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-2">
-                        Open your NZ bank to transfer:
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {[
-                          { name: 'ANZ Bank', href: 'https://www.anz.co.nz/banking/' },
-                          { name: 'ASB', href: 'https://online.asb.co.nz/' },
-                          { name: 'BNZ', href: 'https://www.bnz.co.nz/ib/' },
-                          { name: 'Westpac', href: 'https://www.westpac.co.nz/' },
-                          { name: 'Kiwibank', href: 'https://www.kiwibank.co.nz/' },
-                        ].map((bank) => (
-                          <a
-                            key={bank.name}
-                            href={bank.href}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-[11px] font-bold transition-colors border border-white/10"
-                          >
-                            <span>{bank.name}</span>
-                            <ExternalLink size={10} className="opacity-60" />
-                          </a>
-                        ))}
-                      </div>
-                    </div>
+                    <NZBankQuickLauncher
+                      bankId={result.selectedBank}
+                      total={result.totals.total}
+                      reference={result.reference}
+                    />
                   </div>
                 </div>
               </div>
@@ -538,6 +549,81 @@ function SuccessPanel({ result }: { result: BankTransferSuccess }) {
             </ol>
           </section>
 
+          {/* Estimated delivery & tracking info */}
+          <section className="mb-10 bg-slate-50 border border-slate-100 rounded-2xl p-5">
+            <div className="flex items-center gap-2 mb-3">
+              {isPickup ? (
+                <CalendarPlus size={16} className="text-primary-ink" strokeWidth={2.5} />
+              ) : (
+                <Truck size={16} className="text-primary-ink" strokeWidth={2.5} />
+              )}
+              <h3 className="text-[10px] font-black text-secondary uppercase tracking-[0.2em]">
+                {isPickup ? 'Collection Scheduling' : 'Estimated Delivery'}
+              </h3>
+            </div>
+
+            {isPickup ? (
+              <div className="space-y-3">
+                <p className="text-xs font-medium text-slate-600 leading-relaxed">
+                  We&apos;ll email you within <strong className="text-secondary">24 hours</strong>{' '}
+                  to arrange a convenient pick-up time. Collections are available{' '}
+                  <strong className="text-secondary">Mon–Sat, 8am–6pm</strong> at our Chatswood,
+                  North Shore location.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const tomorrow = new Date();
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    const dtStart = tomorrow.toISOString().replace(/[-:]/g, '').split('.')[0];
+                    tomorrow.setHours(tomorrow.getHours() + 1);
+                    const dtEnd = tomorrow.toISOString().replace(/[-:]/g, '').split('.')[0];
+                    const calUrl = `https://calendar.google.com/calendar/event?action=TEMPLATE&text=Catch-22+Pick-up+${encodeURIComponent(result.reference)}&dates=${dtStart}/${dtEnd}&details=${encodeURIComponent(`Pick up order ${result.reference} ($${result.totals.total.toFixed(2)} NZD) from Chatswood, North Shore Auckland. Pay by Cash or EFTPOS on collection.`)}&location=${encodeURIComponent('Chatswood, North Shore, Auckland, New Zealand')}`;
+                    window.open(calUrl, '_blank', 'noopener,noreferrer');
+                  }}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black text-secondary uppercase tracking-wider hover:border-secondary transition-all shadow-sm"
+                >
+                  <CalendarPlus size={14} strokeWidth={2.5} />
+                  Add to Google Calendar
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-white p-3 rounded-xl border border-slate-100">
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1">
+                      Payment Clearance
+                    </p>
+                    <div className="flex items-center gap-1.5">
+                      <Clock size={12} className="text-primary-ink" />
+                      <span className="text-xs font-black text-secondary">Same day – 2 hours</span>
+                    </div>
+                    <p className="text-[9px] font-medium text-slate-400 mt-1">
+                      ANZ → ANZ instant; other NZ banks 1–2h
+                    </p>
+                  </div>
+                  <div className="bg-white p-3 rounded-xl border border-slate-100">
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider mb-1">
+                      Dispatch & Delivery
+                    </p>
+                    <div className="flex items-center gap-1.5">
+                      <Truck size={12} className="text-primary-ink" />
+                      <span className="text-xs font-black text-secondary">1–4 business days</span>
+                    </div>
+                    <p className="text-[9px] font-medium text-slate-400 mt-1">
+                      NZ-wide tracked courier from Auckland
+                    </p>
+                  </div>
+                </div>
+                <p className="text-[10px] font-medium text-slate-500 leading-relaxed">
+                  📦 You&apos;ll receive a{' '}
+                  <strong className="text-secondary">tracking number by email</strong> once your
+                  order is dispatched. All shipments are fully tracked via NZ Post or courier.
+                </p>
+              </div>
+            )}
+          </section>
+
           <div className="flex flex-col sm:flex-row gap-3 print:hidden">
             <ShareOrderButton reference={result.reference} total={result.totals.total} />
             <button
@@ -556,7 +642,12 @@ function SuccessPanel({ result }: { result: BankTransferSuccess }) {
             </Link>
           </div>
 
-          <p className="mt-8 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">
+          {/* NZ Checkout Confidence */}
+          <div className="mt-10 print:hidden">
+            <NZCheckoutConfidence variant="strip" />
+          </div>
+
+          <p className="mt-6 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">
             Keep this page or print these instructions for your records.
           </p>
         </div>
@@ -597,6 +688,9 @@ function BankTransferCheckout() {
   const [paymentOption, setPaymentOption] = useState<'bank_transfer' | 'pay_on_pickup'>(
     'bank_transfer'
   );
+  const [selectedBankId, setSelectedBankId] = useState('anz');
+  const [wantGstInvoice, setWantGstInvoice] = useState(false);
+  const [addressInput, setAddressInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [result, setResult] = useState<BankTransferSuccess | null>(null);
@@ -625,6 +719,11 @@ function BankTransferCheckout() {
     const formData = new FormData(event.currentTarget);
     const field = (name: string) => String(formData.get(name) ?? '').trim();
 
+    const companyName = field('gstCompanyName');
+    const gstNumber = field('gstNumber');
+    const businessGst =
+      wantGstInvoice && (companyName || gstNumber) ? { companyName, gstNumber } : undefined;
+
     try {
       const response = await createBankTransferOrder({
         items: items.map((item) => ({ id: item.id, quantity: item.quantity })),
@@ -642,6 +741,11 @@ function BankTransferCheckout() {
         shippingMethodId,
         promoCode: field('promoCode'),
         paymentOption: shippingMethodId === 'pickup' ? paymentOption : 'bank_transfer',
+        selectedBank:
+          shippingMethodId !== 'pickup' || paymentOption === 'bank_transfer'
+            ? selectedBankId
+            : undefined,
+        businessGst,
       });
 
       if ('error' in response) {
@@ -690,13 +794,16 @@ function BankTransferCheckout() {
     <div className="bg-white min-h-screen pt-(--header-h) pb-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col mb-8">
-          <Link
-            href="/cart"
-            className="inline-flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-secondary transition-colors mb-4 w-fit"
-          >
-            <ArrowLeft size={14} strokeWidth={2.5} />
-            Back to cart
-          </Link>
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <Link
+              href="/cart"
+              className="inline-flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-secondary transition-colors w-fit"
+            >
+              <ArrowLeft size={14} strokeWidth={2.5} />
+              Back to cart
+            </Link>
+            <NZPaymentOptionsGuide triggerVariant="badge" />
+          </div>
           <h1 className="text-4xl font-black tracking-tight text-secondary uppercase">
             Bank Transfer Checkout
           </h1>
@@ -813,6 +920,7 @@ function BankTransferCheckout() {
                     required
                     autoComplete="address-line1"
                     maxLength={200}
+                    onChange={(e) => setAddressInput(`${e.target.value} ${addressInput}`)}
                     className="block w-full px-5 py-3 bg-white border border-slate-200 rounded-full text-sm font-medium focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-inner"
                   />
                 </div>
@@ -829,6 +937,7 @@ function BankTransferCheckout() {
                     type="text"
                     autoComplete="address-line2"
                     maxLength={200}
+                    onChange={(e) => setAddressInput(`${addressInput} ${e.target.value}`)}
                     className="block w-full px-5 py-3 bg-white border border-slate-200 rounded-full text-sm font-medium focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-inner"
                   />
                 </div>
@@ -903,10 +1012,18 @@ function BankTransferCheckout() {
                       required
                       autoComplete="postal-code"
                       maxLength={10}
+                      onChange={(e) => setAddressInput(`${addressInput} ${e.target.value}`)}
                       className="block w-full px-5 py-3 bg-white border border-slate-200 rounded-full text-sm font-medium focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-inner"
                     />
                   </div>
                 </div>
+
+                {/* Rural Delivery Assistant */}
+                <NZRuralDeliveryAssistant
+                  addressText={addressInput}
+                  currentShippingId={shippingMethodId}
+                  onSelectShipping={setShippingMethodId}
+                />
               </div>
             </fieldset>
 
@@ -1031,6 +1148,88 @@ function BankTransferCheckout() {
               </fieldset>
             )}
 
+            {/* Bank Selector for Direct Bank Deposit */}
+            {(shippingMethodId !== 'pickup' || paymentOption === 'bank_transfer') && (
+              <fieldset className="bg-slate-50 border border-slate-100 rounded-3xl p-6 sm:p-8">
+                <legend className="px-2 text-sm font-black text-secondary uppercase tracking-[0.2em]">
+                  Your NZ Bank
+                </legend>
+                <div className="mt-4">
+                  <NZBankSelector
+                    selectedBankId={selectedBankId}
+                    onSelectBank={setSelectedBankId}
+                  />
+                </div>
+              </fieldset>
+            )}
+
+            {/* Business GST Tax Invoice Request */}
+            <fieldset className="bg-slate-50 border border-slate-100 rounded-3xl p-6 sm:p-8">
+              <legend className="px-2 text-sm font-black text-secondary uppercase tracking-[0.2em]">
+                Tax Invoice &amp; Business Details
+              </legend>
+              <div className="mt-3">
+                <label
+                  htmlFor="wantGstInvoice"
+                  className="flex items-start gap-3 cursor-pointer select-none"
+                >
+                  <input
+                    type="checkbox"
+                    id="wantGstInvoice"
+                    checked={wantGstInvoice}
+                    onChange={(e) => setWantGstInvoice(e.target.checked)}
+                    className="h-4 w-4 mt-0.5 rounded accent-primary cursor-pointer"
+                  />
+                  <div>
+                    <span className="text-xs font-black text-secondary uppercase tracking-wider block">
+                      Need a GST Tax Invoice for your business or charter?
+                    </span>
+                    <span className="text-[10px] font-medium text-slate-500 block mt-0.5">
+                      Includes 15% NZ GST breakdown and your company details on receipt
+                    </span>
+                  </div>
+                </label>
+              </div>
+
+              {wantGstInvoice && (
+                <div className="grid gap-5 sm:grid-cols-2 mt-5 pt-5 border-t border-slate-200">
+                  <div>
+                    <label
+                      htmlFor="gstCompanyName"
+                      className="block text-[10px] font-black text-secondary uppercase tracking-[0.2em] mb-2 ml-1"
+                    >
+                      Company / Charter Name
+                    </label>
+                    <input
+                      id="gstCompanyName"
+                      name="gstCompanyName"
+                      type="text"
+                      placeholder="e.g. Hauraki Gulf Charters Ltd"
+                      maxLength={150}
+                      className="block w-full px-5 py-3 bg-white border border-slate-200 rounded-full text-sm font-medium focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-inner"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="gstNumber"
+                      className="block text-[10px] font-black text-secondary uppercase tracking-[0.2em] mb-2 ml-1"
+                    >
+                      NZ GST Number{' '}
+                      <span className="text-slate-400 font-bold lowercase">(8–9 digits)</span>
+                    </label>
+                    <input
+                      id="gstNumber"
+                      name="gstNumber"
+                      type="text"
+                      placeholder="e.g. 123-456-789"
+                      maxLength={20}
+                      className="block w-full px-5 py-3 bg-white border border-slate-200 rounded-full text-sm font-medium focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-inner font-mono"
+                    />
+                  </div>
+                </div>
+              )}
+            </fieldset>
+
             <div>
               <label
                 htmlFor="promoCode"
@@ -1137,6 +1336,10 @@ function BankTransferCheckout() {
                   <dd className="text-2xl font-black text-primary-ink tracking-tighter">
                     {money(estimatedTotal)}
                   </dd>
+                </div>
+                <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 -mt-2">
+                  <span>Includes 15% NZ GST</span>
+                  <span className="tabular-nums">{money((estimatedTotal * 3) / 23)} NZD</span>
                 </div>
               </dl>
 

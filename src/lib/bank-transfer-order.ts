@@ -21,12 +21,19 @@ export interface BankTransferCustomer {
   region: string;
 }
 
+export interface BusinessGstDetails {
+  companyName: string;
+  gstNumber: string;
+}
+
 export interface BankTransferOrderInput {
   items: CartItemInput[];
   customer: BankTransferCustomer;
   shippingMethodId: string;
   promoCode: string;
   paymentOption?: 'bank_transfer' | 'pay_on_pickup';
+  selectedBank?: string;
+  businessGst?: BusinessGstDetails;
 }
 
 export interface ValidatedBankTransferOrder extends BankTransferOrderInput {
@@ -128,6 +135,58 @@ export function validateBankTransferOrder(raw: unknown): BankTransferOrderValida
     paymentOption = 'pay_on_pickup';
   }
 
+  // Optional selectedBank (e.g. 'anz', 'asb', 'bnz')
+  const rawBank = text(body.selectedBank);
+  let selectedBank: string | undefined;
+  if (rawBank) {
+    if (rawBank.length > 50 || CONTROL_CHARS.test(rawBank)) {
+      return fail('selectedBank', 'Invalid bank selection.');
+    }
+    selectedBank = rawBank.toLowerCase();
+  }
+
+  // Optional business GST invoice details (NZ GST number format: 8 or 9 digits)
+  let businessGst: BusinessGstDetails | undefined;
+  if (body.businessGst && typeof body.businessGst === 'object') {
+    const bg = body.businessGst as Record<string, unknown>;
+    const rawCompany = text(bg.companyName);
+    const rawGst = text(bg.gstNumber);
+
+    if (rawCompany || rawGst) {
+      if (!rawCompany) {
+        return fail(
+          'businessGst.companyName',
+          'Company or charter name is required for GST invoice.'
+        );
+      }
+      if (rawCompany.length > 150 || CONTROL_CHARS.test(rawCompany)) {
+        return fail(
+          'businessGst.companyName',
+          'Company name is too long or contains invalid characters.'
+        );
+      }
+
+      const cleanGst = rawGst.replace(/[\s-]/g, '');
+      if (!/^\d{8,9}$/.test(cleanGst)) {
+        return fail(
+          'businessGst.gstNumber',
+          'NZ GST number must be 8 or 9 digits (e.g. 123-456-789).'
+        );
+      }
+
+      // Format standard NZ GST as XX-XXX-XXX or XXX-XXX-XXX
+      const formattedGst =
+        cleanGst.length === 8
+          ? `${cleanGst.slice(0, 2)}-${cleanGst.slice(2, 5)}-${cleanGst.slice(5)}`
+          : `${cleanGst.slice(0, 3)}-${cleanGst.slice(3, 6)}-${cleanGst.slice(6)}`;
+
+      businessGst = {
+        companyName: rawCompany,
+        gstNumber: formattedGst,
+      };
+    }
+  }
+
   return {
     ok: true,
     value: {
@@ -146,6 +205,8 @@ export function validateBankTransferOrder(raw: unknown): BankTransferOrderValida
       shippingMethodId,
       promoCode,
       paymentOption,
+      ...(selectedBank ? { selectedBank } : {}),
+      ...(businessGst ? { businessGst } : {}),
     },
   };
 }

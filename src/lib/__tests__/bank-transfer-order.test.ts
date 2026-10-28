@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'bun:test';
+import { isNZRuralAddress } from '@/components/checkout/NZRuralDeliveryAssistant';
 import {
   computeOrderTotals,
   discountForCoupon,
@@ -132,6 +133,125 @@ describe('validateBankTransferOrder()', () => {
     if (!result.ok) {
       expect(result.failure.field).toBe('paymentOption');
     }
+  });
+
+  it('accepts and normalizes selectedBank to lowercase', () => {
+    const result = validateBankTransferOrder(payload({ selectedBank: 'ANZ' }));
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.selectedBank).toBe('anz');
+    }
+  });
+
+  it('rejects selectedBank with control characters or excessive length', () => {
+    expect(validateBankTransferOrder(payload({ selectedBank: 'ANZ\nInjection' })).ok).toBe(false);
+    expect(validateBankTransferOrder(payload({ selectedBank: 'A'.repeat(55) })).ok).toBe(false);
+  });
+
+  it('accepts valid 8-digit and 9-digit NZ GST numbers and formats them', () => {
+    // 8 digits: XX-XXX-XXX
+    const result8 = validateBankTransferOrder(
+      payload({
+        businessGst: {
+          companyName: 'Hauraki Charters Ltd',
+          gstNumber: '49091850',
+        },
+      })
+    );
+    expect(result8.ok).toBe(true);
+    if (result8.ok) {
+      expect(result8.value.businessGst?.companyName).toBe('Hauraki Charters Ltd');
+      expect(result8.value.businessGst?.gstNumber).toBe('49-091-850');
+    }
+
+    // 9 digits: XXX-XXX-XXX
+    const result9 = validateBankTransferOrder(
+      payload({
+        businessGst: {
+          companyName: 'Catch-22 Angling Supplies',
+          gstNumber: '133842108',
+        },
+      })
+    );
+    expect(result9.ok).toBe(true);
+    if (result9.ok) {
+      expect(result9.value.businessGst?.gstNumber).toBe('133-842-108');
+    }
+
+    // Already hyphenated
+    const resultHyphen = validateBankTransferOrder(
+      payload({
+        businessGst: {
+          companyName: 'Tutukaka Fishing Club',
+          gstNumber: '123-456-789',
+        },
+      })
+    );
+    expect(resultHyphen.ok).toBe(true);
+    if (resultHyphen.ok) {
+      expect(resultHyphen.value.businessGst?.gstNumber).toBe('123-456-789');
+    }
+  });
+
+  it('rejects businessGst if company name is missing or invalid', () => {
+    const noCompany = validateBankTransferOrder(
+      payload({
+        businessGst: {
+          companyName: '',
+          gstNumber: '133842108',
+        },
+      })
+    );
+    expect(noCompany.ok).toBe(false);
+    if (!noCompany.ok) {
+      expect(noCompany.failure.field).toBe('businessGst.companyName');
+    }
+
+    const evilCompany = validateBankTransferOrder(
+      payload({
+        businessGst: {
+          companyName: 'Acme Ltd\nBcc: evil@test.com',
+          gstNumber: '133842108',
+        },
+      })
+    );
+    expect(evilCompany.ok).toBe(false);
+  });
+
+  it('rejects invalid GST numbers (letters, short, too long)', () => {
+    for (const badGst of ['1234567', '1234567890', 'ABC12345', 'not-a-gst']) {
+      const res = validateBankTransferOrder(
+        payload({
+          businessGst: {
+            companyName: 'Valid Co',
+            gstNumber: badGst,
+          },
+        })
+      );
+      expect(res.ok).toBe(false);
+      if (!res.ok) {
+        expect(res.failure.field).toBe('businessGst.gstNumber');
+      }
+    }
+  });
+});
+
+describe('isNZRuralAddress()', () => {
+  it('detects common NZ rural delivery indicators', () => {
+    expect(isNZRuralAddress('144 Mahurangi East Road, RD 2')).toBe(true);
+    expect(isNZRuralAddress('55 Cape Reinga Road, RD1')).toBe(true);
+    expect(isNZRuralAddress('77 Whangarei Heads, R.D. 4')).toBe(true);
+    expect(isNZRuralAddress('12 Coast Road, Rural Delivery 1, Kaipara')).toBe(true);
+    expect(isNZRuralAddress('Box 42, RD 5, Tauranga')).toBe(true);
+    expect(isNZRuralAddress('Coromandel Rural Area')).toBe(true);
+  });
+
+  it('does not flag standard urban or suburban addresses', () => {
+    expect(isNZRuralAddress('12 Queen Street, Auckland CBD')).toBe(false);
+    expect(isNZRuralAddress('18 Ponsonby Road, Ponsonby, Auckland')).toBe(false);
+    expect(isNZRuralAddress('50 Victoria Street, Wellington')).toBe(false);
+    expect(isNZRuralAddress('24 Riccarton Road, Christchurch')).toBe(false);
+    expect(isNZRuralAddress('')).toBe(false);
   });
 });
 

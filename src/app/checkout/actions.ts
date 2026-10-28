@@ -5,6 +5,7 @@ import { getBankTransferConfig } from '@/config/bank-transfer';
 import { SHIPPING_RATES } from '@/config/shipping';
 import {
   type BankTransferOrderInput,
+  type BusinessGstDetails,
   type CouponLike,
   computeOrderTotals,
   discountForCoupon,
@@ -21,6 +22,8 @@ export interface BankTransferSuccess {
   orderId: number;
   reference: string;
   paymentOption: 'bank_transfer' | 'pay_on_pickup';
+  selectedBank?: string;
+  businessGst?: BusinessGstDetails;
   totals: {
     subtotal: number;
     shipping: number;
@@ -58,7 +61,8 @@ export async function createBankTransferOrder(
 
   const check = validateBankTransferOrder(input);
   if (!check.ok) return { error: check.failure.message };
-  const { items, customer, shippingMethodId, promoCode, paymentOption } = check.value;
+  const { items, customer, shippingMethodId, promoCode, paymentOption, selectedBank, businessGst } =
+    check.value;
 
   const config = getBankTransferConfig();
   if (!config.configured) {
@@ -202,9 +206,16 @@ export async function createBankTransferOrder(
   //       admin never sees a headless order. ────────────────────────────────
   const isPayOnPickup = paymentOption === 'pay_on_pickup';
   const paymentMethod = isPayOnPickup ? 'pay_on_pickup' : 'bank_transfer';
-  const adminNotes = isPayOnPickup
+  let adminNotes = isPayOnPickup
     ? 'Pick-up order (Pay on collection: Cash / EFTPOS) — Chatswood, North Shore Auckland.'
     : `Bank transfer order. Shipping: ${shippingRate.name} ($${totals.shipping.toFixed(2)}).`;
+
+  if (selectedBank) {
+    adminNotes += ` | Bank: ${selectedBank.toUpperCase()}`;
+  }
+  if (businessGst) {
+    adminNotes += ` | GST Invoice Requested: ${businessGst.companyName} (GST# ${businessGst.gstNumber})`;
+  }
 
   const { data: order, error: orderError } = await admin
     .from('orders')
@@ -251,6 +262,8 @@ export async function createBankTransferOrder(
     reference,
     orderId: order.id,
     paymentOption,
+    selectedBank,
+    businessGst,
     customer,
     totals,
     lines,
@@ -265,6 +278,8 @@ export async function createBankTransferOrder(
     orderId: order.id,
     reference,
     paymentOption,
+    selectedBank,
+    businessGst,
     totals,
     bank: config.details,
   };
@@ -278,6 +293,8 @@ interface EmailArgs {
   reference: string;
   orderId: number;
   paymentOption: 'bank_transfer' | 'pay_on_pickup';
+  selectedBank?: string;
+  businessGst?: BusinessGstDetails;
   customer: {
     firstName: string;
     lastName: string;
@@ -448,10 +465,25 @@ async function sendBankTransferEmails(args: EmailArgs): Promise<void> {
       </tr>
       ${discountRow}
       <tr>
+        <td colspan="2" style="padding:6px 12px;color:rgba(255,255,255,0.6);font-size:12px;">Includes 15% NZ GST</td>
+        <td style="padding:6px 12px;color:rgba(255,255,255,0.8);font-size:12px;text-align:right;">${money((args.totals.total * 3) / 23)}</td>
+      </tr>
+      <tr>
         <td colspan="2" style="padding:12px;color:rgba(255,255,255,0.6);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">Amount to pay</td>
         <td style="padding:12px;color:#D1FF00;font-size:16px;font-weight:900;text-align:right;">${money(args.totals.total)} NZD</td>
       </tr>
     </table>`;
+
+  const gstBlock = args.businessGst
+    ? `<table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;background:rgba(209,255,0,0.08);border:1px solid rgba(209,255,0,0.25);border-radius:8px;">
+        <tr><td style="padding:16px 20px;">
+          <p style="margin:0 0 6px;color:#D1FF00;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:0.15em;">GST Tax Invoice Requested</p>
+          <p style="margin:0 0 4px;color:#fff;font-size:13px;font-weight:bold;">Issued to: ${escapeHtml(args.businessGst.companyName)}</p>
+          <p style="margin:0 0 2px;color:rgba(255,255,255,0.7);font-size:12px;">Customer GST #: <strong style="color:#D1FF00;">${escapeHtml(args.businessGst.gstNumber)}</strong></p>
+          <p style="margin:0;color:rgba(255,255,255,0.5);font-size:11px;">Includes 15% NZ GST of ${money((args.totals.total * 3) / 23)} NZD. Official Tax Invoice included.</p>
+        </td></tr>
+      </table>`
+    : '';
 
   const instructions = `
     <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 8px;background:rgba(0,0,0,0.25);border-radius:8px;">
@@ -497,8 +529,8 @@ async function sendBankTransferEmails(args: EmailArgs): Promise<void> {
     ? `Thanks ${name}! We have set aside your gear. You selected Pay on Pick-up (Cash or EFTPOS in Chatswood, North Shore Auckland). We will email you shortly to confirm your collection time.`
     : `Thanks ${name}! We have set aside your gear. Complete the bank transfer below and we will get it packed.`;
   const customerBody = isPickup
-    ? pickupBlock + itemsBlock + pickupInstructions
-    : bankBlock + itemsBlock + instructions;
+    ? pickupBlock + gstBlock + itemsBlock + pickupInstructions
+    : bankBlock + gstBlock + itemsBlock + instructions;
   const customerHtml = shell(customerHeading, customerIntro, customerBody);
 
   // Admin notification
@@ -509,8 +541,8 @@ async function sendBankTransferEmails(args: EmailArgs): Promise<void> {
     ? `A new pick-up order has been placed with payment on collection (Cash / EFTPOS) of ${money(args.totals.total)} NZD. The order is <strong>on-hold</strong> until the customer collects and pays.`
     : `A new bank transfer order is waiting for payment of ${money(args.totals.total)} NZD. The order is <strong>on-hold</strong> until the funds land.`;
   const adminBody = isPickup
-    ? orderBlock + itemsBlock + pickupBlock
-    : orderBlock + itemsBlock + bankBlock;
+    ? orderBlock + gstBlock + itemsBlock + pickupBlock
+    : orderBlock + gstBlock + itemsBlock + bankBlock;
   const adminHtml = shell(adminHeading, adminIntro, adminBody);
 
   const customerSubject = isPickup
