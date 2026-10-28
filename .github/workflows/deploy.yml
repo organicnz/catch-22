@@ -338,10 +338,9 @@ jobs:
             echo "::error::SUPABASE_ACCESS_TOKEN / SUPABASE_PROJECT_REF secrets are not configured."
             exit 1
           fi
-          if ! echo "$SUPABASE_ACCESS_TOKEN" | grep -qE '^sbp_[a-f0-9]{40}$'; then
-            echo "::error::SUPABASE_ACCESS_TOKEN has an invalid format (expected sbp_ followed by 40 hex chars)."
-            echo "::error::Create a classic PAT at https://supabase.com/dashboard/account/tokens —"
-            echo "::error::  sbp_v0_.. (experimental) and legacy JWTs are rejected by the CLI."
+          if ! echo "$SUPABASE_ACCESS_TOKEN" | grep -qE '^sbp_(v[0-9]+_)?[a-f0-9]{40}$'; then
+            echo "::error::SUPABASE_ACCESS_TOKEN has an invalid format (expected sbp_ or sbp_v0_ followed by 40 hex chars)."
+            echo "::error::Create a PAT at https://supabase.com/dashboard/account/tokens"
             exit 1
           fi
           if ! echo "$SUPABASE_PROJECT_REF" | grep -qE '^[a-z0-9]{20}$'; then
