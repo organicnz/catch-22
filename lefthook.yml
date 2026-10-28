@@ -322,7 +322,8 @@ pre-commit:
       priority: 10
       glob: "src/**/*.{ts,tsx}"
       run: |
-        ALLOWLIST="src/app/admin/|src/app/api/webhooks/|src/app/products/page.tsx|src/app/account/page.tsx|src/app/checkout/actions.ts|src/app/success/page.tsx|src/lib/supabase-server.ts|src/lib/admin-auth.ts"
+        # src/app/api/checkout/route.ts needs createAdminClient for guest coupon validation
+        ALLOWLIST="src/app/admin/|src/app/api/webhooks/|src/app/api/checkout/route.ts|src/app/products/page.tsx|src/app/account/page.tsx|src/app/checkout/actions.ts|src/app/success/page.tsx|src/lib/supabase-server.ts|src/lib/admin-auth.ts"
         VIOLATIONS=""
         for f in {staged_files}; do
           [ -f "$f" ] || continue

@@ -380,7 +380,7 @@ export default function CartPage() {
 
               {/* ── Payment methods ── */}
               <div className="space-y-3">
-                {/* Card + Afterpay via Stripe */}
+                {/* Card + Digital Wallets via Stripe */}
                 <button
                   type="button"
                   onClick={handleCheckout}
@@ -396,10 +396,10 @@ export default function CartPage() {
                   </div>
                   <div className="flex-1 text-left">
                     <div className="text-sm leading-tight">
-                      {isLoading ? 'Processing…' : 'Pay by Card'}
+                      {isLoading ? 'Processing…' : 'Credit or Debit Card'}
                     </div>
                     <div className="text-[10px] font-bold opacity-60 mt-0.5 normal-case tracking-normal">
-                      Visa, Mastercard, Amex
+                      NZ Visa, Mastercard, Amex, Apple Pay, Google Pay
                     </div>
                   </div>
                   <ArrowRight size={16} strokeWidth={3} className="opacity-60" />
@@ -450,9 +450,14 @@ export default function CartPage() {
                     <Banknote size={18} strokeWidth={2.5} className="text-secondary" />
                   </div>
                   <div className="flex-1 text-left">
-                    <div className="text-sm leading-tight">Bank Transfer</div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm leading-tight">Direct Bank Transfer</span>
+                      <span className="text-[8px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded">
+                        0% Surcharge
+                      </span>
+                    </div>
                     <div className="text-[10px] font-bold text-slate-500 mt-0.5 normal-case tracking-normal">
-                      ANZ · No card needed
+                      ANZ, ASB, BNZ, Westpac, Kiwibank · No card needed
                     </div>
                   </div>
                   <ArrowRight size={16} strokeWidth={3} className="opacity-40" />
@@ -476,7 +481,13 @@ export default function CartPage() {
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-emerald-500 rounded-full shrink-0" />
                   <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                    Secure Checkout · SSL Encrypted
+                    Secure Checkout · SSL Encrypted · 0% Surcharges
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs">🇳🇿</span>
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                    100% NZ Owned · Fast Auckland Dispatch
                   </span>
                 </div>
                 <div className="flex items-center gap-2">

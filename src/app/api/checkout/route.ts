@@ -162,7 +162,7 @@ export async function POST(req: Request) {
     // free fortnightly payments. Domestic-only (NZ → NZ), which matches our
     // shipping_address_collection restriction. No extra Stripe config needed.
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card', 'afterpay_clearpay'],
+      payment_method_types: ['card', 'link', 'afterpay_clearpay'],
       line_items: lineItems,
       mode: 'payment',
       currency: 'nzd',

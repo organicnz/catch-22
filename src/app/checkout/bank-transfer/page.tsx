@@ -131,44 +131,97 @@ function SuccessPanel({ result }: { result: BankTransferSuccess }) {
             </div>
           </div>
 
-          {/* Bank details */}
+          {/* Bank details & NZ Banking Reference Breakdown */}
           <section aria-labelledby="bank-details-heading" className="mb-8">
             <h2
               id="bank-details-heading"
               className="text-sm font-black text-secondary uppercase tracking-[0.2em] mb-4 flex items-center gap-2"
             >
               <Banknote size={18} className="text-primary-ink" strokeWidth={2.5} />
-              Bank transfer details
+              NZ Internet Banking Details
             </h2>
-            <dl className="divide-y divide-slate-200 border-y border-slate-200">
-              <div className="flex items-baseline justify-between gap-4 py-4">
-                <dt className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                  Bank
-                </dt>
-                <dd className="text-sm font-black text-secondary text-right">
-                  {result.bank.bankName}
-                </dd>
-              </div>
-              <div className="flex items-baseline justify-between gap-4 py-4">
-                <dt className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                  Account name
-                </dt>
-                <dd className="text-sm font-black text-secondary text-right">
-                  {result.bank.accountName}
-                </dd>
-              </div>
-              <div className="flex items-baseline justify-between gap-4 py-4">
-                <dt className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                  Account number
-                </dt>
-                <dd className="flex items-center gap-3">
-                  <span className="text-lg font-black text-secondary tracking-tight">
-                    {result.bank.accountNumber}
+            <div className="bg-slate-900 text-white rounded-3xl p-6 sm:p-8 border border-primary/20 shadow-xl space-y-6">
+              <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/10">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">🇳🇿</span>
+                  <span className="text-xs font-black uppercase tracking-wider text-primary">
+                    Direct NZ Bank Transfer
                   </span>
-                  <CopyButton value={result.bank.accountNumber} label="account number" />
-                </dd>
+                </div>
+                <span className="text-[10px] font-bold text-slate-400 bg-white/5 px-2.5 py-1 rounded-full border border-white/10">
+                  Zero Surcharge · All NZ Banks
+                </span>
               </div>
-            </dl>
+
+              <dl className="grid gap-4 sm:grid-cols-2">
+                <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                  <dt className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                    Bank
+                  </dt>
+                  <dd className="text-base font-black text-white">{result.bank.bankName}</dd>
+                </div>
+                <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                  <dt className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                    Account name
+                  </dt>
+                  <dd className="flex items-center justify-between gap-2">
+                    <span className="text-base font-black text-white">
+                      {result.bank.accountName}
+                    </span>
+                    <CopyButton value={result.bank.accountName} label="account name" />
+                  </dd>
+                </div>
+                <div className="sm:col-span-2 bg-white/10 p-5 rounded-2xl border border-primary/30 shadow-inner">
+                  <dt className="text-[10px] font-black text-primary uppercase tracking-widest mb-1">
+                    Account number
+                  </dt>
+                  <dd className="flex items-center justify-between gap-3">
+                    <span className="text-xl sm:text-2xl font-black text-white tracking-wider font-mono">
+                      {result.bank.accountNumber}
+                    </span>
+                    <CopyButton value={result.bank.accountNumber} label="account number" />
+                  </dd>
+                </div>
+              </dl>
+
+              {/* NZ 3-field payment references */}
+              <div className="pt-4 border-t border-white/10">
+                <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-3">
+                  Enter in your bank app (ANZ, ASB, BNZ, Westpac, Kiwibank):
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="bg-white/5 p-3 rounded-xl border border-white/10">
+                    <p className="text-[9px] font-black uppercase tracking-wider text-slate-400 mb-1">
+                      Particulars
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono font-bold text-sm text-white">Order</span>
+                      <CopyButton value="Order" label="particulars" />
+                    </div>
+                  </div>
+                  <div className="bg-white/5 p-3 rounded-xl border border-white/10">
+                    <p className="text-[9px] font-black uppercase tracking-wider text-slate-400 mb-1">
+                      Code
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono font-bold text-sm text-white">Catch22</span>
+                      <CopyButton value="Catch22" label="code" />
+                    </div>
+                  </div>
+                  <div className="bg-primary/10 p-3 rounded-xl border border-primary/40">
+                    <p className="text-[9px] font-black uppercase tracking-wider text-primary mb-1">
+                      Reference (Required)
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono font-black text-sm text-primary">
+                        {result.reference}
+                      </span>
+                      <CopyButton value={result.reference} label="reference" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </section>
 
           {/* Instructions */}
