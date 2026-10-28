@@ -84,4 +84,51 @@ describe('getStripeShippingOptions()', () => {
     // pickup has a stripeDisplayName
     expect(pickupOpt.shipping_rate_data.display_name).toBe(pickup.stripeDisplayName ?? '');
   });
+
+  it('formats displayPrice consistently with amount', () => {
+    for (const rate of SHIPPING_RATES) {
+      if (rate.amount === 0) {
+        expect(rate.displayPrice).toBe('No cost');
+      } else {
+        expect(rate.displayPrice).toBe(`$${(rate.amount / 100).toFixed(2)}`);
+      }
+    }
+  });
+
+  it('validates delivery estimates are ordered and non-negative', () => {
+    for (const rate of SHIPPING_RATES) {
+      if (rate.deliveryEstimate) {
+        expect(rate.deliveryEstimate.min).toBeGreaterThan(0);
+        expect(rate.deliveryEstimate.max).toBeGreaterThanOrEqual(rate.deliveryEstimate.min);
+      }
+    }
+  });
+
+  it('maps delivery estimates to Stripe business day format and omits for pickup', () => {
+    const options = getStripeShippingOptions();
+    const pickupIndex = SHIPPING_RATES.findIndex((r) => r.id === 'pickup');
+    const standardIndex = SHIPPING_RATES.findIndex((r) => r.id === 'standard');
+
+    // Standard courier / postal options must include delivery_estimate in business days
+    const standardOpt = options[standardIndex];
+    expect(standardOpt.shipping_rate_data).toHaveProperty('delivery_estimate');
+    const standardEstimate = (
+      standardOpt.shipping_rate_data as {
+        delivery_estimate?: {
+          minimum: { unit: string; value: number };
+          maximum: { unit: string; value: number };
+        };
+      }
+    ).delivery_estimate;
+    expect(standardEstimate?.minimum.unit).toBe('business_day');
+    expect(standardEstimate?.maximum.unit).toBe('business_day');
+    expect(standardEstimate?.minimum.value).toBe(2);
+    expect(standardEstimate?.maximum.value).toBe(4);
+
+    // Pickup rate must omit delivery_estimate
+    const pickupOpt = options[pickupIndex];
+    expect(
+      (pickupOpt.shipping_rate_data as { delivery_estimate?: unknown }).delivery_estimate
+    ).toBeUndefined();
+  });
 });

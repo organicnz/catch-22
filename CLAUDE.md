@@ -5,7 +5,7 @@
 - `bun run build`: Production bundle generation.
 - `bun run typecheck`: Rust-based TypeScript type checking (`tsrs --noEmit`).
 - `bun run lint:check`: Sub-50ms code quality validation via Biome + Oxlint.
-- `bun test`: Native Bun unit test suite (186 tests in <300ms).
+- `bun test`: Native Bun unit test suite (189 tests in <300ms).
 - `bun run format:check`: High-speed Biome formatting validation.
 
 ### Agent Skills (Vercel)
