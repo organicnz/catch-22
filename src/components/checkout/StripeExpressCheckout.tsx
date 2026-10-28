@@ -16,9 +16,13 @@ const stripePromise = loadStripe(env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
 
 interface StripeExpressCheckoutProps {
   promoCode?: string;
+  shippingMethodId?: string;
 }
 
-export function StripeExpressCheckout({ promoCode }: StripeExpressCheckoutProps = {}) {
+export function StripeExpressCheckout({
+  promoCode,
+  shippingMethodId,
+}: StripeExpressCheckoutProps = {}) {
   const { items, totalPrice } = useCartStore();
   const [errorMessage, setErrorMessage] = useState('');
   const [isRedirecting, setIsRedirecting] = useState(false);
@@ -55,6 +59,7 @@ export function StripeExpressCheckout({ promoCode }: StripeExpressCheckoutProps 
             quantity: item.quantity,
           })),
           promoCode: promoCode || undefined,
+          shippingMethodId: shippingMethodId || undefined,
         }),
       });
 

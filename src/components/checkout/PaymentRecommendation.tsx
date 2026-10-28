@@ -29,7 +29,7 @@ function getRecommendations(total: number): Recommendation[] {
     recs.push({
       type: 'fastest',
       method: 'card',
-      reason: 'Fastest for small orders',
+      reason: 'Fastest for small orders · Apple Pay & Google Pay',
       icon: Zap,
       accentColor: 'text-blue-600 bg-blue-50 border-blue-100',
       badgeText: 'Fastest Checkout',
@@ -38,10 +38,18 @@ function getRecommendations(total: number): Recommendation[] {
     recs.push({
       type: 'popular',
       method: 'afterpay',
-      reason: `4 × $${(total / 4).toFixed(2)} fortnightly`,
+      reason: `Afterpay & Zip · 4 × $${(total / 4).toFixed(2)} fortnightly`,
       icon: TrendingUp,
       accentColor: 'text-[#1a1a1a] bg-[#B2FCE4]/30 border-[#B2FCE4]',
       badgeText: 'Most Popular in NZ',
+    });
+    recs.push({
+      type: 'popular',
+      method: 'zip',
+      reason: `Zip · 4 payments of $${(total / 4).toFixed(2)}`,
+      icon: TrendingUp,
+      accentColor: 'text-purple-900 bg-purple-50 border-purple-200',
+      badgeText: 'NZ Favorite',
     });
     recs.push({
       type: 'fastest',
@@ -55,7 +63,7 @@ function getRecommendations(total: number): Recommendation[] {
     recs.push({
       type: 'savings',
       method: 'bank',
-      reason: '0% surcharge · Direct bank deposit',
+      reason: '0% surcharge · ANZ direct bank deposit',
       icon: Sparkles,
       accentColor: 'text-emerald-700 bg-emerald-50 border-emerald-100',
       badgeText: 'Best Value',
@@ -73,12 +81,21 @@ function getRecommendations(total: number): Recommendation[] {
     });
   }
 
+  recs.push({
+    type: 'savings',
+    method: 'pickup',
+    reason: 'Free Auckland collection · Cash or EFTPOS',
+    icon: Sparkles,
+    accentColor: 'text-secondary bg-primary/20 border-primary/40',
+    badgeText: 'Free Pick-up',
+  });
+
   return recs;
 }
 
 interface PaymentRecommendationBadgeProps {
-  /** The target method this badge applies to: 'card' | 'afterpay' | 'bank' */
-  method: 'card' | 'afterpay' | 'bank';
+  /** The target method this badge applies to */
+  method: 'card' | 'afterpay' | 'bank' | 'pickup' | 'zip';
   /** Cart/order total in NZD */
   total: number;
 }

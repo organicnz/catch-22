@@ -52,7 +52,7 @@ export async function POST(req: Request) {
     });
 
     const body = await req.json();
-    const { items: rawItems, promoCode, preferredMethod } = body;
+    const { items: rawItems, promoCode, preferredMethod, shippingMethodId } = body;
 
     const cartCheck = validateCartItems(rawItems);
     if (!cartCheck.ok) {
@@ -167,19 +167,29 @@ export async function POST(req: Request) {
     // Reorder payment methods based on customer intent:
     // When the customer explicitly clicks Afterpay & Klarna, place BNPL methods
     // first so Stripe's hosted UI pre-focuses Afterpay.
-    const isBnplPreferred = preferredMethod === 'afterpay' || preferredMethod === 'bnpl';
-    const paymentMethodTypes: Stripe.Checkout.SessionCreateParams.PaymentMethodType[] =
-      isBnplPreferred
-        ? ['afterpay_clearpay', 'klarna', 'card', 'link']
-        : ['card', 'link', 'afterpay_clearpay', 'klarna'];
+    const isZipPreferred = preferredMethod === 'zip';
+    const isBnplPreferred =
+      isZipPreferred ||
+      preferredMethod === 'afterpay' ||
+      preferredMethod === 'bnpl' ||
+      preferredMethod === 'klarna';
 
-    if (env.STRIPE_ENABLE_ZIP === 'true') {
-      if (isBnplPreferred) {
+    const paymentMethodTypes: Stripe.Checkout.SessionCreateParams.PaymentMethodType[] = [];
+
+    if (isZipPreferred && env.STRIPE_ENABLE_ZIP === 'true') {
+      paymentMethodTypes.push('zip', 'afterpay_clearpay', 'klarna', 'card', 'link');
+    } else if (isBnplPreferred) {
+      paymentMethodTypes.push('afterpay_clearpay', 'klarna', 'card', 'link');
+      if (env.STRIPE_ENABLE_ZIP === 'true') {
         paymentMethodTypes.splice(2, 0, 'zip');
-      } else {
+      }
+    } else {
+      paymentMethodTypes.push('card', 'link', 'afterpay_clearpay', 'klarna');
+      if (env.STRIPE_ENABLE_ZIP === 'true') {
         paymentMethodTypes.push('zip');
       }
     }
+
     if (env.STRIPE_ENABLE_PAYPAL === 'true') {
       paymentMethodTypes.push('paypal');
     }
@@ -202,7 +212,9 @@ export async function POST(req: Request) {
       // available for card-only checkouts. No friction trade-off for NZ.
       billing_address_collection: 'required',
       phone_number_collection: { enabled: true },
-      shipping_options: getStripeShippingOptions(),
+      shipping_options: getStripeShippingOptions(
+        typeof shippingMethodId === 'string' ? shippingMethodId : undefined
+      ),
       // Promo codes are applied in the cart against the `coupons` table. We do
       // not allow Stripe's own code field: it would bypass expiry/DB checks and
       // leave the order without a recorded coupon.

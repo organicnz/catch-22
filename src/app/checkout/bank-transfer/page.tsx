@@ -28,6 +28,8 @@ import {
 } from '@/components/checkout/NZRuralDeliveryAssistant';
 import { SHIPPING_RATES } from '@/config/shipping';
 import { getNZDeliveryEstimate, inferNZRegion, type NZDeliveryEstimate } from '@/lib/nz-regions';
+import { classifyNZPhone } from '@/lib/nz-phone';
+import { validateNZGstNumber } from '@/lib/nz-gst';
 import { useCartStore } from '@/lib/store/cart';
 
 /** No-op store subscription: hydration state never changes after mount. */
@@ -709,20 +711,36 @@ function CheckoutSkeleton() {
 // Inner component (uses useSearchParams — must be wrapped in Suspense)
 function BankTransferCheckout() {
   const { items, totalPrice, clearCart } = useCartStore();
-  const [shippingMethodId, setShippingMethodId] = useState('standard');
+  const searchParams = useSearchParams();
+  const promoParam = (searchParams.get('promo') ?? '').trim();
+  const shippingParam = (searchParams.get('shipping') ?? '').trim();
+  const postcodeParam = (searchParams.get('postcode') ?? '').trim();
+
+  const initialShipping = SHIPPING_RATES.some((r) => r.id === shippingParam)
+    ? shippingParam
+    : 'standard';
+  const initialPostcode = postcodeParam.replace(/\D/g, '').slice(0, 4);
+  const initialRegion = initialPostcode ? inferNZRegion(initialPostcode) || '' : '';
+
+  const [shippingMethodId, setShippingMethodId] = useState(initialShipping);
   const [paymentOption, setPaymentOption] = useState<'bank_transfer' | 'pay_on_pickup'>(
-    'bank_transfer'
+    initialShipping === 'pickup' ? 'pay_on_pickup' : 'bank_transfer'
   );
   const [selectedBankId, setSelectedBankId] = useState('anz');
   const [wantGstInvoice, setWantGstInvoice] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [phoneVal, setPhoneVal] = useState('');
+  const [gstNumberVal, setGstNumberVal] = useState('');
   const [address1Val, setAddress1Val] = useState('');
   const [address2Val, setAddress2Val] = useState('');
   const [cityVal, setCityVal] = useState('');
-  const [regionVal, setRegionVal] = useState('');
-  const [postcodeVal, setPostcodeVal] = useState('');
+  const [regionVal, setRegionVal] = useState(initialRegion);
+  const [postcodeVal, setPostcodeVal] = useState(initialPostcode);
   const [errorMessage, setErrorMessage] = useState('');
   const [result, setResult] = useState<BankTransferSuccess | null>(null);
+
+  const phoneClassification = phoneVal.length >= 7 ? classifyNZPhone(phoneVal) : null;
+  const gstValidation = gstNumberVal.length >= 8 ? validateNZGstNumber(gstNumberVal) : null;
 
   const isRural =
     shippingMethodId.startsWith('rural') ||
@@ -740,11 +758,6 @@ function BankTransferCheckout() {
       }
     }
   };
-
-  // The cart links here with an already-validated promo (?promo=CODE). Pre-fill
-  // the field so the customer doesn't re-type it; the server action re-validates
-  // at submit, so a stale or hand-crafted param simply fails there.
-  const promoParam = (useSearchParams().get('promo') ?? '').trim();
 
   // Persisted cart rehydrates client-side only; render the skeleton on the
   // server/first paint to avoid an empty-cart mismatch flash.
@@ -941,8 +954,25 @@ function BankTransferCheckout() {
                     required
                     autoComplete="tel"
                     maxLength={30}
+                    value={phoneVal}
+                    onChange={(e) => setPhoneVal(e.target.value)}
+                    onBlur={() => {
+                      if (phoneClassification?.isValid) {
+                        setPhoneVal(phoneClassification.formatted);
+                      }
+                    }}
                     className="block w-full px-5 py-3 bg-white border border-slate-200 rounded-full text-sm font-medium focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-inner"
                   />
+                  {phoneClassification && phoneClassification.isValid && (
+                    <p className="mt-1.5 ml-2 text-[10px] font-bold text-emerald-700 flex items-center gap-1.5 animate-in fade-in">
+                      <CheckCircle size={11} strokeWidth={2.5} />
+                      <span>
+                        {phoneClassification.carrier ||
+                          phoneClassification.region ||
+                          'Valid NZ Number'}
+                      </span>
+                    </p>
+                  )}
                 </div>
               </div>
             </fieldset>
@@ -1303,8 +1333,32 @@ function BankTransferCheckout() {
                       type="text"
                       placeholder="e.g. 123-456-789"
                       maxLength={20}
+                      value={gstNumberVal}
+                      onChange={(e) => setGstNumberVal(e.target.value)}
+                      onBlur={() => {
+                        if (gstValidation?.formatted) {
+                          setGstNumberVal(gstValidation.formatted);
+                        }
+                      }}
                       className="block w-full px-5 py-3 bg-white border border-slate-200 rounded-full text-sm font-medium focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-inner font-mono"
                     />
+                    {gstValidation && (
+                      <div className="mt-1.5 ml-2 text-[10px] flex items-center gap-1.5 animate-in fade-in">
+                        {gstValidation.isChecksumValid ? (
+                          <span className="text-emerald-700 font-bold flex items-center gap-1">
+                            <CheckCircle size={11} strokeWidth={2.5} />
+                            Valid IRD Modulus 11 Checksum
+                          </span>
+                        ) : gstValidation.isValid ? (
+                          <span className="text-amber-600 font-medium">
+                            ⚠️ Digits match format ({gstValidation.formatted}); please verify
+                            against IRD cert.
+                          </span>
+                        ) : (
+                          <span className="text-rose-600 font-bold">{gstValidation.error}</span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

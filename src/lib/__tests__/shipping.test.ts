@@ -131,4 +131,13 @@ describe('getStripeShippingOptions()', () => {
       (pickupOpt.shipping_rate_data as { delivery_estimate?: unknown }).delivery_estimate
     ).toBeUndefined();
   });
+
+  it('puts the preferred shipping rate first when preferredRateId is passed', () => {
+    const options = getStripeShippingOptions('rural-courier');
+    expect(options[0].shipping_rate_data.display_name).toBe('Rural tracked courier');
+    expect(options[0].shipping_rate_data.fixed_amount.amount).toBe(1500);
+
+    const pickupOptions = getStripeShippingOptions('pickup');
+    expect(pickupOptions[0].shipping_rate_data.fixed_amount.amount).toBe(0);
+  });
 });

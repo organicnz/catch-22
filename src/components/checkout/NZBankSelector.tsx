@@ -75,6 +75,35 @@ export const NZ_BANKS: NZBankOption[] = [
       'TSB internet banking transfers clear within 1–2 hours during hourly interbank clearing cycles.',
   },
   {
+    id: 'cooperative',
+    name: 'The Co-operative Bank',
+    shortName: 'Co-op Bank',
+    speed: '1-2h',
+    speedText: '1–2 Hours',
+    portalUrl: 'https://www.co-operativebank.co.nz/',
+    notes:
+      'The Co-operative Bank internet banking transfers clear in 1–2 hours under Payments NZ 365-day hourly settlement.',
+  },
+  {
+    id: 'sbs',
+    name: 'SBS Bank',
+    shortName: 'SBS Bank',
+    speed: '1-2h',
+    speedText: '1–2 Hours',
+    portalUrl: 'https://www.sbsbank.co.nz/',
+    notes:
+      'SBS Bank internet banking transfers clear within 1–2 hours during hourly interbank clearing cycles.',
+  },
+  {
+    id: 'heartland',
+    name: 'Heartland Bank',
+    shortName: 'Heartland',
+    speed: '1-2h',
+    speedText: '1–2 Hours',
+    portalUrl: 'https://www.heartland.co.nz/',
+    notes: 'Heartland Bank transfers clear in 1–2 hours under Payments NZ 365-day settlement.',
+  },
+  {
     id: 'other',
     name: 'Other NZ Bank / Credit Union',
     shortName: 'Other NZ Bank',
@@ -82,7 +111,7 @@ export const NZ_BANKS: NZBankOption[] = [
     speedText: '1–2 Hours',
     portalUrl: '',
     notes:
-      'Heartland, SBS, The Co-operative Bank, or credit unions clear within 1–2 business hours.',
+      'NZ Credit Unions, Building Societies, and other institutions clear within 1–2 business hours.',
   },
 ];
 

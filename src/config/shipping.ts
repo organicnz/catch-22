@@ -73,8 +73,17 @@ function toStripeDeliveryEstimate(estimate: DeliveryEstimate) {
   };
 }
 
-export function getStripeShippingOptions() {
-  return SHIPPING_RATES.map((rate) => ({
+export function getStripeShippingOptions(preferredRateId?: string) {
+  const rates = [...SHIPPING_RATES];
+  if (preferredRateId) {
+    const preferredIndex = rates.findIndex((r) => r.id === preferredRateId);
+    if (preferredIndex > 0) {
+      const [preferred] = rates.splice(preferredIndex, 1);
+      rates.unshift(preferred);
+    }
+  }
+
+  return rates.map((rate) => ({
     shipping_rate_data: {
       type: 'fixed_amount' as const,
       fixed_amount: { amount: rate.amount, currency: rate.currency },
