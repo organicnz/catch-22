@@ -4,6 +4,9 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { AddToCartButton } from '@/components/checkout/AddToCartButton';
+import { AfterpayInfoModal } from '@/components/checkout/AfterpayInfoModal';
+import { NZCheckoutConfidence } from '@/components/checkout/NZCheckoutConfidence';
+import { NZPaymentOptionsGuide } from '@/components/checkout/NZPaymentOptionsGuide';
 import { PaymentMethodStrip } from '@/components/checkout/PaymentIcons';
 import { ProductSlider } from '@/components/products/ProductSlider';
 import { WishlistButton } from '@/components/products/WishlistButton';
@@ -252,6 +255,7 @@ async function ProductDetailsBody({ params }: { params: Promise<{ slug: string }
                     <span className="text-[10px] font-black tracking-tight text-secondary bg-[#B2FCE4] px-1.5 py-0.5 rounded-md uppercase">
                       afterpay
                     </span>
+                    <AfterpayInfoModal price={product.price} />
                   </div>
                   <div className="inline-flex items-center gap-1.5 text-[11px] font-bold text-slate-500">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
@@ -326,11 +330,15 @@ async function ProductDetailsBody({ params }: { params: Promise<{ slug: string }
             </div>
 
             {/* Payment methods reassurance */}
-            <div className="mt-6 pt-5 border-t border-slate-100 flex flex-col items-center gap-2">
+            <div className="mt-6 pt-5 border-t border-slate-100 flex flex-col items-center gap-3">
               <PaymentMethodStrip showBankAndEftpos={true} className="justify-center" />
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center mt-1">
-                All prices in NZD ($) incl. GST &middot; No card surcharges
-              </p>
+              <NZCheckoutConfidence variant="compact" className="mt-1" />
+              <div className="flex flex-col items-center gap-1 mt-1 text-center">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                  All prices in NZD ($) incl. GST &middot; No card surcharges
+                </p>
+                <NZPaymentOptionsGuide triggerVariant="link" className="text-[10px]" />
+              </div>
             </div>
           </div>
         </div>

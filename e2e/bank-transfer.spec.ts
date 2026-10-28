@@ -91,4 +91,67 @@ test.describe('bank-transfer checkout', () => {
     await expect(page.locator('#firstName')).toBeFocused();
     await expect(page.getByRole('heading', { name: 'Order reserved' })).toBeHidden();
   });
+
+  test('NZ payment options comparison guide opens and details all options', async ({ page }) => {
+    await withCart(page, ONE_ITEM);
+    await page.goto('/checkout/bank-transfer');
+
+    // Click "Compare all NZ payment avenues" button
+    const guideBtn = page.getByRole('button', { name: /Compare all NZ payment avenues/i });
+    await expect(guideBtn).toBeVisible();
+    await guideBtn.click();
+
+    // Dialog title appears
+    await expect(
+      page.getByRole('heading', { name: /NZ Payment Options & Protections/i })
+    ).toBeVisible();
+    // Reassurance of 0% surcharge and consumer rights
+    await expect(page.getByText('Zero Surcharges Guaranteed')).toBeVisible();
+    await expect(page.getByText('Direct Bank Transfer (NZD)')).toBeVisible();
+    await expect(page.getByText('Afterpay & Klarna (NZD)')).toBeVisible();
+    await expect(page.getByText('Chatswood, Auckland Pick-up')).toBeVisible();
+
+    // Close modal
+    await page.getByRole('button', { name: /Close payment options/i }).click();
+    await expect(
+      page.getByRole('heading', { name: /NZ Payment Options & Protections/i })
+    ).toBeHidden();
+  });
+
+  test('NZ rural delivery assistant detects RD in address and offers one-click switch', async ({
+    page,
+  }) => {
+    await withCart(page, ONE_ITEM);
+    await page.goto('/checkout/bank-transfer');
+
+    // Standard courier is selected by default ($58.00 total)
+    await expect(page.locator('input[name="shippingMethod"][value="standard"]')).toBeChecked();
+
+    // Type RD address into address1
+    await page.locator('#address1').fill('144 Mahurangi East Road, RD 2');
+
+    // Assistant should appear
+    await expect(page.getByText(/Rural Delivery \(RD\) Address Detected/i)).toBeVisible();
+
+    // Click "Switch to Rural Delivery Courier"
+    await page.getByRole('button', { name: /Switch to Rural Delivery Courier/i }).click();
+
+    // Now rural shipping should be checked and total updated
+    await expect(page.locator('input[name="shippingMethod"][value="rural"]')).toBeChecked();
+    // Assistant automatically disappears once rural rate is chosen
+    await expect(page.getByText(/Rural Delivery \(RD\) Address Detected/i)).toBeHidden();
+  });
+
+  test('NZ bank selector toggles banks and updates clearance speed pill', async ({ page }) => {
+    await withCart(page, ONE_ITEM);
+    await page.goto('/checkout/bank-transfer');
+
+    // Verify ANZ default is selected and shows "Instant"
+    await expect(page.getByText(/Instant ANZ-to-ANZ settlement/i)).toBeVisible();
+
+    // Select ASB Bank
+    await page.getByRole('button', { name: /ASB Bank/i }).click();
+    // Should display 1-2 hours SBI clearance note
+    await expect(page.getByText(/1–2h interbank clearance/i)).toBeVisible();
+  });
 });
