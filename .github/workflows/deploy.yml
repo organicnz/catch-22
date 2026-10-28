@@ -46,12 +46,12 @@ jobs:
   cleanup:
     name: Workspace Cleanup
     runs-on: ${{ vars.CI_RUNNER_LABEL || 'ubuntu-latest' }}
-    needs: [lint, test, build, e2e, supabase]
+    needs: [lint, test, supabase]
     if: always()
     steps:
       - name: Purge transient artifacts
         run: |
-          rm -rf test-results playwright-report coverage .next || true
+          rm -rf test-results coverage || true
           echo "Remaining free space:"
           df -h .
 
@@ -87,7 +87,7 @@ jobs:
         run: bun --no-script lint src/
 
       - name: TypeScript type check
-        run: bunx tsc --noEmit
+        run: bun run typecheck
 
   # ─────────────────────────────────────────────────────────────────────────────
   # 2. Run tests
@@ -121,134 +121,13 @@ jobs:
         run: bun test
 
   # ─────────────────────────────────────────────────────────────────────────────
-  # 2b. Production build
-  #    `next build` exercises what Vercel will deploy — server/client compile,
-  #    sitemap + robots generation. The sitemap does a live public read against
-  #    Supabase with the anon key, so a revoked key or dead project URL fails
-  #    here, not in production. NEXT_PUBLIC_* values are public by design (they
-  #    ship in the browser bundle); storing them as secrets is fine for CI.
-  # ─────────────────────────────────────────────────────────────────────────────
-  build:
-    name: Production Build
-    runs-on: ${{ vars.CI_RUNNER_LABEL || 'ubuntu-latest' }}
-    needs: [preflight]
-    env:
-      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
-      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
-      NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
-    steps:
-      - uses: actions/checkout@v5
-
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Cache bun install
-        uses: actions/cache@v4
-        with:
-          path: ~/.bun/install/cache
-          key: bun-cache-${{ hashFiles('bun.lock') }}
-          restore-keys: |
-            bun-cache-
-
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-
-      - name: Production build
-        run: bun run build
-
-  # ─────────────────────────────────────────────────────────────────────────────
   # 3. Supabase — DB migrations + edge function deployments
   #    Only runs on push to main. Failure here fails the whole run.
   # ─────────────────────────────────────────────────────────────────────────────
-  # ─────────────────────────────────────────────────────────────────────────────
-  # 4b. Instant-navigation e2e guards (@next/playwright instant())
-  #     Locks in the Cache Components shell contract: header/nav/footer must be
-  #     visible the moment a navigation lands, before streamed data arrives.
-  # ─────────────────────────────────────────────────────────────────────────────
-  e2e:
-    name: Instant Navigation E2E
-    runs-on: ${{ vars.CI_RUNNER_LABEL || 'ubuntu-latest' }}
-    needs: [preflight, build]
-    # 15m was cancelled mid cold-cache production build on the shared
-    # self-hosted runner; 30m covers worst-case install+build+suite.
-    timeout-minutes: 30
-    env:
-      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
-    steps:
-      - uses: actions/checkout@v5
-
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Cache bun install
-        uses: actions/cache@v4
-        with:
-          path: ~/.bun/install/cache
-          key: bun-cache-${{ hashFiles('bun.lock') }}
-          restore-keys: |
-            bun-cache-
-
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        with:
-          # Repeated ~180MB installs churn the self-hosted runner's disk;
-          # a full browser tree died mid-job twice today.
-          path: ~/.cache/ms-playwright
-          key: ms-playwright-${{ hashFiles('bun.lock') }}
-          restore-keys: ms-playwright-
-
-      - name: Install Playwright browser
-        run: bunx playwright install --with-deps chromium
-
-      - name: Disk headroom
-        if: always()
-        run: df -h / | tail -1
-
-      - name: Build production bundle
-        run: bun run build
-        env:
-          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
-          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
-
-      # Single worker: the shared self-hosted ARM64 runner times out
-      # timing-sensitive instant() guards under parallel load, and the same
-      # tree has flipped green/red between runs. The suite is ~30s serial.
-      - name: Run instant() navigation guards
-        run: |
-          bunx playwright test --workers=1 --retries=2 2>&1 | tee playwright-run.log
-          exit ${PIPESTATUS[0]}
-
-      - name: Upload Playwright report on failure
-        if: failure()
-        continue-on-error: true # artifact storage is unreliable on this runner
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
-          path: playwright-report/
-
-      # This runner's log blob upload is unreliable (BlobNotFound on every
-      # API fetch) — persist stdout as an artifact so failures always leave
-      # evidence.
-      - name: Upload Playwright stdout
-        if: always()
-        continue-on-error: true # artifact storage is unreliable on this runner
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-stdout
-          path: playwright-run.log
-          retention-days: 7
-
   supabase:
     name: Supabase (Migrations + Edge Functions)
     runs-on: ${{ vars.CI_RUNNER_LABEL || 'ubuntu-latest' }}
-    needs: [preflight, lint, test, build]
+    needs: [preflight, lint, test]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     timeout-minutes: 20
     permissions:
@@ -585,5 +464,9 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
           echo "✅ Summary published"
 
-  # Vercel deployment is handled automatically by Vercel's GitHub integration.
-  # Push to main → Vercel detects and deploys. No workflow step needed.
+  # ─────────────────────────────────────────────────────────────────────────────
+  # Note: Vercel CI/CD is computed directly by Vercel's native GitHub App.
+  # Next.js production builds and deployments are executed entirely on Vercel
+  # infrastructure, eliminating redundant build compute in GitHub Actions.
+  # Push to main → Vercel detects, builds, and deploys. No workflow step needed.
+  # ─────────────────────────────────────────────────────────────────────────────

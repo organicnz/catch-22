@@ -76,8 +76,8 @@ bun run build        # production build
 
 ### 5. CI/CD
 
-- All workflows execute on a self-hosted ARM64 runner (`[self-hosted, linux, ARM64]`) with a preflight disk guard and terminal workspace cleanup.
-- Push to `main` → CI gates (lint, types, unit, build, e2e, Supabase migrations) → Vercel auto-deploys production.
+- Push to `main` → CI gates (lint, types, unit, Supabase migrations) → Vercel natively computes build and auto-deploys production.
+- Pull request → CI gates (lint, types, unit) → Vercel preview deployment. Zero redundant build compute in GitHub Actions.
 - Dependency health runs nightly: drift audit, vulnerability scan, safe-upgrade proposals.
 
 ## 💳 Payment Configuration

@@ -130,8 +130,9 @@ The team shares one Fluid Active CPU pool (4 hrs / rolling 30 days) across all p
   - Package manager & runtime: Pure `bun` (`engines: { bun: ">=1.4.0" }`, `@types/bun`, zero `@types/node`).
   - Type checking: Swapped legacy `tsc` (`typescript` devDependency removed) with `tsrs` (`tsrs --noEmit`).
   - Linting & Formatting: Native `bun lint` + `bun fmt` in `bunfig.toml` (<15ms execution), removing all legacy ESLint, Prettier, and Biome dependencies.
-  - Test suites: Native runner support (`bun test`), excised all legacy `// @vitest-environment node` docblocks, all 189 unit tests passing clean.
+  - Test suites: Native runner support (`bun test`), excised all legacy `// @vitest-environment node` docblocks, all 212 unit tests passing clean.
   - Vercel production deployment verified live on `https://www.catch-22.co.nz`.
+- [x] **Vercel Native Compute Streamlining**: Excised redundant `next build` / production build and local e2e build jobs from GitHub Actions workflows (`.github/workflows/deploy.yml` and `.github/workflows/daily-compat.yml`). Next.js application builds, serverless compilation, and preview/production deployments are executed natively on Vercel compute, eliminating duplicate compute while preserving fast lint, typecheck (`tsrs`), unit tests (`bun test`), and Supabase migrations/edge functions in CI.
 
 ---
 
