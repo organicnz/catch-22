@@ -7,7 +7,7 @@ const mockEvent = {
   type: 'checkout.session.completed',
   data: {
     object: {
-      id: 'cs_live_a1YvslFKQK3RlHt4FzW16dYrImVxjdHtzwa0MzWVCc8DTFpGu7vzviP9rW',
+      id: 'cs_live_mock_test_session_123',
       amount_total: 1000, 
       currency: 'nzd',
       customer_details: {
