@@ -34,6 +34,34 @@ describe('validateCartItems()', () => {
       }
     }
   });
+
+  it('accepts boundary quantities (1 and 999)', () => {
+    const minResult = validateCartItems([{ id: 1, quantity: 1 }]);
+    expect(minResult.ok).toBe(true);
+    const maxResult = validateCartItems([{ id: 1, quantity: 999 }]);
+    expect(maxResult.ok).toBe(true);
+  });
+
+  it('validates multi-item carts with multiple braid spool variations', () => {
+    const multiItems = [
+      { id: 101, quantity: 1 },
+      { id: 102, quantity: 3 },
+      { id: 103, quantity: 5 },
+    ];
+    const result = validateCartItems(multiItems);
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.items.length).toBe(3);
+      expect(result.items).toEqual(multiItems);
+    }
+  });
+
+  it('rejects null and malformed cart item entries', () => {
+    for (const badEntry of [null, undefined, {}, { id: 10 }, { quantity: 2 }]) {
+      const r = validateCartItems([badEntry]);
+      expect(r.ok).toBe(false);
+    }
+  });
 });
 
 describe('validatePromoCode()', () => {
@@ -50,5 +78,6 @@ describe('validatePromoCode()', () => {
     expect(validatePromoCode(42).ok).toBe(false);
     expect(validatePromoCode('x'.repeat(51)).ok).toBe(false);
     expect(validatePromoCode('SAVE10').ok).toBe(true);
+    expect(validatePromoCode('SPRING-2026').ok).toBe(true);
   });
 });

@@ -5,6 +5,7 @@ import Stripe from 'stripe';
 import { ClearCartOnMount } from '@/components/checkout/ClearCartOnMount';
 import { PrintButton } from '@/components/checkout/PrintButton';
 import { SHIPPING_RATES } from '@/config/shipping';
+import { orderReference } from '@/lib/bank-transfer-order';
 import { env } from '@/lib/env';
 import { createAdminClient } from '@/lib/supabase-server';
 import { formatAddress, formatDate, formatNZD, type ShippingAddress } from '@/types/orders';
@@ -117,7 +118,7 @@ export default async function SuccessPage({
     session.payment_status === 'paid' || session.payment_status === 'no_payment_required';
   const isPending = session.payment_status === 'unpaid';
 
-  const reference = order ? `CATCH22-${order.id}` : session.id.slice(-8).toUpperCase();
+  const reference = order ? orderReference(order.id) : session.id.slice(-8).toUpperCase();
   const items = session.line_items?.data ?? [];
   const subtotal = cents(session.amount_subtotal);
   const discount = cents(session.total_details?.amount_discount);

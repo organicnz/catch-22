@@ -58,6 +58,12 @@ function SuccessPanel({ result }: { result: BankTransferSuccess }) {
               Thanks! Your gear is set aside. Complete the bank transfer below and we&apos;ll get it
               packed as soon as the payment clears.
             </p>
+            <div className="inline-flex items-center gap-2 mt-5 px-4 py-2 bg-emerald-50 border border-emerald-200 rounded-full">
+              <span className="text-emerald-600 text-lg">🌊</span>
+              <span className="text-[10px] font-black text-emerald-700 uppercase tracking-wider">
+                2.5% of this order goes to NZ Sea Cleaners
+              </span>
+            </div>
           </div>
 
           {result.bank.testMode && (
