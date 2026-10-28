@@ -1,6 +1,7 @@
 # Catch-22: Migration Architectural Guide
 
 ## Project Objective
+
 Transform the legacy WordPress/Elementor ecosystem (catch-22.co.nz) into a modern, high-performance headless e-commerce platform. The goal is to achieve feature parity while introducing a "Sensory Luxury" design language and a robust, secure infrastructure.
 
 ---
@@ -8,16 +9,19 @@ Transform the legacy WordPress/Elementor ecosystem (catch-22.co.nz) into a moder
 ## 🏗 Architectural Blueprint
 
 ### 1. Headless E-commerce (Next.js 16)
+
 - **App Router Architecture**: Leveraging Server Components for data fetching and Client Components for interactivity (Cart, Wishlist).
 - **Dynamic Routing**: Implementation of `[slug]` patterns for products, categories, and dynamic content pages.
 - **Sanitization Layer**: A dedicated utility in `src/app/[slug]/page.tsx` for scrubbing legacy WordPress artifacts and preventing malicious spam injections.
 
 ### 2. Backend & Security (Supabase)
+
 - **PostgreSQL Database**: Relational schema for products, categories, content, and coupons.
 - **Supabase Auth & MFA**: Secure user management with Multi-Factor Authentication support for account protection.
 - **Edge Functions**: Specialized logic for data synchronization, complex server-side operations, and secure Stripe webhook handling.
 
 ### 3. "Sensory Luxury" Design System
+
 - **Design Tokens**: Defined directly in `src/app/globals.css` using Tailwind 4 `@theme` (no legacy config file).
 - **Core Componentry**: Reusable, high-fidelity components like `ProductCard`, `WishlistButton`, and `Header`.
 - **Aesthetic Principles**:
@@ -28,9 +32,10 @@ Transform the legacy WordPress/Elementor ecosystem (catch-22.co.nz) into a moder
 ---
 
 ## 🛠 Working Stack (Simplified)
+
 - **Runtime & Package Manager**: Bun (All package management, scripts, runtime, and test execution — zero node/npm/yarn/pnpm dependencies)
 - **Type Checking**: `tsrs` (Rust-based TypeScript type checking, `tsrs --noEmit` — zero legacy `tsc`)
-- **Linting & Formatting**: Biome + Native Bun Lint (Rust/C++ toolchain with sub-20ms execution)
+- **Linting & Formatting**: Pure Native `bun lint` & `bun fmt` (C++/Zig sub-15ms execution in `bunfig.toml` — zero Biome/ESLint/Prettier)
 - **Git Automation**: Lefthook (Fast Rust/Go git hooks runner)
 - **Frontend**: Next.js 16 (App Router + React 19)
 - **Backend**: Supabase (Database, Auth, Storage via REST client)
@@ -42,65 +47,74 @@ Transform the legacy WordPress/Elementor ecosystem (catch-22.co.nz) into a moder
 ---
 
 ## 🧠 Agent Skills (Vercel)
+
 Installed from `vercel-labs/agent-skills` via `bunx skills add`. Load on demand; do not re-install.
 
-| Skill | Use when |
-| --- | --- |
-| `vercel-react-best-practices` | Writing/refactoring React or Next.js code (performance patterns). |
-| `vercel-composition-patterns` | Component architecture, compound components, provider APIs. |
-| `web-design-guidelines` | UI/accessibility audits ("review my UI"). |
-| `vercel-react-view-transitions` | Page/route animations via the View Transition API. |
-| `deploy-to-vercel` | Deploying the app or creating preview deployments. |
-| `vercel-cli-with-tokens` | Vercel CLI automation with access tokens (CI). |
-| `vercel-optimize` | Cost/performance optimization of the deployed project. |
-| `react-native-skills` | Not applicable to this web-only project (installed for reference). |
-| `writing-guidelines` | Docs/prose style review. |
+| Skill                           | Use when                                                           |
+| ------------------------------- | ------------------------------------------------------------------ |
+| `vercel-react-best-practices`   | Writing/refactoring React or Next.js code (performance patterns).  |
+| `vercel-composition-patterns`   | Component architecture, compound components, provider APIs.        |
+| `web-design-guidelines`         | UI/accessibility audits ("review my UI").                          |
+| `vercel-react-view-transitions` | Page/route animations via the View Transition API.                 |
+| `deploy-to-vercel`              | Deploying the app or creating preview deployments.                 |
+| `vercel-cli-with-tokens`        | Vercel CLI automation with access tokens (CI).                     |
+| `vercel-optimize`               | Cost/performance optimization of the deployed project.             |
+| `react-native-skills`           | Not applicable to this web-only project (installed for reference). |
+| `writing-guidelines`            | Docs/prose style review.                                           |
 
 Update with `bunx skills update`; restore with `bunx skills experimental_install`.
 
 ---
 
 ## ⏸ Deferred Upgrades
+
 - **TypeScript 7**: BLOCKED — Next.js 16.3 loads TS via the JS compiler API (`lib/typescript.js`), removed in TS 7.0; support lands ~TS 7.1 (see vercel/next.js#95633). Stay on TS 5.9 until then. tsconfig is already TS7-shaped (`moduleResolution: bundler`).
 - **TypeScript 6**: bridge release only (deprecations); no value while blocked on 7.
 - Revisit after the Next.js 16.3.x line announces native-TS builds.
 
 ### Vercel Free-Tier Conservation Mode
+
 The team shares one Fluid Active CPU pool (4 hrs / rolling 30 days) across all projects. Deliberate posture — do not revert without checking the Usage dashboard:
+
 - All catalog/content `cacheLife` profiles are **`hours`** (not `minutes`) to minimize background renders; price/stock edits propagate within the hour.
 - Middleware runs **only** on `/account`, `/admin`, `/login`.
 - Image transforms: 31-day cache, slim variant grids, logo served unoptimized, qualities locked to 75.
 - Sitemap is fully static (`○`). Fuzzed content OG slugs fail fast with 404.
 - Rate limits: checkout 10/min/IP, contact 3/10min/IP.
-When the store generates revenue, move to Pro and revisit TTLs (`minutes`) for price freshness.
+  When the store generates revenue, move to Pro and revisit TTLs (`minutes`) for price freshness.
 
 ---
 
 ## 🗺 Migration Roadmap
 
 ### Phase 1: Core Infrastructure (Completed)
+
 - [x] Supabase project initialization and schema design.
 - [x] Next.js 16 project structure and base styling.
 - [x] Primary Header and Footer navigation mirroring.
 
 ### Phase 2: Feature Parity & UI Hardening (Completed)
+
 - [x] **Home Page**: Hero section and "Best Sellers" grid with hardened design tokens.
 - [x] **Products**: Dynamic category filtering and individual product detail views.
 - [x] **Cart & Checkout**: Persistent cart state and Stripe session integration.
 - [x] **Logbook (Blog)**: Content migration with aggressive spam filtering.
 
 ### Phase 3: Content Population & Asset Migration (Completed)
+
 - [x] **Static Pages**: FAQs, About Us, Partners, and Gallery (Catch-Snaps).
 - [x] **Asset Hardening**: Mapping partner logos, community gallery images, and "Sledger Rigs" content.
 - [x] **Legal**: Terms of Service, Privacy Policy, and Shipping/Returns.
 
 ### Phase 4: Production Hardening (Completed)
+
 - [x] **Documentation**: Finalizing README, AGENTS, and CLAUDE guides.
 - [x] **Sensory Design**: Full hardening of ProductCard and Gallery components.
 - [x] **Final QA**: End-to-end checkout flow validation and cross-device testing.
 - [x] **Stripe Production**: Transitioning from test keys to live environment.
 
 ### Phase 5: Stack Hardening Round (Current)
+
 - [x] **Error Telemetry**: Supabase-native error beacon — `error_reports` table (anon insert-only RLS), rate-limited `/api/report-error`, wired into `error.tsx` / `global-error.tsx`.
 - [x] **Full-Text Search**: Weighted `tsvector` generated columns + GIN indexes + ranked RPCs (`search_products`, `search_content`); `/search` uses ranked FTS with ILIKE fallback for un-migrated previews.
 - [x] **A11y Regression Gate**: `@axe-core/playwright` suite (`e2e/a11y.spec.ts`) over 8 public routes; serious/critical violations fail CI.
@@ -115,14 +129,16 @@ When the store generates revenue, move to Pro and revisit TTLs (`minutes`) for p
 - [x] **Pure Bun & Rust-Based Toolchain Hardening**: Fully excised legacy `node` runtime and packages:
   - Package manager & runtime: Pure `bun` (`engines: { bun: ">=1.4.0" }`, `@types/bun`, zero `@types/node`).
   - Type checking: Swapped legacy `tsc` (`typescript` devDependency removed) with `tsrs` (`tsrs --noEmit`).
-  - Linting & Formatting: `biome` v2.6.3 + `oxlint` sub-50ms execution, removing legacy ESLint/Prettier.
+  - Linting & Formatting: Native `bun lint` + `bun fmt` in `bunfig.toml` (<15ms execution), removing all legacy ESLint, Prettier, and Biome dependencies.
   - Test suites: Native runner support (`bun test`), excised all legacy `// @vitest-environment node` docblocks, all 189 unit tests passing clean.
   - Vercel production deployment verified live on `https://www.catch-22.co.nz`.
 
 ---
 
 ## 🛡 Security & Sanitization
+
 The `sanitizeWPContent` helper is critical for brand integrity. It handles:
+
 1. **Shortcode Extraction**: Replaces legacy WPForms with native Next.js contact components.
 2. **Spam Blacklist**: Aggressive filtering of keywords (Casino, Slot, Betting) and their surrounding elements.
 3. **Link Hardening**: Strips unauthorized outbound links while preserving trusted domains (Supabase, Stripe).
@@ -130,6 +146,7 @@ The `sanitizeWPContent` helper is critical for brand integrity. It handles:
 ---
 
 ## 📋 Guidelines for Future Development
+
 1. **Maintain Aesthetic Consistency**: All new components must use defined design tokens.
 2. **SEO First**: Every dynamic page MUST implement `generateMetadata` for unique titles and descriptions.
 3. **Sanitize Everything**: Any data coming from the `content` table in Supabase MUST pass through the sanitization helper.

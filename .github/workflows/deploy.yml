@@ -80,8 +80,8 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Biome check
-        run: bunx biome ci src/
+      - name: Code format check (bun fmt)
+        run: bun fmt --check src/
 
       - name: Bun lint (native)
         run: bun --no-script lint src/

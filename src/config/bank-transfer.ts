@@ -24,8 +24,7 @@ export interface BankTransferDetails {
 }
 
 export type BankTransferConfig =
-  | { configured: true; details: BankTransferDetails }
-  | { configured: false; missing: string[] };
+  { configured: true; details: BankTransferDetails } | { configured: false; missing: string[] };
 
 const PRODUCTION_REQUIRED = [
   'BANK_TRANSFER_BANK_NAME',

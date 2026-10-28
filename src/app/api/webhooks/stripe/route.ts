@@ -73,7 +73,9 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, 
       .select('id', { count: 'exact', head: true })
       .eq('order_id', existing.id);
     if (count && count > 0) {
-      console.log(`⏭️ Order for session ${session.id} already exists — skipping duplicate delivery`);
+      console.log(
+        `⏭️ Order for session ${session.id} already exists — skipping duplicate delivery`
+      );
       return;
     }
     // Orphan order from a partially-failed earlier delivery — backfill items.

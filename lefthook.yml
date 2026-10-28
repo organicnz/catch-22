@@ -16,13 +16,12 @@
 pre-commit:
   parallel: true
   commands:
-
     # ── 1. Secret leak detection ──────────────────────────────────────────────
     # Patterns: Supabase secret/publishable, Stripe live/test/webhook, Resend,
     # PRIVATE_KEY assignments, and Postgres connection strings with passwords.
     no-secrets:
       priority: 1
-      glob: "*.{ts,tsx,js,mjs,json,yml,yaml,env,md}"
+      glob: '*.{ts,tsx,js,mjs,json,yml,yaml,env,md}'
       run: |
         FORBIDDEN=$(grep -rn \
           -e "sb_secret_[A-Za-z0-9]\{20,\}" \
@@ -49,7 +48,7 @@ pre-commit:
     # Migrations are append-only. Modifying an already-tracked file is dangerous.
     migration-guard:
       priority: 2
-      glob: "supabase/migrations/*.sql"
+      glob: 'supabase/migrations/*.sql'
       run: |
         MODIFIED=$(git diff --cached --name-only --diff-filter=M -- "supabase/migrations/*.sql" 2>/dev/null || true)
         if [ -n "$MODIFIED" ]; then
@@ -71,7 +70,7 @@ pre-commit:
     # Tables without RLS expose all rows to the anon/authenticated roles.
     rls-table-guard:
       priority: 3
-      glob: "supabase/migrations/*.sql"
+      glob: 'supabase/migrations/*.sql'
       run: |
         VIOLATIONS=""
         for f in {staged_files}; do
@@ -113,7 +112,7 @@ pre-commit:
     # https://www.postgresql.org/docs/current/sql-createfunction.html#id-1.9.3.67.7
     sql-security-definer-guard:
       priority: 4
-      glob: "supabase/migrations/*.sql"
+      glob: 'supabase/migrations/*.sql'
       run: |
         VIOLATIONS=""
         for f in {staged_files}; do
@@ -152,7 +151,7 @@ pre-commit:
     # session tokens, and PII into production logs.
     no-debug-logs:
       priority: 5
-      glob: "{src/app/api/**,src/app/admin/**,middleware}.{ts,tsx}"
+      glob: '{src/app/api/**,src/app/admin/**,middleware}.{ts,tsx}'
       run: |
         FOUND=$(grep -n "console\.log" {staged_files} 2>/dev/null || true)
         if [ -n "$FOUND" ]; then
@@ -171,7 +170,7 @@ pre-commit:
     # There is currently 0 suppressions in these paths — this keeps it at 0.
     no-suppressions-in-security-paths:
       priority: 6
-      glob: "{src/app/api/**,src/app/admin/**,middleware}.{ts,tsx}"
+      glob: '{src/app/api/**,src/app/admin/**,middleware}.{ts,tsx}'
       run: |
         FOUND=$(grep -n "@ts-ignore\|@ts-nocheck\|eslint-disable\|biome-ignore" {staged_files} 2>/dev/null || true)
         if [ -n "$FOUND" ]; then
@@ -193,7 +192,7 @@ pre-commit:
     #            supabase-server.ts which needs raw access for SSR client init.
     no-raw-env-access:
       priority: 7
-      glob: "src/**/*.{ts,tsx}"
+      glob: 'src/**/*.{ts,tsx}'
       run: |
         VIOLATIONS=""
         for f in {staged_files}; do
@@ -234,7 +233,7 @@ pre-commit:
     # generateMetadata for unique titles and descriptions."
     metadata-coverage:
       priority: 8
-      glob: "src/app/**/page.tsx"
+      glob: 'src/app/**/page.tsx'
       run: |
         VIOLATIONS=""
         for f in {staged_files}; do
@@ -274,7 +273,7 @@ pre-commit:
     # The error only surfaces at request time, not at build time.
     use-client-guard:
       priority: 9
-      glob: "src/**/*.{ts,tsx}"
+      glob: 'src/**/*.{ts,tsx}'
       run: |
         VIOLATIONS=""
         for f in {staged_files}; do
@@ -320,7 +319,7 @@ pre-commit:
     #                               it only to /admin routes and actions.
     admin-client-scope:
       priority: 10
-      glob: "src/**/*.{ts,tsx}"
+      glob: 'src/**/*.{ts,tsx}'
       run: |
         # src/app/api/checkout/route.ts needs createAdminClient for guest coupon validation
         ALLOWLIST="src/app/admin/|src/app/api/webhooks/|src/app/api/checkout/route.ts|src/app/products/page.tsx|src/app/account/page.tsx|src/app/checkout/actions.ts|src/app/success/page.tsx|src/lib/supabase-server.ts|src/lib/admin-auth.ts"
@@ -354,7 +353,7 @@ pre-commit:
     # server-only imports to leak to the browser bundle.
     server-action-directive:
       priority: 11
-      glob: "src/**/{actions,action}.{ts,tsx}"
+      glob: 'src/**/{actions,action}.{ts,tsx}'
       run: |
         VIOLATIONS=""
         for f in {staged_files}; do
@@ -382,7 +381,7 @@ pre-commit:
     # same or immediately preceding line. The 3 existing uses are protected.
     no-raw-innerhtml:
       priority: 12
-      glob: "*.{ts,tsx}"
+      glob: '*.{ts,tsx}'
       run: |
         VIOLATIONS=""
         for f in {staged_files}; do
@@ -416,7 +415,7 @@ pre-commit:
     # Every key in .env.example must exist in .env.local.
     env-integrity:
       priority: 13
-      glob: ".env*"
+      glob: '.env*'
       run: |
         if [ ! -f ".env.local" ]; then
           echo ""
@@ -445,7 +444,7 @@ pre-commit:
     # ── 14. Hardcoded Supabase project ref guard (new files only) ────────────
     no-new-hardcoded-ref:
       priority: 14
-      glob: "*.{ts,tsx,js,mjs}"
+      glob: '*.{ts,tsx,js,mjs}'
       run: |
         PROJECT_REF="wcoaqlglwxwceqktpckt"
         NEW_FILES=$(git diff --cached --name-only --diff-filter=A -- "*.ts" "*.tsx" "*.js" "*.mjs" 2>/dev/null || true)
@@ -489,7 +488,7 @@ pre-commit:
     # ── 16. Empty API route directory guard ──────────────────────────────────
     no-empty-api-routes:
       priority: 16
-      glob: "src/app/api/**"
+      glob: 'src/app/api/**'
       run: |
         EMPTY_DIRS=""
         find src/app/api -mindepth 1 -maxdepth 3 -type d 2>/dev/null | sort > /tmp/catch22_api_dirs.txt || true
@@ -519,7 +518,7 @@ pre-commit:
     # breaks the bundle (this caused BOOT_ERROR on earlier deployments).
     edge-import-scope:
       priority: 17.5
-      glob: "supabase/functions/**/*.ts"
+      glob: 'supabase/functions/**/*.ts'
       run: |
         VIOLATIONS=""
         for f in {staged_files}; do
@@ -579,7 +578,7 @@ pre-commit:
     # so a broken pipeline never ships.
     workflow-yaml:
       priority: 17.7
-      glob: ".github/workflows/*.{yml,yaml}"
+      glob: '.github/workflows/*.{yml,yaml}'
       run: |
         ERRORS=""
         for f in {staged_files}; do
@@ -600,23 +599,23 @@ pre-commit:
           exit 1
         fi
 
-    # ── 17. Biome – format + lint staged files ────────────────────────────────
-    biome-check:
+    # ── 17. bun fmt – Native Prettier-compatible formatting ──────────────────
+    bun-fmt:
       priority: 17
-      glob: "*.{js,jsx,ts,tsx,json,css}"
-      run: bun biome check --write --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
+      glob: '*.{js,jsx,ts,tsx,json,css,html,yml,yaml,md}'
+      run: bun fmt {staged_files}
       stage_fixed: true
 
     # ── 18. bun lint – Native React / hooks / Next.js rules ──────────────────
     bun-lint:
       priority: 18
-      glob: "*.{ts,tsx}"
+      glob: '*.{ts,tsx}'
       run: bun --no-script lint {staged_files}
 
     # ── 19. TypeScript – type-check without full build ────────────────────────
     typecheck:
       priority: 19
-      glob: "*.{ts,tsx}"
+      glob: '*.{ts,tsx}'
       run: bun tsrs --noEmit
 
     # ── 20. Env usage coverage ────────────────────────────────────────────────
@@ -628,7 +627,7 @@ pre-commit:
     # by no-raw-env-access; this closes the NEXT_PUBLIC + declaration gap.
     env-usage-coverage:
       priority: 20
-      glob: "src/**/*.{ts,tsx}"
+      glob: 'src/**/*.{ts,tsx}'
       run: |
         VIOLATIONS=""
         for f in {staged_files}; do
@@ -718,7 +717,6 @@ post-commit:
 pre-push:
   parallel: false
   commands:
-
     # ── 1. Block direct pushes to main ───────────────────────────────────────
     no-direct-main-push:
       priority: 1
@@ -754,7 +752,7 @@ pre-push:
     # ── 3. Migration verify script ────────────────────────────────────────────
     migration-verify:
       priority: 3
-      glob: "supabase/migrations/*.sql"
+      glob: 'supabase/migrations/*.sql'
       run: |
         if [ ! -f ".env.local" ]; then
           echo "ℹ️   No .env.local — skipping migration verification."; exit 0
@@ -807,7 +805,7 @@ pre-push:
     # local machine has no link state / token (CI covers it there).
     migration-dryrun:
       priority: 5.5
-      glob: "supabase/migrations/*.sql"
+      glob: 'supabase/migrations/*.sql'
       run: |
         if [ ! -f "supabase/.temp/linked-project.json" ]; then
           echo "ℹ️   No linked Supabase project — skipping migration dry-run."

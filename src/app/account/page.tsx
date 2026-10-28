@@ -60,10 +60,12 @@ export default async function AccountPage(props: {
       ? createAdminClient().then((ac) =>
           ac
             .from('orders')
-            .select(`id, created_at, status, total_amount, currency, payment_method,
+            .select(
+              `id, created_at, status, total_amount, currency, payment_method,
               stripe_session_id, shipping_address, billing_address,
               order_items ( id, product_name, quantity, total ),
-              profiles ( first_name, last_name, email )`)
+              profiles ( first_name, last_name, email )`
+            )
             .order('created_at', { ascending: false })
             .limit(200)
         )

@@ -37,8 +37,10 @@ export default async function AdminCustomersPage({
 
   const { data: customers } = await adminClient
     .from('profiles')
-    .select(`id, email, first_name, last_name, is_admin, created_at,
-      orders ( id, total_amount, created_at, status )`)
+    .select(
+      `id, email, first_name, last_name, is_admin, created_at,
+      orders ( id, total_amount, created_at, status )`
+    )
     .order('created_at', { ascending: false })
     .limit(500);
 
