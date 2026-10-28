@@ -116,7 +116,7 @@ export function ProductCard({ product }: ProductCardProps) {
         <div className="flex items-end justify-between gap-3 mt-auto">
           <div className="flex flex-col">
             {isOnSale && (
-              <span className="text-[10px] text-slate-400 line-through font-medium leading-none mb-1">
+              <span className="text-[10px] text-slate-600 line-through font-semibold leading-none mb-1">
                 ${product.regular_price?.toFixed(2)}
               </span>
             )}
@@ -124,7 +124,7 @@ export function ProductCard({ product }: ProductCardProps) {
               ${product.price.toFixed(2)}
             </p>
             {product.price >= 20 && (
-              <div className="flex items-center gap-1 mt-1.5 text-[9px] font-bold text-slate-500">
+              <div className="flex items-center gap-1 mt-1.5 text-[9px] font-bold text-slate-600">
                 <span>or 4 × ${(product.price / 4).toFixed(2)}</span>
                 <span className="font-black text-[#00a87a] bg-[#B2FCE4]/60 px-1 py-0.5 rounded text-[8px] uppercase tracking-tight">
                   afterpay

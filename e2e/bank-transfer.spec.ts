@@ -71,7 +71,7 @@ test.describe('bank-transfer checkout', () => {
 
     // Switching to pick-up (free) re-computes the estimate to $50.00.
     await page.locator('input[name="shippingMethod"][value="pickup"]').check();
-    await expect(page.getByText('$50.00')).toBeVisible();
+    await expect(page.getByText('$50.00').first()).toBeVisible();
   });
 
   test('promo code passed from the cart URL pre-fills the field', async ({ page }) => {

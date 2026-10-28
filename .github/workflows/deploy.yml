@@ -262,7 +262,7 @@ jobs:
         with:
           # Pinned — a CLI major bump must be reviewed deliberately, never
           # surprise-shipped. Update after verifying against a live deploy.
-          version: v2.113.0
+          version: v2.121.0
 
       # ── 0. Local-only migration hygiene — pure file checks, no network ──────
       # Locked in here (not just lefthook) so merged code with a bypassed
