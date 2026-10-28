@@ -20,6 +20,8 @@ const serverSchema = publicSchema.extend({
   // Preview environment has no secrets (production-only env vars).
   STRIPE_SECRET_KEY: z.string().min(1).optional().catch(undefined),
   STRIPE_WEBHOOK_SECRET: z.string().min(1).optional().catch(undefined),
+  STRIPE_ENABLE_PAYPAL: z.string().optional().catch(undefined),
+  STRIPE_ENABLE_ZIP: z.string().optional().catch(undefined),
   // Email / Order notifications (Resend)
   RESEND_API_KEY: z.string().min(1).optional().catch(undefined),
   RESEND_FROM_EMAIL: z.string().min(1).optional().default('orders@catch-22.co.nz'),

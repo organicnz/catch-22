@@ -52,7 +52,7 @@ export async function POST(req: Request) {
     });
 
     const body = await req.json();
-    const { items: rawItems, promoCode } = body;
+    const { items: rawItems, promoCode, preferredMethod } = body;
 
     const cartCheck = validateCartItems(rawItems);
     if (!cartCheck.ok) {
@@ -158,11 +158,34 @@ export async function POST(req: Request) {
     // trusted, highest-converting surface: it renders Apple Pay / Google Pay /
     // Link automatically for card payments, handles 3-D Secure and SCA, and
     // keeps the storefront out of PCI scope.
-    // afterpay_clearpay: NZ-supported BNPL — customers split into 4 interest-
-    // free fortnightly payments. Domestic-only (NZ → NZ), which matches our
-    // shipping_address_collection restriction. No extra Stripe config needed.
+    // NZ Payment Methods:
+    // - card: Visa, Mastercard, Amex, Apple Pay, Google Pay
+    // - link: 1-click accelerated checkout by Stripe
+    // - afterpay_clearpay: NZ 4 interest-free fortnightly payments (NZ → NZ)
+    // - klarna: NZ 4 interest-free instalments
+    // - paypal / zip: optionally toggled when enabled in Stripe Dashboard
+    // Reorder payment methods based on customer intent:
+    // When the customer explicitly clicks Afterpay & Klarna, place BNPL methods
+    // first so Stripe's hosted UI pre-focuses Afterpay.
+    const isBnplPreferred = preferredMethod === 'afterpay' || preferredMethod === 'bnpl';
+    const paymentMethodTypes: Stripe.Checkout.SessionCreateParams.PaymentMethodType[] =
+      isBnplPreferred
+        ? ['afterpay_clearpay', 'klarna', 'card', 'link']
+        : ['card', 'link', 'afterpay_clearpay', 'klarna'];
+
+    if (env.STRIPE_ENABLE_ZIP === 'true') {
+      if (isBnplPreferred) {
+        paymentMethodTypes.splice(2, 0, 'zip');
+      } else {
+        paymentMethodTypes.push('zip');
+      }
+    }
+    if (env.STRIPE_ENABLE_PAYPAL === 'true') {
+      paymentMethodTypes.push('paypal');
+    }
+
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card', 'link', 'afterpay_clearpay'],
+      payment_method_types: paymentMethodTypes,
       line_items: lineItems,
       mode: 'payment',
       currency: 'nzd',

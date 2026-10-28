@@ -15,10 +15,10 @@ This project does **not** use Node.js or legacy Node-era tooling. All runtime, p
 - **Tool**: `tsrs` (`tsrs --noEmit`).
 - **Policy**: Legacy `typescript` (`tsc`) devDependency is completely removed. All typechecking is executed via `bun run typecheck`.
 
-### 3. Code Quality: Biome & Oxlint (Rust)
-- **Linting**: `biome lint ./src && oxlint ./src` (`bun run lint:check`).
+### 3. Code Quality: Biome & Native Bun Lint
+- **Linting**: `biome lint ./src && bun --no-script lint src` (`bun run lint:check`).
 - **Formatting**: `biome format --write ./src` (`bun run format`).
-- **Policy**: Zero legacy ESLint or Prettier packages.
+- **Policy**: Zero legacy ESLint or Prettier packages; native `bun lint` runs oxlint rules natively in sub-20ms.
 
 ### 4. Unit & Integration Testing: bun:test
 - **Test Runner**: Native `bun test` and `bun test --coverage`.

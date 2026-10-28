@@ -275,8 +275,12 @@ export default async function SuccessPage({
                 {formatNZD(total)} NZD
               </dd>
             </div>
-            <p className="text-[10px] text-slate-400 font-medium text-right">
-              Includes NZ GST. A paid invoice is attached to your receipt email.
+            <div className="flex justify-between items-center text-[11px] font-bold text-slate-400">
+              <span>Includes 15% NZ GST</span>
+              <span className="tabular-nums">{formatNZD((total * 3) / 23)} NZD</span>
+            </div>
+            <p className="text-[10px] text-slate-400 font-medium text-right mt-1">
+              All payments in NZD. A paid GST invoice is attached to your receipt email.
             </p>
           </dl>
         </section>

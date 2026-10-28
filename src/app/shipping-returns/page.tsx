@@ -1,6 +1,7 @@
 'use client';
 
 import { Clock, RotateCcw, ShieldCheck, Truck } from 'lucide-react';
+import { PaymentMethodStrip } from '@/components/checkout/PaymentIcons';
 import { SHIPPING_RATES } from '@/config/shipping';
 
 export default function ShippingReturnsPage() {
@@ -74,6 +75,67 @@ export default function ShippingReturnsPage() {
                 <li>Contact us before returning any items</li>
                 <li>Full refund less shipping costs for change of mind</li>
               </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Payment Methods Section */}
+        <div className="bg-slate-900 text-white p-8 sm:p-12 rounded-[2.5rem] border border-primary/20 shadow-xl mb-20">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-white/10">
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-[0.25em] text-primary">
+                New Zealand Checkout
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-white mt-1">
+                Flexible Payment Options
+              </h2>
+            </div>
+            <PaymentMethodStrip showBankAndEftpos={true} className="justify-start md:justify-end" />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
+            <div className="bg-white/5 p-5 rounded-2xl border border-white/5">
+              <span className="text-xl mb-2 block">💳</span>
+              <h3 className="text-xs font-black uppercase tracking-wider text-primary mb-1">
+                Credit &amp; Debit Card
+              </h3>
+              <p className="text-xs text-slate-300 font-medium leading-relaxed">
+                Visa, Mastercard, and American Express with 256-bit SSL encryption via Stripe. No
+                card surcharges.
+              </p>
+            </div>
+
+            <div className="bg-white/5 p-5 rounded-2xl border border-white/5">
+              <span className="text-xl mb-2 block">📱</span>
+              <h3 className="text-xs font-black uppercase tracking-wider text-primary mb-1">
+                1-Tap Wallets
+              </h3>
+              <p className="text-xs text-slate-300 font-medium leading-relaxed">
+                Instant Apple Pay, Google Pay, and Stripe Link for fast biometric checkout on mobile
+                and desktop.
+              </p>
+            </div>
+
+            <div className="bg-white/5 p-5 rounded-2xl border border-white/5">
+              <span className="text-xl mb-2 block">⚡</span>
+              <h3 className="text-xs font-black uppercase tracking-wider text-primary mb-1">
+                Afterpay &amp; Klarna
+              </h3>
+              <p className="text-xs text-slate-300 font-medium leading-relaxed">
+                4 equal fortnightly instalments with zero interest. Instant online approval at
+                checkout.
+              </p>
+            </div>
+
+            <div className="bg-white/5 p-5 rounded-2xl border border-white/5">
+              <span className="text-xl mb-2 block">🇳🇿</span>
+              <h3 className="text-xs font-black uppercase tracking-wider text-primary mb-1">
+                ANZ Direct Deposit / Pick-up
+              </h3>
+              <p className="text-xs text-slate-300 font-medium leading-relaxed">
+                Pay via internet banking (0% fee) or choose Auckland North Shore collection with
+                Cash or EFTPOS.
+              </p>
             </div>
           </div>
         </div>

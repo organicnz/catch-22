@@ -1,6 +1,16 @@
 'use client';
 
-import { ArrowLeft, Banknote, CheckCircle, Copy, Loader2, Printer } from 'lucide-react';
+import {
+  ArrowLeft,
+  Banknote,
+  CheckCircle,
+  Copy,
+  ExternalLink,
+  Loader2,
+  MapPin,
+  Printer,
+  Share2,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Suspense, useState, useSyncExternalStore } from 'react';
@@ -42,7 +52,83 @@ function CopyButton({ value, label }: { value: string; label: string }) {
   );
 }
 
+function CopyAllBankDetailsButton({
+  bank,
+  reference,
+  total,
+}: {
+  bank: BankTransferSuccess['bank'];
+  reference: string;
+  total: number;
+}) {
+  const [copied, setCopied] = useState(false);
+
+  const copyAll = async () => {
+    const text = [
+      'Catch-22 New Zealand — Bank Transfer Details',
+      `Bank: ${bank.bankName}`,
+      `Account Name: ${bank.accountName}`,
+      `Account Number: ${bank.accountNumber}`,
+      `Amount: $${total.toFixed(2)} NZD`,
+      'Particulars: Order',
+      'Code: Catch22',
+      `Reference: ${reference}`,
+    ].join('\n');
+
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      toast.success('All bank transfer details copied to clipboard!');
+      window.setTimeout(() => setCopied(false), 2500);
+    } catch {
+      toast.error('Could not copy all details — please copy fields individually.');
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={copyAll}
+      className="inline-flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl bg-primary text-secondary text-xs font-black uppercase tracking-wider transition-all hover:bg-primary-dark shadow-sm"
+    >
+      <Copy size={14} strokeWidth={2.5} />
+      {copied ? '✓ All Details Copied!' : 'Copy All Bank Details to Clipboard'}
+    </button>
+  );
+}
+
+function ShareOrderButton({ reference, total }: { reference: string; total: number }) {
+  const share = async () => {
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({
+          title: `Catch-22 Order ${reference}`,
+          text: `Catch-22 order ${reference} — Total: $${total.toFixed(2)} NZD`,
+          url: window.location.href,
+        });
+      } catch {
+        // User cancelled or dismissed share sheet
+      }
+    }
+  };
+
+  if (typeof navigator === 'undefined' || !navigator.share) return null;
+
+  return (
+    <button
+      type="button"
+      onClick={share}
+      className="flex-1 inline-flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-secondary rounded-full py-4 px-6 text-xs font-black uppercase tracking-[0.2em] transition-all"
+    >
+      <Share2 size={16} strokeWidth={2.5} />
+      Share details
+    </button>
+  );
+}
+
 function SuccessPanel({ result }: { result: BankTransferSuccess }) {
+  const isPickup = result.paymentOption === 'pay_on_pickup';
+
   return (
     <div className="min-h-[80vh] bg-white pt-(--header-h) pb-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
@@ -52,11 +138,12 @@ function SuccessPanel({ result }: { result: BankTransferSuccess }) {
               <CheckCircle className="w-10 h-10 text-emerald-600" strokeWidth={3} />
             </div>
             <h1 className="text-3xl sm:text-4xl font-black text-secondary uppercase tracking-tight mb-3">
-              Order reserved
+              {isPickup ? 'Pick-up order reserved' : 'Order reserved'}
             </h1>
             <p className="text-slate-600 font-medium max-w-md leading-relaxed">
-              Thanks! Your gear is set aside. Complete the bank transfer below and we&apos;ll get it
-              packed as soon as the payment clears.
+              {isPickup
+                ? 'Thanks! Your gear is set aside in Chatswood, North Shore. Pay via Cash or EFTPOS when you collect.'
+                : "Thanks! Your gear is set aside. Complete the bank transfer below and we'll get it packed as soon as the payment clears."}
             </p>
             <div className="inline-flex items-center gap-2 mt-5 px-4 py-2 bg-emerald-50 border border-emerald-200 rounded-full">
               <span className="text-emerald-600 text-lg">🌊</span>
@@ -66,7 +153,7 @@ function SuccessPanel({ result }: { result: BankTransferSuccess }) {
             </div>
           </div>
 
-          {result.bank.testMode && (
+          {!isPickup && result.bank.testMode && (
             <div
               role="status"
               className="mb-8 p-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-2xl font-bold text-xs uppercase tracking-wider text-center"
@@ -80,7 +167,7 @@ function SuccessPanel({ result }: { result: BankTransferSuccess }) {
             <div className="grid gap-6 sm:grid-cols-2">
               <div>
                 <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-2 print:text-slate-500">
-                  Payment reference
+                  {isPickup ? 'Order reference' : 'Payment reference'}
                 </p>
                 <div className="flex items-center gap-3">
                   <p className="text-2xl font-black text-primary tracking-tight break-all print:text-secondary">
@@ -91,7 +178,7 @@ function SuccessPanel({ result }: { result: BankTransferSuccess }) {
               </div>
               <div>
                 <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-2 print:text-slate-500">
-                  Amount to pay
+                  {isPickup ? 'Amount due on collection' : 'Amount to pay'}
                 </p>
                 <p className="text-2xl font-black text-white tracking-tight print:text-secondary">
                   {money(result.totals.total)} NZD
@@ -113,7 +200,7 @@ function SuccessPanel({ result }: { result: BankTransferSuccess }) {
               <div className="flex justify-between">
                 <span>Shipping</span>
                 <span className="text-secondary">
-                  {result.totals.shipping === 0 ? 'Free' : money(result.totals.shipping)}
+                  {result.totals.shipping === 0 ? 'Free (Pick-up)' : money(result.totals.shipping)}
                 </span>
               </div>
               {result.totals.discount > 0 && (
@@ -123,7 +210,9 @@ function SuccessPanel({ result }: { result: BankTransferSuccess }) {
                 </div>
               )}
               <div className="flex justify-between items-baseline pt-3 mt-2 border-t border-slate-100 text-sm font-black text-secondary">
-                <span className="uppercase tracking-widest text-[11px]">Total due</span>
+                <span className="uppercase tracking-widest text-[11px]">
+                  {isPickup ? 'Total due on collection' : 'Total due'}
+                </span>
                 <span className="text-lg text-primary-ink tabular-nums">
                   {money(result.totals.total)} NZD
                 </span>
@@ -131,98 +220,271 @@ function SuccessPanel({ result }: { result: BankTransferSuccess }) {
             </div>
           </div>
 
-          {/* Bank details & NZ Banking Reference Breakdown */}
-          <section aria-labelledby="bank-details-heading" className="mb-8">
-            <h2
-              id="bank-details-heading"
-              className="text-sm font-black text-secondary uppercase tracking-[0.2em] mb-4 flex items-center gap-2"
-            >
-              <Banknote size={18} className="text-primary-ink" strokeWidth={2.5} />
-              NZ Internet Banking Details
-            </h2>
-            <div className="bg-slate-900 text-white rounded-3xl p-6 sm:p-8 border border-primary/20 shadow-xl space-y-6">
-              <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/10">
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">🇳🇿</span>
-                  <span className="text-xs font-black uppercase tracking-wider text-primary">
-                    Direct NZ Bank Transfer
+          {/* Conditional: Pick-up details or Bank details */}
+          {isPickup ? (
+            <section aria-labelledby="pickup-details-heading" className="mb-8">
+              <h2
+                id="pickup-details-heading"
+                className="text-sm font-black text-secondary uppercase tracking-[0.2em] mb-4 flex items-center gap-2"
+              >
+                <MapPin size={18} className="text-primary-ink" strokeWidth={2.5} />
+                Pick-up &amp; Collection Details
+              </h2>
+              <div className="bg-slate-900 text-white rounded-3xl p-6 sm:p-8 border border-primary/20 shadow-xl space-y-6">
+                <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/10">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">📍</span>
+                    <span className="text-xs font-black uppercase tracking-wider text-primary">
+                      Auckland North Shore Pick-up
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-400 bg-white/5 px-2.5 py-1 rounded-full border border-white/10">
+                    Zero Surcharge · Cash or EFTPOS
                   </span>
                 </div>
-                <span className="text-[10px] font-bold text-slate-400 bg-white/5 px-2.5 py-1 rounded-full border border-white/10">
-                  Zero Surcharge · All NZ Banks
-                </span>
-              </div>
 
-              <dl className="grid gap-4 sm:grid-cols-2">
-                <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
-                  <dt className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
-                    Bank
-                  </dt>
-                  <dd className="text-base font-black text-white">{result.bank.bankName}</dd>
-                </div>
-                <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
-                  <dt className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
-                    Account name
-                  </dt>
-                  <dd className="flex items-center justify-between gap-2">
-                    <span className="text-base font-black text-white">
-                      {result.bank.accountName}
-                    </span>
-                    <CopyButton value={result.bank.accountName} label="account name" />
-                  </dd>
-                </div>
-                <div className="sm:col-span-2 bg-white/10 p-5 rounded-2xl border border-primary/30 shadow-inner">
-                  <dt className="text-[10px] font-black text-primary uppercase tracking-widest mb-1">
-                    Account number
-                  </dt>
-                  <dd className="flex items-center justify-between gap-3">
-                    <span className="text-xl sm:text-2xl font-black text-white tracking-wider font-mono">
-                      {result.bank.accountNumber}
-                    </span>
-                    <CopyButton value={result.bank.accountNumber} label="account number" />
-                  </dd>
-                </div>
-              </dl>
-
-              {/* NZ 3-field payment references */}
-              <div className="pt-4 border-t border-white/10">
-                <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-3">
-                  Enter in your bank app (ANZ, ASB, BNZ, Westpac, Kiwibank):
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="bg-white/5 p-3 rounded-xl border border-white/10">
-                    <p className="text-[9px] font-black uppercase tracking-wider text-slate-400 mb-1">
-                      Particulars
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono font-bold text-sm text-white">Order</span>
-                      <CopyButton value="Order" label="particulars" />
-                    </div>
+                <dl className="grid gap-4 sm:grid-cols-2">
+                  <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                    <dt className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                      Pick-up Location
+                    </dt>
+                    <dd className="text-base font-black text-white">
+                      Chatswood, North Shore, Auckland
+                    </dd>
+                    <a
+                      href="https://www.google.com/maps/search/?api=1&query=Chatswood,+North+Shore,+Auckland,+New+Zealand"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs text-primary font-bold hover:underline mt-2"
+                    >
+                      <MapPin size={12} />
+                      View on Google Maps &rarr;
+                    </a>
                   </div>
-                  <div className="bg-white/5 p-3 rounded-xl border border-white/10">
-                    <p className="text-[9px] font-black uppercase tracking-wider text-slate-400 mb-1">
-                      Code
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono font-bold text-sm text-white">Catch22</span>
-                      <CopyButton value="Catch22" label="code" />
-                    </div>
+                  <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                    <dt className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                      Collection Time
+                    </dt>
+                    <dd className="text-base font-black text-white">
+                      By appointment (we email you to confirm)
+                    </dd>
                   </div>
-                  <div className="bg-primary/10 p-3 rounded-xl border border-primary/40">
-                    <p className="text-[9px] font-black uppercase tracking-wider text-primary mb-1">
-                      Reference (Required)
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono font-black text-sm text-primary">
-                        {result.reference}
+                  <div className="sm:col-span-2 bg-white/10 p-5 rounded-2xl border border-primary/30 shadow-inner">
+                    <dt className="text-[10px] font-black text-primary uppercase tracking-widest mb-1">
+                      Payment Accepted on Collection
+                    </dt>
+                    <dd className="flex items-center justify-between gap-2">
+                      <span className="text-base sm:text-lg font-black text-white">
+                        Cash or EFTPOS on collection
                       </span>
-                      <CopyButton value={result.reference} label="reference" />
+                      <span className="text-sm font-bold text-primary font-mono">
+                        {money(result.totals.total)} NZD
+                      </span>
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+            </section>
+          ) : (
+            <section aria-labelledby="bank-details-heading" className="mb-8">
+              <h2
+                id="bank-details-heading"
+                className="text-sm font-black text-secondary uppercase tracking-[0.2em] mb-4 flex items-center gap-2"
+              >
+                <Banknote size={18} className="text-primary-ink" strokeWidth={2.5} />
+                NZ Internet Banking Details
+              </h2>
+              <div className="bg-slate-900 text-white rounded-3xl p-6 sm:p-8 border border-primary/20 shadow-xl space-y-6">
+                <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/10">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">🇳🇿</span>
+                    <span className="text-xs font-black uppercase tracking-wider text-primary">
+                      Direct NZ Bank Transfer
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-400 bg-white/5 px-2.5 py-1 rounded-full border border-white/10">
+                    Zero Surcharge · All NZ Banks
+                  </span>
+                </div>
+
+                <dl className="grid gap-4 sm:grid-cols-2">
+                  <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                    <dt className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                      Bank
+                    </dt>
+                    <dd className="text-base font-black text-white">{result.bank.bankName}</dd>
+                  </div>
+                  <div className="bg-white/5 p-4 rounded-2xl border border-white/5">
+                    <dt className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                      Account name
+                    </dt>
+                    <dd className="flex items-center justify-between gap-2">
+                      <span className="text-base font-black text-white">
+                        {result.bank.accountName}
+                      </span>
+                      <CopyButton value={result.bank.accountName} label="account name" />
+                    </dd>
+                  </div>
+                  <div className="sm:col-span-2 bg-white/10 p-5 rounded-2xl border border-primary/30 shadow-inner">
+                    <dt className="text-[10px] font-black text-primary uppercase tracking-widest mb-1">
+                      Account number
+                    </dt>
+                    <dd className="flex items-center justify-between gap-3">
+                      <span className="text-xl sm:text-2xl font-black text-white tracking-wider font-mono">
+                        {result.bank.accountNumber}
+                      </span>
+                      <CopyButton value={result.bank.accountNumber} label="account number" />
+                    </dd>
+
+                    {/* Segmented for NZ Bank Apps */}
+                    <div className="mt-4 pt-3 border-t border-white/10">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[9px] font-black uppercase tracking-wider text-slate-300">
+                          NZ Bank App Separate Inputs
+                        </span>
+                        <span className="text-[9px] font-bold text-primary">
+                          1-click copy each part
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-4 gap-2">
+                        {(() => {
+                          const parts = result.bank.accountNumber.split('-');
+                          const bankCode = parts[0] || '06';
+                          const branchCode = parts[1] || '0241';
+                          const accountCode = parts[2] || '0897724';
+                          const suffixCode = parts[3] || '00';
+                          return (
+                            <>
+                              <div className="bg-black/20 p-2 rounded-xl border border-white/10 text-center">
+                                <span className="block text-[8px] font-black uppercase tracking-wider text-slate-400">
+                                  Bank
+                                </span>
+                                <span className="font-mono font-bold text-xs text-white">
+                                  {bankCode}
+                                </span>
+                                <div className="mt-1 flex justify-center">
+                                  <CopyButton value={bankCode} label="bank code" />
+                                </div>
+                              </div>
+                              <div className="bg-black/20 p-2 rounded-xl border border-white/10 text-center">
+                                <span className="block text-[8px] font-black uppercase tracking-wider text-slate-400">
+                                  Branch
+                                </span>
+                                <span className="font-mono font-bold text-xs text-white">
+                                  {branchCode}
+                                </span>
+                                <div className="mt-1 flex justify-center">
+                                  <CopyButton value={branchCode} label="branch code" />
+                                </div>
+                              </div>
+                              <div className="bg-black/20 p-2 rounded-xl border border-white/10 text-center">
+                                <span className="block text-[8px] font-black uppercase tracking-wider text-slate-400">
+                                  Account
+                                </span>
+                                <span className="font-mono font-bold text-xs text-white">
+                                  {accountCode}
+                                </span>
+                                <div className="mt-1 flex justify-center">
+                                  <CopyButton value={accountCode} label="account digits" />
+                                </div>
+                              </div>
+                              <div className="bg-black/20 p-2 rounded-xl border border-white/10 text-center">
+                                <span className="block text-[8px] font-black uppercase tracking-wider text-slate-400">
+                                  Suffix
+                                </span>
+                                <span className="font-mono font-bold text-xs text-white">
+                                  {suffixCode}
+                                </span>
+                                <div className="mt-1 flex justify-center">
+                                  <CopyButton value={suffixCode} label="suffix" />
+                                </div>
+                              </div>
+                            </>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                  </div>
+                </dl>
+
+                {/* NZ 3-field payment references */}
+                <div className="pt-4 border-t border-white/10">
+                  <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-3">
+                    Enter in your bank app (ANZ, ASB, BNZ, Westpac, Kiwibank):
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="bg-white/5 p-3 rounded-xl border border-white/10">
+                      <p className="text-[9px] font-black uppercase tracking-wider text-slate-400 mb-1">
+                        Particulars
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono font-bold text-sm text-white">Order</span>
+                        <CopyButton value="Order" label="particulars" />
+                      </div>
+                    </div>
+                    <div className="bg-white/5 p-3 rounded-xl border border-white/10">
+                      <p className="text-[9px] font-black uppercase tracking-wider text-slate-400 mb-1">
+                        Code
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono font-bold text-sm text-white">Catch22</span>
+                        <CopyButton value="Catch22" label="code" />
+                      </div>
+                    </div>
+                    <div className="bg-primary/10 p-3 rounded-xl border border-primary/40">
+                      <p className="text-[9px] font-black uppercase tracking-wider text-primary mb-1">
+                        Reference (Required)
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono font-black text-sm text-primary">
+                          {result.reference}
+                        </span>
+                        <CopyButton value={result.reference} label="reference" />
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-[11px] font-medium text-slate-400 mt-4 leading-relaxed">
+                    💡 <strong className="text-white">Clearance note:</strong> ANZ-to-ANZ transfers
+                    clear instantly. Payments from other NZ banks (ASB, BNZ, Westpac, Kiwibank)
+                    typically clear within 1–2 hours under Payments NZ 365-day settlement (7 days a
+                    week, including weekends).
+                  </p>
+                  <div className="mt-4 pt-4 border-t border-white/10 space-y-3">
+                    <CopyAllBankDetailsButton
+                      bank={result.bank}
+                      reference={result.reference}
+                      total={result.totals.total}
+                    />
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-2">
+                        Open your NZ bank to transfer:
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          { name: 'ANZ Bank', href: 'https://www.anz.co.nz/banking/' },
+                          { name: 'ASB', href: 'https://online.asb.co.nz/' },
+                          { name: 'BNZ', href: 'https://www.bnz.co.nz/ib/' },
+                          { name: 'Westpac', href: 'https://www.westpac.co.nz/' },
+                          { name: 'Kiwibank', href: 'https://www.kiwibank.co.nz/' },
+                        ].map((bank) => (
+                          <a
+                            key={bank.name}
+                            href={bank.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-[11px] font-bold transition-colors border border-white/10"
+                          >
+                            <span>{bank.name}</span>
+                            <ExternalLink size={10} className="opacity-60" />
+                          </a>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </section>
+            </section>
+          )}
 
           {/* Instructions */}
           <section aria-labelledby="instructions-heading" className="mb-10">
@@ -233,18 +495,51 @@ function SuccessPanel({ result }: { result: BankTransferSuccess }) {
               What happens next
             </h2>
             <ol className="space-y-3">
-              {result.bank.instructions.map((instruction, index) => (
-                <li key={instruction} className="flex gap-3 text-sm text-slate-600 font-medium">
-                  <span className="mt-0.5 h-5 w-5 shrink-0 rounded-full bg-primary/30 text-secondary text-[10px] font-black flex items-center justify-center">
-                    {index + 1}
-                  </span>
-                  {instruction}
-                </li>
-              ))}
+              {isPickup ? (
+                <>
+                  <li className="flex gap-3 text-sm text-slate-600 font-medium">
+                    <span className="mt-0.5 h-5 w-5 shrink-0 rounded-full bg-primary/30 text-secondary text-[10px] font-black flex items-center justify-center">
+                      1
+                    </span>
+                    <span>
+                      Your items are reserved immediately under order reference{' '}
+                      <strong className="text-secondary font-black">{result.reference}</strong>.
+                    </span>
+                  </li>
+                  <li className="flex gap-3 text-sm text-slate-600 font-medium">
+                    <span className="mt-0.5 h-5 w-5 shrink-0 rounded-full bg-primary/30 text-secondary text-[10px] font-black flex items-center justify-center">
+                      2
+                    </span>
+                    <span>
+                      We will contact you via email or phone to confirm a convenient pick-up time at
+                      our Chatswood, North Shore location.
+                    </span>
+                  </li>
+                  <li className="flex gap-3 text-sm text-slate-600 font-medium">
+                    <span className="mt-0.5 h-5 w-5 shrink-0 rounded-full bg-primary/30 text-secondary text-[10px] font-black flex items-center justify-center">
+                      3
+                    </span>
+                    <span>
+                      Inspect your braid and gear in person, and pay via Cash or EFTPOS on
+                      collection.
+                    </span>
+                  </li>
+                </>
+              ) : (
+                result.bank.instructions.map((instruction, index) => (
+                  <li key={instruction} className="flex gap-3 text-sm text-slate-600 font-medium">
+                    <span className="mt-0.5 h-5 w-5 shrink-0 rounded-full bg-primary/30 text-secondary text-[10px] font-black flex items-center justify-center">
+                      {index + 1}
+                    </span>
+                    {instruction}
+                  </li>
+                ))
+              )}
             </ol>
           </section>
 
           <div className="flex flex-col sm:flex-row gap-3 print:hidden">
+            <ShareOrderButton reference={result.reference} total={result.totals.total} />
             <button
               type="button"
               onClick={() => window.print()}
@@ -299,6 +594,9 @@ function CheckoutSkeleton() {
 function BankTransferCheckout() {
   const { items, totalPrice, clearCart } = useCartStore();
   const [shippingMethodId, setShippingMethodId] = useState('standard');
+  const [paymentOption, setPaymentOption] = useState<'bank_transfer' | 'pay_on_pickup'>(
+    'bank_transfer'
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [result, setResult] = useState<BankTransferSuccess | null>(null);
@@ -343,6 +641,7 @@ function BankTransferCheckout() {
         },
         shippingMethodId,
         promoCode: field('promoCode'),
+        paymentOption: shippingMethodId === 'pickup' ? paymentOption : 'bank_transfer',
       });
 
       if ('error' in response) {
@@ -401,10 +700,13 @@ function BankTransferCheckout() {
           <h1 className="text-4xl font-black tracking-tight text-secondary uppercase">
             Bank Transfer Checkout
           </h1>
+          <span className="text-xs font-black tracking-widest text-primary-ink uppercase mt-1">
+            Direct Bank Deposit &amp; Auckland Pick-up
+          </span>
           <div className="h-1.5 w-24 bg-primary mt-3" />
           <p className="mt-4 text-slate-500 font-medium max-w-2xl">
-            No card required. Place your order and we&apos;ll show you our bank details — your gear
-            is reserved once the order is placed.
+            No credit card needed. Pay online via ANZ direct bank deposit (0% surcharge, all NZ
+            banks) or choose local Auckland pick-up with payment on collection.
           </p>
         </div>
 
@@ -472,12 +774,17 @@ function BankTransferCheckout() {
                     htmlFor="phone"
                     className="block text-[10px] font-black text-secondary uppercase tracking-[0.2em] mb-2 ml-1"
                   >
-                    Phone
+                    Phone{' '}
+                    <span className="text-slate-400 font-bold lowercase">
+                      (NZ mobile or landline)
+                    </span>
                   </label>
                   <input
                     id="phone"
                     name="phone"
                     type="tel"
+                    inputMode="tel"
+                    placeholder="e.g. 021 123 4567 or 09 123 4567"
                     required
                     autoComplete="tel"
                     maxLength={30}
@@ -554,25 +861,48 @@ function BankTransferCheckout() {
                       id="region"
                       name="region"
                       type="text"
+                      list="nz-regions"
+                      placeholder="e.g. Auckland"
                       autoComplete="address-level1"
                       maxLength={100}
                       className="block w-full px-5 py-3 bg-white border border-slate-200 rounded-full text-sm font-medium focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-inner"
                     />
+                    <datalist id="nz-regions">
+                      <option value="Northland" />
+                      <option value="Auckland" />
+                      <option value="Waikato" />
+                      <option value="Bay of Plenty" />
+                      <option value="Gisborne" />
+                      <option value="Hawke's Bay" />
+                      <option value="Taranaki" />
+                      <option value="Manawatū-Whanganui" />
+                      <option value="Wellington" />
+                      <option value="Tasman" />
+                      <option value="Nelson" />
+                      <option value="Marlborough" />
+                      <option value="West Coast" />
+                      <option value="Canterbury" />
+                      <option value="Otago" />
+                      <option value="Southland" />
+                    </datalist>
                   </div>
                   <div>
                     <label
                       htmlFor="postcode"
                       className="block text-[10px] font-black text-secondary uppercase tracking-[0.2em] mb-2 ml-1"
                     >
-                      Postcode
+                      Postcode{' '}
+                      <span className="text-slate-400 font-bold lowercase">(4 digits)</span>
                     </label>
                     <input
                       id="postcode"
                       name="postcode"
                       type="text"
+                      inputMode="numeric"
+                      placeholder="e.g. 0626"
                       required
                       autoComplete="postal-code"
-                      maxLength={20}
+                      maxLength={10}
                       className="block w-full px-5 py-3 bg-white border border-slate-200 rounded-full text-sm font-medium focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-inner"
                     />
                   </div>
@@ -600,7 +930,12 @@ function BankTransferCheckout() {
                         name="shippingMethod"
                         value={rate.id}
                         checked={shippingMethodId === rate.id}
-                        onChange={() => setShippingMethodId(rate.id)}
+                        onChange={() => {
+                          setShippingMethodId(rate.id);
+                          if (rate.id !== 'pickup') {
+                            setPaymentOption('bank_transfer');
+                          }
+                        }}
                         className="h-4 w-4 accent-primary"
                       />
                       <span className="flex flex-col">
@@ -619,6 +954,82 @@ function BankTransferCheckout() {
                 ))}
               </div>
             </fieldset>
+
+            {shippingMethodId === 'pickup' && (
+              <fieldset className="bg-primary/5 border border-primary/20 rounded-3xl p-6 sm:p-8">
+                <legend className="px-2 text-sm font-black text-secondary uppercase tracking-[0.2em] flex items-center gap-2">
+                  <MapPin size={16} className="text-primary-ink" strokeWidth={2.5} />
+                  Pick-up Payment Option
+                </legend>
+                <p className="text-xs text-slate-600 font-medium mt-1 mb-4">
+                  For Auckland North Shore collection in Chatswood, choose how you would like to
+                  pay:
+                </p>
+                <div className="space-y-3">
+                  <label
+                    className={`flex items-start gap-4 cursor-pointer rounded-2xl border p-5 transition-all ${
+                      paymentOption === 'bank_transfer'
+                        ? 'border-secondary bg-white shadow-sm ring-1 ring-secondary/10'
+                        : 'border-slate-200 bg-white/70 hover:border-slate-300'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="pickupPaymentOption"
+                      value="bank_transfer"
+                      checked={paymentOption === 'bank_transfer'}
+                      onChange={() => setPaymentOption('bank_transfer')}
+                      className="h-4 w-4 mt-1 accent-secondary"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-black text-secondary">
+                          Direct Bank Transfer
+                        </span>
+                        <span className="text-[9px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
+                          ANZ 0% Fee
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500 font-medium mt-1">
+                        Pay online beforehand via internet banking. Your order will be ready for
+                        collection once funds clear.
+                      </p>
+                    </div>
+                  </label>
+
+                  <label
+                    className={`flex items-start gap-4 cursor-pointer rounded-2xl border p-5 transition-all ${
+                      paymentOption === 'pay_on_pickup'
+                        ? 'border-secondary bg-white shadow-sm ring-1 ring-secondary/10'
+                        : 'border-slate-200 bg-white/70 hover:border-slate-300'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="pickupPaymentOption"
+                      value="pay_on_pickup"
+                      checked={paymentOption === 'pay_on_pickup'}
+                      onChange={() => setPaymentOption('pay_on_pickup')}
+                      className="h-4 w-4 mt-1 accent-secondary"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-black text-secondary">
+                          Pay on Pick-up (Cash or EFTPOS)
+                        </span>
+                        <span className="text-[9px] font-black uppercase tracking-wider bg-primary/30 text-secondary px-2 py-0.5 rounded-full">
+                          Auckland Local
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500 font-medium mt-1">
+                        Reserve your gear online now and pay in person (Cash or EFTPOS) when you
+                        collect from Chatswood.
+                      </p>
+                    </div>
+                  </label>
+                </div>
+              </fieldset>
+            )}
 
             <div>
               <label
@@ -660,6 +1071,11 @@ function BankTransferCheckout() {
                   <Loader2 className="mr-3 animate-spin" size={20} strokeWidth={3} />
                   Reserving your order…
                 </>
+              ) : paymentOption === 'pay_on_pickup' && shippingMethodId === 'pickup' ? (
+                <>
+                  Place Order — Pay on Pick-up
+                  <MapPin className="ml-3" size={20} strokeWidth={3} />
+                </>
               ) : (
                 <>
                   Place Order — Pay by Bank Transfer
@@ -668,7 +1084,9 @@ function BankTransferCheckout() {
               )}
             </button>
             <p className="text-center text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-              No payment is taken now — you&apos;ll receive bank details next.
+              {paymentOption === 'pay_on_pickup' && shippingMethodId === 'pickup'
+                ? 'No payment is taken now — pay cash or EFTPOS upon collection in Chatswood.'
+                : "No payment is taken now — you'll receive bank details next."}
             </p>
           </form>
 

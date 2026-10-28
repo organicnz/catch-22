@@ -26,10 +26,15 @@ export interface BankTransferOrderInput {
   customer: BankTransferCustomer;
   shippingMethodId: string;
   promoCode: string;
+  paymentOption?: 'bank_transfer' | 'pay_on_pickup';
+}
+
+export interface ValidatedBankTransferOrder extends BankTransferOrderInput {
+  paymentOption: 'bank_transfer' | 'pay_on_pickup';
 }
 
 export type BankTransferOrderValidation =
-  | { ok: true; value: BankTransferOrderInput }
+  | { ok: true; value: ValidatedBankTransferOrder }
   | { ok: false; failure: { field: string; message: string } };
 
 const CONTROL_CHARS = /\p{C}/u;
@@ -114,6 +119,15 @@ export function validateBankTransferOrder(raw: unknown): BankTransferOrderValida
     return fail('promoCode', 'Promo code is too long.');
   }
 
+  const rawPaymentOption = text(body.paymentOption);
+  let paymentOption: 'bank_transfer' | 'pay_on_pickup' = 'bank_transfer';
+  if (rawPaymentOption === 'pay_on_pickup') {
+    if (shippingMethodId !== 'pickup') {
+      return fail('paymentOption', 'Pay on pick-up is only available when pick-up is selected.');
+    }
+    paymentOption = 'pay_on_pickup';
+  }
+
   return {
     ok: true,
     value: {
@@ -131,6 +145,7 @@ export function validateBankTransferOrder(raw: unknown): BankTransferOrderValida
       },
       shippingMethodId,
       promoCode,
+      paymentOption,
     },
   };
 }

@@ -83,8 +83,8 @@ jobs:
       - name: Biome check
         run: bunx biome ci src/
 
-      - name: Oxlint
-        run: bunx oxlint src/
+      - name: Bun lint (native)
+        run: bun --no-script lint src/
 
       - name: TypeScript type check
         run: bunx tsc --noEmit

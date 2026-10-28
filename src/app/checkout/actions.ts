@@ -20,6 +20,7 @@ export interface BankTransferSuccess {
   success: true;
   orderId: number;
   reference: string;
+  paymentOption: 'bank_transfer' | 'pay_on_pickup';
   totals: {
     subtotal: number;
     shipping: number;
@@ -38,10 +39,9 @@ export interface BankTransferSuccess {
 export type BankTransferResult = { error: string } | BankTransferSuccess;
 
 /**
- * Creates an order that is paid by bank transfer (direct deposit) instead of
- * a card. The order is written with status `on-hold` until the owner confirms
- * the money arrived, at which point the existing admin order actions move it
- * to `completed`.
+ * Creates an order that is paid by bank transfer (direct deposit) or
+ * pay on pick-up (cash/EFTPOS on collection) instead of online card.
+ * The order is written with status `on-hold` until confirmed.
  *
  * Everything money-related is recomputed server-side from the catalog — the
  * client only sends product ids, quantities and the customer's details.
@@ -58,7 +58,7 @@ export async function createBankTransferOrder(
 
   const check = validateBankTransferOrder(input);
   if (!check.ok) return { error: check.failure.message };
-  const { items, customer, shippingMethodId, promoCode } = check.value;
+  const { items, customer, shippingMethodId, promoCode, paymentOption } = check.value;
 
   const config = getBankTransferConfig();
   if (!config.configured) {
@@ -200,6 +200,12 @@ export async function createBankTransferOrder(
 
   // ── 6. Order + items. Items failing means the order is rolled back so the
   //       admin never sees a headless order. ────────────────────────────────
+  const isPayOnPickup = paymentOption === 'pay_on_pickup';
+  const paymentMethod = isPayOnPickup ? 'pay_on_pickup' : 'bank_transfer';
+  const adminNotes = isPayOnPickup
+    ? 'Pick-up order (Pay on collection: Cash / EFTPOS) — Chatswood, North Shore Auckland.'
+    : `Bank transfer order. Shipping: ${shippingRate.name} ($${totals.shipping.toFixed(2)}).`;
+
   const { data: order, error: orderError } = await admin
     .from('orders')
     .insert({
@@ -207,11 +213,11 @@ export async function createBankTransferOrder(
       status: 'on-hold',
       currency: 'NZD',
       total_amount: totals.total,
-      payment_method: 'bank_transfer',
+      payment_method: paymentMethod,
       billing_address: address,
       shipping_address: address,
       coupon_code: coupon ? promoCode.toUpperCase() : null,
-      admin_notes: `Bank transfer order. Shipping: ${shippingRate.name} ($${totals.shipping.toFixed(2)}).`,
+      admin_notes: adminNotes,
       created_at: new Date().toISOString(),
     })
     .select('id')
@@ -244,6 +250,7 @@ export async function createBankTransferOrder(
   await sendBankTransferEmails({
     reference,
     orderId: order.id,
+    paymentOption,
     customer,
     totals,
     lines,
@@ -257,6 +264,7 @@ export async function createBankTransferOrder(
     success: true,
     orderId: order.id,
     reference,
+    paymentOption,
     totals,
     bank: config.details,
   };
@@ -269,6 +277,7 @@ export async function createBankTransferOrder(
 interface EmailArgs {
   reference: string;
   orderId: number;
+  paymentOption: 'bank_transfer' | 'pay_on_pickup';
   customer: {
     firstName: string;
     lastName: string;
@@ -457,31 +466,71 @@ async function sendBankTransferEmails(args: EmailArgs): Promise<void> {
       </td></tr>
     </table>`;
 
-  // Customer confirmation — carries the payment instructions.
-  const customerHtml = shell(
-    'Your order is reserved',
-    `Thanks ${name}! We have set aside your gear. Complete the bank transfer below and we will get it packed.`,
-    bankBlock + itemsBlock + instructions
-  );
+  const isPickup = args.paymentOption === 'pay_on_pickup';
 
-  // Admin notification — flags that money is still outstanding.
-  const adminHtml = shell(
-    `Bank transfer order ${escapeHtml(args.reference)}`,
-    `A new bank transfer order is waiting for payment of ${money(args.totals.total)} NZD. The order is <strong>on-hold</strong> until the funds land.`,
-    orderBlock + itemsBlock + bankBlock
-  );
+  const pickupBlock = `
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;background:rgba(0,0,0,0.25);border-radius:8px;">
+      <tr><td style="padding:16px 20px;">
+        <p style="margin:0 0 8px;color:#D1FF00;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:0.15em;">Collection & Payment Details</p>
+        <p style="margin:0 0 2px;color:rgba(255,255,255,0.6);font-size:11px;text-transform:uppercase;letter-spacing:0.1em;">Pick-up Location</p>
+        <p style="margin:0 0 10px;color:#fff;font-size:14px;font-weight:bold;">Chatswood, North Shore, Auckland (By appointment)</p>
+        <p style="margin:0 0 2px;color:rgba(255,255,255,0.6);font-size:11px;text-transform:uppercase;letter-spacing:0.1em;">Payment Method</p>
+        <p style="margin:0 0 10px;color:#D1FF00;font-size:15px;font-weight:900;">Pay on Pick-up (Cash or EFTPOS on collection)</p>
+        <p style="margin:0 0 2px;color:rgba(255,255,255,0.6);font-size:11px;text-transform:uppercase;letter-spacing:0.1em;">Order Reference</p>
+        <p style="margin:0;color:#fff;font-size:16px;font-weight:900;">${escapeHtml(args.reference)}</p>
+      </td></tr>
+    </table>`;
+
+  const pickupInstructions = `
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 8px;background:rgba(0,0,0,0.25);border-radius:8px;">
+      <tr><td style="padding:16px 20px;">
+        <p style="margin:0 0 8px;color:#D1FF00;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:0.15em;">What happens next</p>
+        <p style="margin:0 0 6px;color:rgba(255,255,255,0.75);font-size:13px;line-height:1.5;">&bull; Your items are set aside immediately.</p>
+        <p style="margin:0 0 6px;color:rgba(255,255,255,0.75);font-size:13px;line-height:1.5;">&bull; We will contact you by email or phone to confirm a convenient pick-up time in Chatswood.</p>
+        <p style="margin:0 0 6px;color:rgba(255,255,255,0.75);font-size:13px;line-height:1.5;">&bull; Pay by Cash or EFTPOS upon collecting your gear.</p>
+      </td></tr>
+    </table>`;
+
+  // Customer confirmation
+  const customerHeading = isPickup ? 'Your pick-up order is reserved' : 'Your order is reserved';
+  const customerIntro = isPickup
+    ? `Thanks ${name}! We have set aside your gear. You selected Pay on Pick-up (Cash or EFTPOS in Chatswood, North Shore Auckland). We will email you shortly to confirm your collection time.`
+    : `Thanks ${name}! We have set aside your gear. Complete the bank transfer below and we will get it packed.`;
+  const customerBody = isPickup
+    ? pickupBlock + itemsBlock + pickupInstructions
+    : bankBlock + itemsBlock + instructions;
+  const customerHtml = shell(customerHeading, customerIntro, customerBody);
+
+  // Admin notification
+  const adminHeading = isPickup
+    ? `Pick-up order ${escapeHtml(args.reference)} (Pay on collection)`
+    : `Bank transfer order ${escapeHtml(args.reference)}`;
+  const adminIntro = isPickup
+    ? `A new pick-up order has been placed with payment on collection (Cash / EFTPOS) of ${money(args.totals.total)} NZD. The order is <strong>on-hold</strong> until the customer collects and pays.`
+    : `A new bank transfer order is waiting for payment of ${money(args.totals.total)} NZD. The order is <strong>on-hold</strong> until the funds land.`;
+  const adminBody = isPickup
+    ? orderBlock + itemsBlock + pickupBlock
+    : orderBlock + itemsBlock + bankBlock;
+  const adminHtml = shell(adminHeading, adminIntro, adminBody);
+
+  const customerSubject = isPickup
+    ? `Your Catch-22 pick-up order ${args.reference} — collection details`
+    : `Your Catch-22 order ${args.reference} — bank transfer details`;
+  const adminSubject = isPickup
+    ? `🎣 Pick-up order ${args.reference} — ${money(args.totals.total)} NZD (Pay on collection)`
+    : `🎣 Bank transfer order ${args.reference} — ${money(args.totals.total)} NZD awaiting payment`;
 
   await Promise.allSettled([
     postResend({
       from,
       to: args.customer.email,
-      subject: `Your Catch-22 order ${args.reference} — bank transfer details`,
+      subject: customerSubject,
       html: customerHtml,
     }),
     postResend({
       from,
       to: adminEmail,
-      subject: `🎣 Bank transfer order ${args.reference} — ${money(args.totals.total)} NZD awaiting payment`,
+      subject: adminSubject,
       html: adminHtml,
     }),
   ]);

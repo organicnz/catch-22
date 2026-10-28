@@ -607,11 +607,11 @@ pre-commit:
       run: bun biome check --write --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
       stage_fixed: true
 
-    # ── 18. oxlint – React / hooks / Next.js rules ───────────────────────────
-    oxlint:
+    # ── 18. bun lint – Native React / hooks / Next.js rules ──────────────────
+    bun-lint:
       priority: 18
       glob: "*.{ts,tsx}"
-      run: bun oxlint {staged_files}
+      run: bun --no-script lint {staged_files}
 
     # ── 19. TypeScript – type-check without full build ────────────────────────
     typecheck:
@@ -800,7 +800,7 @@ pre-push:
       priority: 5
       run: bun run lint:check
 
-    # oxlint already runs via lint:check above; kept separate for fast
+    # bun lint already runs via lint:check above; kept separate for fast
     # iteration on the React/hooks/Next rule set.
     # Just-in-time migration dry-run — mirrors the CI token-only flow:
     # supabase link + db push --linked --dry-run. Skips silently when the

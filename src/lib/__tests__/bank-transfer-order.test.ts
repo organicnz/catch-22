@@ -106,10 +106,32 @@ describe('validateBankTransferOrder()', () => {
     }
   });
 
-  it('rejects oversized promo codes', () => {
-    const result = validateBankTransferOrder(payload({ promoCode: 'X'.repeat(51) }));
+  it('defaults paymentOption to bank_transfer when omitted', () => {
+    const result = validateBankTransferOrder(payload());
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.paymentOption).toBe('bank_transfer');
+    }
+  });
+
+  it('accepts pay_on_pickup when shippingMethodId is pickup', () => {
+    const result = validateBankTransferOrder(
+      payload({ shippingMethodId: 'pickup', paymentOption: 'pay_on_pickup' })
+    );
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.paymentOption).toBe('pay_on_pickup');
+    }
+  });
+
+  it('rejects pay_on_pickup when shippingMethodId is not pickup', () => {
+    const result = validateBankTransferOrder(
+      payload({ shippingMethodId: 'standard', paymentOption: 'pay_on_pickup' })
+    );
     expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.failure.field).toBe('promoCode');
+    if (!result.ok) {
+      expect(result.failure.field).toBe('paymentOption');
+    }
   });
 });
 

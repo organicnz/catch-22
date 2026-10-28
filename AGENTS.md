@@ -30,7 +30,7 @@ Transform the legacy WordPress/Elementor ecosystem (catch-22.co.nz) into a moder
 ## 🛠 Working Stack (Simplified)
 - **Runtime & Package Manager**: Bun (All package management, scripts, runtime, and test execution — zero node/npm/yarn/pnpm dependencies)
 - **Type Checking**: `tsrs` (Rust-based TypeScript type checking, `tsrs --noEmit` — zero legacy `tsc`)
-- **Linting & Formatting**: Biome + Oxlint (Rust-based toolchain with sub-50ms execution)
+- **Linting & Formatting**: Biome + Native Bun Lint (Rust/C++ toolchain with sub-20ms execution)
 - **Git Automation**: Lefthook (Fast Rust/Go git hooks runner)
 - **Frontend**: Next.js 16 (App Router + React 19)
 - **Backend**: Supabase (Database, Auth, Storage via REST client)

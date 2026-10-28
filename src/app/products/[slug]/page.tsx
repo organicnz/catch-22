@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { AddToCartButton } from '@/components/checkout/AddToCartButton';
+import { PaymentMethodStrip } from '@/components/checkout/PaymentIcons';
 import { ProductSlider } from '@/components/products/ProductSlider';
 import { WishlistButton } from '@/components/products/WishlistButton';
 import {
@@ -322,6 +323,14 @@ async function ProductDetailsBody({ params }: { params: Promise<{ slug: string }
                   2.5% to Sea Cleaners
                 </span>
               </div>
+            </div>
+
+            {/* Payment methods reassurance */}
+            <div className="mt-6 pt-5 border-t border-slate-100 flex flex-col items-center gap-2">
+              <PaymentMethodStrip showBankAndEftpos={true} className="justify-center" />
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center mt-1">
+                All prices in NZD ($) incl. GST &middot; No card surcharges
+              </p>
             </div>
           </div>
         </div>

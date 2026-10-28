@@ -1,6 +1,7 @@
 'use client';
 
-import { ChevronDown, ShoppingCart } from 'lucide-react';
+import { ChevronDown, ShoppingBag, ShoppingCart } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useCartStore } from '@/lib/store/cart';
 
@@ -24,26 +25,33 @@ interface AddToCartButtonProps {
 }
 
 export function AddToCartButton({ product, variations = [] }: AddToCartButtonProps) {
+  const router = useRouter();
   const addItem = useCartStore((state) => state.addItem);
   const [isAdded, setIsAdded] = useState(false);
   const [selectedVariation, setSelectedVariation] = useState<Variation | null>(
     variations.length > 0 ? variations[0] : null
   );
 
-  const handleAddToCart = () => {
-    addItem({
-      id: selectedVariation ? selectedVariation.id : product.id,
-      name: selectedVariation
-        ? `${product.name} - ${Object.values(selectedVariation.attributes).join(', ')}`
-        : product.name,
-      price: selectedVariation ? selectedVariation.price : product.price,
-      quantity: 1,
-      image_url: product.image_url,
-      slug: product.slug,
-    });
+  const getCartItem = () => ({
+    id: selectedVariation ? selectedVariation.id : product.id,
+    name: selectedVariation
+      ? `${product.name} - ${Object.values(selectedVariation.attributes).join(', ')}`
+      : product.name,
+    price: selectedVariation ? selectedVariation.price : product.price,
+    quantity: 1,
+    image_url: product.image_url,
+    slug: product.slug,
+  });
 
+  const handleAddToCart = () => {
+    addItem(getCartItem());
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
+  };
+
+  const handleBuyNow = () => {
+    addItem(getCartItem());
+    router.push('/cart');
   };
 
   const isOutOfStock = selectedVariation
@@ -87,29 +95,47 @@ export function AddToCartButton({ product, variations = [] }: AddToCartButtonPro
 
       {variations.length > 0 && (
         <div className="mt-4 mb-6">
-          <p className="text-4xl font-black text-primary">${displayPrice.toFixed(2)}</p>
+          <p className="text-4xl font-black text-primary-ink">${displayPrice.toFixed(2)}</p>
         </div>
       )}
 
-      <button
-        type="button"
-        onClick={handleAddToCart}
-        disabled={isOutOfStock}
-        className={`w-full border-none rounded-full py-5 px-10 flex items-center justify-center text-sm font-black text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all uppercase tracking-widest shadow-xl ${
-          isOutOfStock
-            ? 'bg-slate-300 cursor-not-allowed shadow-none'
-            : isAdded
-              ? 'bg-emerald-500 shadow-emerald-100 scale-95'
-              : 'bg-primary hover:bg-primary-dark shadow-primary/20 hover:scale-[1.02] active:scale-95'
-        }`}
-      >
-        <ShoppingCart className="mr-3" size={20} strokeWidth={3} />
-        {isOutOfStock ? 'Out of stock' : isAdded ? 'Added to Cart!' : 'Add to bag'}
-      </button>
+      <div className="space-y-3">
+        <button
+          type="button"
+          onClick={handleAddToCart}
+          disabled={isOutOfStock}
+          className={`w-full border-none rounded-full py-5 px-10 flex items-center justify-center text-sm font-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all uppercase tracking-widest shadow-xl ${
+            isOutOfStock
+              ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
+              : isAdded
+                ? 'bg-emerald-500 text-white shadow-emerald-100 scale-95'
+                : 'bg-primary text-secondary hover:bg-secondary hover:text-white shadow-primary/20 hover:scale-[1.02] active:scale-95'
+          }`}
+        >
+          <ShoppingCart className="mr-3" size={20} strokeWidth={3} />
+          {isOutOfStock ? 'Out of stock' : isAdded ? 'Added to Cart!' : 'Add to bag'}
+        </button>
 
-      <div className="flex items-center justify-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-tighter">
-        <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-        Secure checkout via Stripe
+        {!isOutOfStock && (
+          <button
+            type="button"
+            onClick={handleBuyNow}
+            className="w-full bg-slate-100 hover:bg-secondary hover:text-white text-secondary border border-slate-200 rounded-full py-4 px-10 flex items-center justify-center text-xs font-black uppercase tracking-widest transition-all hover:scale-[1.01] active:scale-95"
+          >
+            <ShoppingBag className="mr-2.5" size={16} strokeWidth={2.5} />
+            Buy Now · Fast NZ Checkout
+          </button>
+        )}
+      </div>
+
+      <div className="flex flex-col items-center gap-1.5 text-center pt-2">
+        <div className="flex items-center justify-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-wider">
+          <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+          Fast NZ Checkout · 100% Secure
+        </div>
+        <p className="text-[10px] font-semibold text-slate-400">
+          Cards, Apple Pay, Google Pay, Afterpay &amp; ANZ Bank Deposit
+        </p>
       </div>
     </div>
   );

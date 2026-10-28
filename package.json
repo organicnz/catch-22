@@ -7,8 +7,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "biome lint --write ./src && oxlint ./src",
-    "lint:check": "biome lint ./src && oxlint ./src",
+    "lint": "biome lint --write ./src && bun --no-script lint --fix src",
+    "lint:check": "biome lint ./src && bun --no-script lint src",
     "format": "biome format --write ./src",
     "format:check": "biome format ./src",
     "check": "biome check --write ./src",
@@ -57,7 +57,6 @@
     "@types/react-dom": "19.3.0",
     "fast-check": "4.10.2",
     "lefthook": "2.2.2",
-    "oxlint": "1.89.0",
     "tailwindcss": "^4.3.3",
     "tsrs": "0.18.0-ts7.1.0-dev.20260929",
     "vercel": "65.2.0"

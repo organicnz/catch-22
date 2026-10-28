@@ -65,6 +65,31 @@ export default function FAQPage() {
       ],
     },
     {
+      category: 'Payment Options & Security',
+      questions: [
+        {
+          q: 'What payment methods do you accept?',
+          a: 'We accept all major credit and debit cards (Visa, Mastercard, American Express), Apple Pay, Google Pay, Stripe Link, Afterpay (4 fortnightly instalments), Klarna, direct New Zealand bank transfer (ANZ direct deposit with 0% surcharge), and Pay on Pick-up (Cash or EFTPOS upon collection from Chatswood, North Shore, Auckland).',
+        },
+        {
+          q: 'How does New Zealand Direct Bank Transfer work?',
+          a: 'When you choose Bank Transfer at checkout, no credit card is required. Your gear is reserved immediately under an on-hold order status, and you receive our ANZ account details with a unique payment reference (e.g. CATCH22-1001). Simply complete an internet banking transfer from any NZ bank (ANZ, ASB, BNZ, Westpac, Kiwibank). Once funds clear, your parcel is packed and dispatched. There is 0% surcharge.',
+        },
+        {
+          q: 'How does Afterpay & Klarna (Buy Now, Pay Later) work?',
+          a: 'Afterpay and Klarna allow you to split your purchase into 4 equal, interest-free instalments paid fortnightly. Select Afterpay or Klarna at checkout — approval is instant and your order is dispatched right away, with no waiting for subsequent payments.',
+        },
+        {
+          q: 'Can I pick up my gear in Auckland and pay on collection?',
+          a: 'Yes! Choose "Local Pick-up (Chatswood, Auckland)" at checkout ($0 shipping). You can pre-pay via bank deposit or select "Pay on Pick-up" to pay in person via Cash or EFTPOS when you collect your gear by appointment.',
+        },
+        {
+          q: 'Are all prices in New Zealand Dollars (NZD)?',
+          a: 'Yes, 100%. All prices on Catch-22 are in NZD ($) and include 15% NZ GST. There are no foreign exchange markups, international transaction fees, or hidden surprise charges.',
+        },
+      ],
+    },
+    {
       category: 'Charters & Partners',
       questions: [
         {
