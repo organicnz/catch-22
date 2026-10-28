@@ -57,7 +57,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ### 4. Development
 ```bash
 bun run dev          # dev server (Turbopack)
-bun test             # native Bun unit suite (<300ms)
+bun test             # native Bun unit suite (189 tests, <300ms)
 bun run typecheck    # tsrs Rust type checking
 bun run lint:check   # Biome + Oxlint code validation
 bun run test:e2e     # Playwright instant-nav + clearance + link-integrity guards

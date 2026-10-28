@@ -116,7 +116,7 @@ When the store generates revenue, move to Pro and revisit TTLs (`minutes`) for p
   - Package manager & runtime: Pure `bun` (`engines: { bun: ">=1.4.0" }`, `@types/bun`, zero `@types/node`).
   - Type checking: Swapped legacy `tsc` (`typescript` devDependency removed) with `tsrs` (`tsrs --noEmit`).
   - Linting & Formatting: `biome` v2.6.3 + `oxlint` sub-50ms execution, removing legacy ESLint/Prettier.
-  - Test suites: Native runner support (`bun test`), excised all legacy `// @vitest-environment node` docblocks, all 177 unit tests passing clean.
+  - Test suites: Native runner support (`bun test`), excised all legacy `// @vitest-environment node` docblocks, all 189 unit tests passing clean.
   - Vercel production deployment verified live on `https://www.catch-22.co.nz`.
 
 ---
