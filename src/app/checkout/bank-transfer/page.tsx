@@ -690,8 +690,10 @@ function BankTransferCheckout() {
   );
   const [selectedBankId, setSelectedBankId] = useState('anz');
   const [wantGstInvoice, setWantGstInvoice] = useState(false);
-  const [addressInput, setAddressInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [address1Val, setAddress1Val] = useState('');
+  const [address2Val, setAddress2Val] = useState('');
+  const [cityVal, setCityVal] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [result, setResult] = useState<BankTransferSuccess | null>(null);
 
@@ -920,7 +922,7 @@ function BankTransferCheckout() {
                     required
                     autoComplete="address-line1"
                     maxLength={200}
-                    onChange={(e) => setAddressInput(`${e.target.value} ${addressInput}`)}
+                    onChange={(e) => setAddress1Val(e.target.value)}
                     className="block w-full px-5 py-3 bg-white border border-slate-200 rounded-full text-sm font-medium focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-inner"
                   />
                 </div>
@@ -937,7 +939,7 @@ function BankTransferCheckout() {
                     type="text"
                     autoComplete="address-line2"
                     maxLength={200}
-                    onChange={(e) => setAddressInput(`${addressInput} ${e.target.value}`)}
+                    onChange={(e) => setAddress2Val(e.target.value)}
                     className="block w-full px-5 py-3 bg-white border border-slate-200 rounded-full text-sm font-medium focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-inner"
                   />
                 </div>
@@ -956,6 +958,7 @@ function BankTransferCheckout() {
                       required
                       autoComplete="address-level2"
                       maxLength={100}
+                      onChange={(e) => setCityVal(e.target.value)}
                       className="block w-full px-5 py-3 bg-white border border-slate-200 rounded-full text-sm font-medium focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-inner"
                     />
                   </div>
@@ -1012,7 +1015,6 @@ function BankTransferCheckout() {
                       required
                       autoComplete="postal-code"
                       maxLength={10}
-                      onChange={(e) => setAddressInput(`${addressInput} ${e.target.value}`)}
                       className="block w-full px-5 py-3 bg-white border border-slate-200 rounded-full text-sm font-medium focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-inner"
                     />
                   </div>
@@ -1020,7 +1022,7 @@ function BankTransferCheckout() {
 
                 {/* Rural Delivery Assistant */}
                 <NZRuralDeliveryAssistant
-                  addressText={addressInput}
+                  addressText={`${address1Val} ${address2Val} ${cityVal}`}
                   currentShippingId={shippingMethodId}
                   onSelectShipping={setShippingMethodId}
                 />
