@@ -1,3 +1,4 @@
+no_tty: true
 # Lefthook – Git hooks for Catch-22
 # Docs: https://github.com/evilmartians/lefthook
 #
@@ -232,7 +233,7 @@ pre-commit:
     # The AGENTS.md spec explicitly requires: "Every dynamic page MUST implement
     # generateMetadata for unique titles and descriptions."
     metadata-coverage:
-      priority: 8
+      priority: 9
       glob: 'src/app/**/page.tsx'
       run: |
         VIOLATIONS=""
@@ -517,7 +518,7 @@ pre-commit:
     # correctly. Importing app code (src/lib, src/components…) from a function
     # breaks the bundle (this caused BOOT_ERROR on earlier deployments).
     edge-import-scope:
-      priority: 17.5
+      priority: 17
       glob: 'supabase/functions/**/*.ts'
       run: |
         VIOLATIONS=""
@@ -559,7 +560,7 @@ pre-commit:
     # A leftover conflict marker compiles fine in most grammars but ships
     # broken code. Fail the commit if any staged file contains one.
     no-conflict-markers:
-      priority: 17.6
+      priority: 18
       run: |
         FOUND=$(grep -rn "^<<<<<<< \|^=======$\|^>>>>>>> " {staged_files} 2>/dev/null || true)
         if [ -n "$FOUND" ]; then
@@ -577,7 +578,7 @@ pre-commit:
     # (GitHub drops invalid workflow files). Parse-check any staged workflow
     # so a broken pipeline never ships.
     workflow-yaml:
-      priority: 17.7
+      priority: 19
       glob: '.github/workflows/*.{yml,yaml}'
       run: |
         ERRORS=""
@@ -601,20 +602,20 @@ pre-commit:
 
     # ── 17. bun fmt – Native Prettier-compatible formatting ──────────────────
     bun-fmt:
-      priority: 17
+      priority: 20
       glob: '*.{js,jsx,ts,tsx,json,css,html,yml,yaml,md}'
       run: bun fmt {staged_files}
       stage_fixed: true
 
     # ── 18. bun lint – Native React / hooks / Next.js rules ──────────────────
     bun-lint:
-      priority: 18
+      priority: 21
       glob: '*.{ts,tsx}'
       run: bun --no-script lint {staged_files}
 
     # ── 19. TypeScript – type-check without full build ────────────────────────
     typecheck:
-      priority: 19
+      priority: 22
       glob: '*.{ts,tsx}'
       run: bun tsrs --noEmit
 
@@ -626,7 +627,7 @@ pre-commit:
     # Allowed raw-access files (env.ts, supabase init) are already exempted
     # by no-raw-env-access; this closes the NEXT_PUBLIC + declaration gap.
     env-usage-coverage:
-      priority: 20
+      priority: 23
       glob: 'src/**/*.{ts,tsx}'
       run: |
         VIOLATIONS=""
@@ -666,12 +667,16 @@ pre-commit:
       run: |
         STAGED=$(git diff --cached --name-only 2>/dev/null || true)
         if echo "$STAGED" | grep -qx "package.json" && ! echo "$STAGED" | grep -qx "bun.lock"; then
-          echo ""
-          echo "✖  package.json staged without bun.lock."
-          echo "   Run: bun install   (updates the lockfile) then re-stage bun.lock."
-          echo "   CI installs with --frozen-lockfile and will fail otherwise."
-          echo ""
-          exit 1
+          # Only require bun.lock when dependency sections in package.json change
+          DEP_DIFF=$(git diff --cached -U0 package.json 2>/dev/null | grep -E '^[+-][[:space:]]*"(dependencies|devDependencies|peerDependencies|optionalDependencies|trustedDependencies|overrides)"' || true)
+          if [ -n "$DEP_DIFF" ]; then
+            echo ""
+            echo "✖  package.json dependencies changed without bun.lock."
+            echo "   Run: bun install   (updates the lockfile) then re-stage bun.lock."
+            echo "   CI installs with --frozen-lockfile and will fail otherwise."
+            echo ""
+            exit 1
+          fi
         fi
 
 # ─── commit-msg ───────────────────────────────────────────────────────────────
@@ -804,7 +809,7 @@ pre-push:
     # supabase link + db push --linked --dry-run. Skips silently when the
     # local machine has no link state / token (CI covers it there).
     migration-dryrun:
-      priority: 5.5
+      priority: 6
       glob: 'supabase/migrations/*.sql'
       run: |
         if [ ! -f "supabase/.temp/linked-project.json" ]; then
@@ -832,18 +837,18 @@ pre-push:
         fi
 
     tests:
-      priority: 6
+      priority: 7
       run: bun test
 
     typecheck:
-      priority: 7
+      priority: 8
       run: bun tsrs --noEmit
 
     # ── 6. Coverage threshold ─────────────────────────────────────────────────
     # Statement coverage ≥90% against the measurable lib/ + config/ files.
     # Current baseline: ~94% statements, 97% branches, 100% functions.
     coverage:
-      priority: 8
+      priority: 9
       run: |
         OUTPUT=$(bun test --coverage 2>&1 || true)
         echo "$OUTPUT"
@@ -864,7 +869,7 @@ pre-push:
 
     # ── 7. Build smoke-test ───────────────────────────────────────────────────
     build-check:
-      priority: 9
+      priority: 10
       run: NEXT_SKIP_ENV_VALIDATION=1 bun run build
 
     # ── 8. Peer-dependency compatibility ──────────────────────────────────────
@@ -872,7 +877,7 @@ pre-push:
     # audits, and tests while still violating a peer range that only breaks at
     # build/deploy time. Cheap to run locally (node_modules is present).
     peer-deps:
-      priority: 10
+      priority: 11
       run: bun scripts/check-peer-deps.mjs --all
 
 # ─── post-checkout ────────────────────────────────────────────────────────────

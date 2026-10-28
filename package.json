@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "prepare": "test -d .git && lefthook install || true",
+    "prepare": "test -d .git && bunx lefthook install --force || true",
+    "hooks:install": "bunx lefthook install --force",
+    "hooks:check": "bunx lefthook validate",
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
