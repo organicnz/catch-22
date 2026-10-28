@@ -3,7 +3,7 @@
  * End-to-end verification of the bank transfer checkout transaction.
  *
  * Verifies:
- * 1. Bank transfer configuration (ANZ, Account Name, 06-XXXX-XXXXXXX-XX).
+ * 1. Bank transfer configuration (bankName, accountName, accountNumber from env).
  * 2. Catalog product lookup & stock status verification.
  * 3. Server-side totals computation (subtotal + shipping).
  * 4. Database order insertion with status 'on-hold' and payment_method 'bank_transfer'.

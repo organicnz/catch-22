@@ -20,6 +20,14 @@ const serverSchema = publicSchema.extend({
   // Preview environment has no secrets (production-only env vars).
   STRIPE_SECRET_KEY: z.string().min(1).optional().catch(undefined),
   STRIPE_WEBHOOK_SECRET: z.string().min(1).optional().catch(undefined),
+  // Email / Order notifications (Resend)
+  RESEND_API_KEY: z.string().min(1).optional().catch(undefined),
+  RESEND_FROM_EMAIL: z.string().min(1).optional().default('orders@catch-22.co.nz'),
+  ADMIN_ORDER_EMAIL: z.string().min(1).optional().default('orders@catch-22.co.nz'),
+  // Bank transfer checkout
+  BANK_TRANSFER_BANK_NAME: z.string().min(1).optional().catch(undefined),
+  BANK_TRANSFER_ACCOUNT_NAME: z.string().min(1).optional().catch(undefined),
+  BANK_TRANSFER_ACCOUNT_NUMBER: z.string().min(1).optional().catch(undefined),
   // Contact notifications: test/ops overrides (defaults are derived in-code).
   CONTACT_FUNCTION_URL: z.string().url().optional(),
   CONTACT_RATE_LIMIT_MAX: z.coerce.number().int().positive().optional(),

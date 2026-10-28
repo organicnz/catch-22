@@ -75,7 +75,7 @@ The store supports three comprehensive payment options tailored for New Zealand 
 
 1. **Credit / Debit Cards & Digital Wallets**: Visa, Mastercard, Amex, Apple Pay, Google Pay, and Stripe Link via Stripe Hosted Checkout.
 2. **Afterpay (Buy Now, Pay Later)**: 4 interest-free fortnightly instalments via Stripe (`afterpay_clearpay`). Dynamic 4-instalment breakdown badges are rendered across all catalog product cards, product detail pages, and the cart.
-3. **Direct Bank Transfer (NZ Direct Deposit)**: Zero-card payment path directly into direct deposit account with automatic `on-hold` order reservation, unique `CATCH22-<id>` payment reference, and Resend email dispatches.
+3. **Direct Bank Transfer (NZ Direct Deposit)**: Zero-card payment path directly into the designated bank deposit account with automatic `on-hold` order reservation, unique `CATCH22-<id>` payment reference, and Resend email dispatches.
 
 ### Afterpay (BNPL) — Configuration
 
@@ -86,29 +86,29 @@ Afterpay is integrated directly into Stripe Checkout (`payment_method_types: ['c
 
 ### Bank Transfer — Configuration
 
-Bank transfer config is stored in the **Supabase Vault** (Edge Function secrets), which is the canonical store for all runtime config. The Next.js server action also reads these via `process.env`, so they must be mirrored in Vercel too.
+Bank transfer config is stored in **GitHub Secrets**, **Supabase Vault** (Edge Function secrets), and **Vercel Production Environment Variables**. The Next.js server action reads these via `process.env`.
 
 **Step 1 — Set in Supabase Vault (CLI):**
 ```bash
 supabase secrets set \
   BANK_TRANSFER_BANK_NAME="ANZ" \
-  BANK_TRANSFER_ACCOUNT_NAME="Account Name" \
-  BANK_TRANSFER_ACCOUNT_NUMBER="06-XXXX-XXXXXXX-XX"
+  BANK_TRANSFER_ACCOUNT_NAME="<ACCOUNT_NAME>" \
+  BANK_TRANSFER_ACCOUNT_NUMBER="<ACCOUNT_NUMBER>"
 ```
 
 Verify with `supabase secrets list`. See `supabase/functions/.env.example` for the full secrets manifest.
 
-**Step 2 — Mirror in Vercel** (required for the Next.js server action):
+**Step 2 — Mirror in Vercel & GitHub Secrets** (required for the Next.js server action & CI):
 
-Bank transfer checkout **will not work in production** unless these three variables are also set in the Vercel dashboard. Without them, the checkout refuses to create orders rather than showing a wrong account number to customers.
+Bank transfer checkout **will not work in production** unless these variables are set in the Vercel dashboard and GitHub Secrets. Without them, the checkout refuses to create orders rather than showing a wrong account number to customers.
 
 Go to: Vercel Dashboard → `catch-22` project → Settings → Environment Variables → Add to **Production**
 
-| Variable | Value |
-|---|---|
-| `BANK_TRANSFER_BANK_NAME` | `ANZ` |
-| `BANK_TRANSFER_ACCOUNT_NAME` | `Account Name` |
-| `BANK_TRANSFER_ACCOUNT_NUMBER` | `06-XXXX-XXXXXXX-XX` |
+| Variable | Description | Example |
+|---|---|---|
+| `BANK_TRANSFER_BANK_NAME` | Bank institution name | `ANZ` |
+| `BANK_TRANSFER_ACCOUNT_NAME` | Registered account holder | `Catch-22` |
+| `BANK_TRANSFER_ACCOUNT_NUMBER` | NZ Bank Account format | `06-XXXX-XXXXXXX-XX` |
 
 After adding all three, trigger a redeployment (Settings → Deployments → Redeploy, or push a commit).
 

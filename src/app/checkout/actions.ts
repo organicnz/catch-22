@@ -12,6 +12,7 @@ import {
   roundMoney,
   validateBankTransferOrder,
 } from '@/lib/bank-transfer-order';
+import { env } from '@/lib/env';
 import { clientKey, rateLimit } from '@/lib/rate-limit';
 import { createAdminClient, createServerClient } from '@/lib/supabase-server';
 
@@ -315,7 +316,7 @@ async function postResend(payload: {
   subject: string;
   html: string;
 }): Promise<void> {
-  const key = process.env.RESEND_API_KEY;
+  const key = env.RESEND_API_KEY;
   if (!key || key === 're_placeholder') {
     console.warn('[bank-transfer] RESEND_API_KEY not configured — skipping email');
     return;
@@ -342,8 +343,8 @@ async function postResend(payload: {
 }
 
 async function sendBankTransferEmails(args: EmailArgs): Promise<void> {
-  const from = process.env.RESEND_FROM_EMAIL || 'orders@catch-22.co.nz';
-  const adminEmail = process.env.ADMIN_ORDER_EMAIL || 'orders@catch-22.co.nz';
+  const from = env.RESEND_FROM_EMAIL || 'orders@catch-22.co.nz';
+  const adminEmail = env.ADMIN_ORDER_EMAIL || 'orders@catch-22.co.nz';
 
   const name = escapeHtml(`${args.customer.firstName} ${args.customer.lastName}`.trim());
   const email = escapeHtml(args.customer.email);

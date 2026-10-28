@@ -12,6 +12,8 @@
  * is used so the whole flow can be exercised locally.
  */
 
+import { env } from '@/lib/env';
+
 export interface BankTransferDetails {
   bankName: string;
   accountName: string;
@@ -32,9 +34,9 @@ const PRODUCTION_REQUIRED = [
 ] as const;
 
 export function getBankTransferConfig(): BankTransferConfig {
-  const bankName = process.env.BANK_TRANSFER_BANK_NAME?.trim() ?? '';
-  const accountName = process.env.BANK_TRANSFER_ACCOUNT_NAME?.trim() ?? '';
-  const accountNumber = process.env.BANK_TRANSFER_ACCOUNT_NUMBER?.trim() ?? '';
+  const bankName = env.BANK_TRANSFER_BANK_NAME?.trim() ?? '';
+  const accountName = env.BANK_TRANSFER_ACCOUNT_NAME?.trim() ?? '';
+  const accountNumber = env.BANK_TRANSFER_ACCOUNT_NUMBER?.trim() ?? '';
 
   const missing = PRODUCTION_REQUIRED.filter((name) => {
     if (name === 'BANK_TRANSFER_BANK_NAME') return !bankName;

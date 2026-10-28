@@ -33,7 +33,7 @@ All UI development must adhere to the core design tokens.
 ## 💳 Payment Architecture
 1. **Cards & Stripe Link**: Visa, Mastercard, Amex, Apple Pay, Google Pay via Stripe Hosted Checkout.
 2. **Afterpay (BNPL)**: 4 interest-free fortnightly instalments via Stripe (`afterpay_clearpay`). Dynamic 4-instalment badges rendered on product cards and cart.
-3. **Direct Bank Transfer (NZ Direct Deposit)**: Zero-card checkout into direct deposit account (`06-XXXX-XXXXXXX-XX`, `Account Name`) with automated `on-hold` order reservation, unique `CATCH22-<id>` payment reference, and Resend email alerts to customer and store (`orders@catch-22.co.nz`).
+3. **Direct Bank Transfer (NZ Direct Deposit)**: Zero-card checkout into direct deposit account (configured via environment secrets) with automated `on-hold` order reservation, unique `CATCH22-<id>` payment reference, and Resend email alerts to customer and store administrator.
 
 ---
 
