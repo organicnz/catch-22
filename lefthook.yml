@@ -323,7 +323,8 @@ pre-commit:
       glob: 'src/**/*.{ts,tsx}'
       run: |
         # src/app/api/checkout/route.ts needs createAdminClient for guest coupon validation
-        ALLOWLIST="src/app/admin/|src/app/api/webhooks/|src/app/api/checkout/route.ts|src/app/products/page.tsx|src/app/account/page.tsx|src/app/checkout/actions.ts|src/app/success/page.tsx|src/lib/supabase-server.ts|src/lib/admin-auth.ts"
+        # src/lib/actions/promo.ts needs createAdminClient for guest promo code preview
+        ALLOWLIST="src/app/admin/|src/app/api/webhooks/|src/app/api/checkout/route.ts|src/lib/actions/promo.ts|src/app/products/page.tsx|src/app/account/page.tsx|src/app/checkout/actions.ts|src/app/success/page.tsx|src/lib/supabase-server.ts|src/lib/admin-auth.ts"
         VIOLATIONS=""
         for f in {staged_files}; do
           [ -f "$f" ] || continue
@@ -826,7 +827,7 @@ pre-push:
           exit 0
         fi
         echo "🗄️   Migrations changed — dry-running local → remote diff..."
-        OUT=$(bun x supabase@latest db push --linked --dry-run --yes 2>&1)
+        OUT=$(bunx supabase@latest db push --linked --dry-run --yes 2>&1)
         RES=$?
         if [ $RES -eq 0 ]; then
           echo "✔   Migration dry-run passed."

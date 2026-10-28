@@ -93,8 +93,6 @@ jobs:
           if [ "$FAILURES" -gt 0 ]; then exit 1; fi
           echo "✅ all edge functions booted"
 
-
-
       # Mock-backed by default via playwright.config webServer env:
       # CONTACT_FUNCTION_URL points at scripts/mock-notify-contact.mjs, so no
       # real email leaves. CONTACT_RATE_LIMIT_MAX is raised for the suite.

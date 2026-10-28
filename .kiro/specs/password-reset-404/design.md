@@ -11,6 +11,7 @@ No new dependencies are required. The page uses the existing `createClient()` br
 ## Bug Condition
 
 **isBugCondition(request):**
+
 ```
 request.path === "/account/update-password"
 ```
@@ -26,6 +27,7 @@ This is a deterministic, structural bug (missing file), not a logic or data bug.
 ## Expected Behavior
 
 **expectedBehavior(result) for requests with a valid recovery session:**
+
 ```
 result.status === 200
 AND result.body contains a password update form
@@ -34,6 +36,7 @@ AND on success, router.push("/account")
 ```
 
 **expectedBehavior(result) for requests without a valid session:**
+
 ```
 result.redirectsTo === "/login?error=Invalid_Token"
 ```
@@ -58,13 +61,13 @@ These behaviors exist today and must not regress after the fix is applied.
 
 **¬isBugCondition(request) — non-buggy paths that must be preserved:**
 
-| Requirement | Condition | Expected Preserved Behavior |
-|---|---|---|
-| 3.1 | Normal login flow | `supabase.auth.signInWithPassword` authenticates and redirects to `/account` |
-| 3.2 | Authenticated `/account` visit | Account overview page renders without disruption |
-| 3.3 | `/auth/callback` code exchange | `exchangeCodeForSession(code)` succeeds and redirects to `next` param |
-| 3.4 | MFA verification at `/auth/mfa` | Successful TOTP verify redirects to `/account` |
-| 3.5 | Password reset email dispatch | `resetPasswordForEmail` sends email with link to `/account/update-password` |
+| Requirement | Condition                       | Expected Preserved Behavior                                                  |
+| ----------- | ------------------------------- | ---------------------------------------------------------------------------- |
+| 3.1         | Normal login flow               | `supabase.auth.signInWithPassword` authenticates and redirects to `/account` |
+| 3.2         | Authenticated `/account` visit  | Account overview page renders without disruption                             |
+| 3.3         | `/auth/callback` code exchange  | `exchangeCodeForSession(code)` succeeds and redirects to `next` param        |
+| 3.4         | MFA verification at `/auth/mfa` | Successful TOTP verify redirects to `/account`                               |
+| 3.5         | Password reset email dispatch   | `resetPasswordForEmail` sends email with link to `/account/update-password`  |
 
 The fix is purely additive (creating a new file). It does not touch any existing route, component, or utility. Preservation risk is minimal.
 
@@ -213,17 +216,17 @@ export default function UpdatePasswordPage() {
 
 Mirrors `src/app/auth/mfa/page.tsx` exactly:
 
-| Element | Class |
-|---|---|
-| Page wrapper | `min-h-[80vh] bg-white flex items-center justify-center px-4 py-16` |
-| Card | `max-w-md w-full bg-slate-50 p-10 rounded-3xl shadow-sm text-center border border-slate-100` |
-| Icon container | `p-4 bg-primary/10 text-primary rounded-2xl mb-4` |
-| Heading | `text-3xl font-black text-secondary uppercase tracking-tight` |
-| Accent bar | `h-1.5 w-16 bg-primary` |
-| Labels | `text-[10px] font-black text-secondary uppercase tracking-widest` |
-| Inputs | `bg-white border border-slate-200 rounded-2xl focus:ring-2 focus:ring-primary` |
-| Submit button | `bg-secondary text-white font-black rounded-full` |
-| Error block | `bg-rose-50 border border-rose-100 rounded-2xl` with `ShieldAlert` icon |
+| Element        | Class                                                                                        |
+| -------------- | -------------------------------------------------------------------------------------------- |
+| Page wrapper   | `min-h-[80vh] bg-white flex items-center justify-center px-4 py-16`                          |
+| Card           | `max-w-md w-full bg-slate-50 p-10 rounded-3xl shadow-sm text-center border border-slate-100` |
+| Icon container | `p-4 bg-primary/10 text-primary rounded-2xl mb-4`                                            |
+| Heading        | `text-3xl font-black text-secondary uppercase tracking-tight`                                |
+| Accent bar     | `h-1.5 w-16 bg-primary`                                                                      |
+| Labels         | `text-[10px] font-black text-secondary uppercase tracking-widest`                            |
+| Inputs         | `bg-white border border-slate-200 rounded-2xl focus:ring-2 focus:ring-primary`               |
+| Submit button  | `bg-secondary text-white font-black rounded-full`                                            |
+| Error block    | `bg-rose-50 border border-rose-100 rounded-2xl` with `ShieldAlert` icon                      |
 
 ---
 

@@ -57,7 +57,7 @@ This feature updates the Catch-22 website by migrating content from the legacy W
 
 #### Acceptance Criteria
 
-1. WHEN scanning ANY migrated page code, THE Artifact_Scanner SHALL identify all WordPress-specific class names (wp-*, elementor-*, freshio-*)
+1. WHEN scanning ANY migrated page code, THE Artifact_Scanner SHALL identify all WordPress-specific class names (wp-_, elementor-_, freshio-*)
 2. WHEN WordPress artifacts are found, THE Artifact_Remover SHALL replace them with semantic HTML5 elements or Tailwind CSS classes
 3. THE Artifact_Remover SHALL remove all references to WordPress plugins (WooCommerce classes, YITH wishlist classes)
 4. WHEN Freshio theme CSS variables are found, THE Artifact_Remover SHALL replace them with Sensory_Luxury_Design tokens
@@ -190,4 +190,3 @@ This feature updates the Catch-22 website by migrating content from the legacy W
 5. ALL Migrated_Pages SHALL use touch-friendly button sizes (minimum 44x44px tap targets)
 6. WHEN rendering navigation, ALL Migrated_Pages SHALL collapse to hamburger menu on mobile viewports
 7. ALL Migrated_Pages SHALL test layout integrity on viewport widths from 320px to 1920px
-

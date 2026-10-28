@@ -108,6 +108,7 @@ _For any_ invocation of `updateUserSettingsAction` where the bug condition does 
 No other changes are required. The surrounding logic (auth check, key filter, settings merge, error handling, `revalidatePath`) is correct and must not be modified.
 
 **Before (primary upsert):**
+
 ```typescript
 .upsert({
   user_id: user.id,
@@ -118,6 +119,7 @@ No other changes are required. The surrounding logic (auth check, key filter, se
 ```
 
 **After (primary upsert):**
+
 ```typescript
 .upsert({
   user_id: user.id,
@@ -127,6 +129,7 @@ No other changes are required. The surrounding logic (auth check, key filter, se
 ```
 
 **Before (fallback upsert):**
+
 ```typescript
 .upsert({
   email: user.email,
@@ -137,6 +140,7 @@ No other changes are required. The surrounding logic (auth check, key filter, se
 ```
 
 **After (fallback upsert):**
+
 ```typescript
 .upsert({
   email: user.email,

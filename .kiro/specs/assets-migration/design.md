@@ -51,6 +51,7 @@ graph LR
 ```
 
 Pages follow a strict split:
+
 - **Server Components** for all data fetching (Supabase queries, static content rendering)
 - **Client Components** only where interactivity is required (contact form, cart, wishlist)
 - `revalidate = 60` on all data-fetching pages for ISR
@@ -61,14 +62,14 @@ Pages follow a strict split:
 
 ### Page Component Map
 
-| Legacy HTML File | Next.js Route | Component File | Type |
-|---|---|---|---|
-| `Home - Catch-22.html` | `/` | `src/app/page.tsx` | Server + Client (Suspense) |
-| `Shop - Catch-22.html` | `/products` | `src/app/products/page.tsx` | Server |
-| `Contact us - Catch-22.html` | `/contact` | `src/app/contact/page.tsx` | Client |
-| `FAQs - Catch-22.html` | `/faqs` | `src/app/faqs/page.tsx` | Server |
-| `Visit Our Partners - Catch-22.html` | `/partners` | `src/app/partners/page.tsx` | Server |
-| `Catch-22 Catch-Snaps.html` | `/gallery` | `src/app/gallery/page.tsx` | Server |
+| Legacy HTML File                     | Next.js Route | Component File              | Type                       |
+| ------------------------------------ | ------------- | --------------------------- | -------------------------- |
+| `Home - Catch-22.html`               | `/`           | `src/app/page.tsx`          | Server + Client (Suspense) |
+| `Shop - Catch-22.html`               | `/products`   | `src/app/products/page.tsx` | Server                     |
+| `Contact us - Catch-22.html`         | `/contact`    | `src/app/contact/page.tsx`  | Client                     |
+| `FAQs - Catch-22.html`               | `/faqs`       | `src/app/faqs/page.tsx`     | Server                     |
+| `Visit Our Partners - Catch-22.html` | `/partners`   | `src/app/partners/page.tsx` | Server                     |
+| `Catch-22 Catch-Snaps.html`          | `/gallery`    | `src/app/gallery/page.tsx`  | Server                     |
 
 ### Sanitization Layer Interface
 
@@ -81,19 +82,19 @@ The `sanitizeWPContent` function in `src/app/[slug]/page.tsx` is the canonical s
  * Removes WordPress artifacts, spam content, and XSS vectors from HTML strings.
  * Safe to call on any user-generated or legacy-migrated content.
  */
-export function sanitizeWPContent(html: string): string
+export function sanitizeWPContent(html: string): string;
 
 /**
  * Sanitizes a plain text string (no HTML) — replaces spam keywords with "..."
  * Used for blog post titles and other non-HTML text fields.
  */
-export function sanitizeText(text: string): string
+export function sanitizeText(text: string): string;
 
 /**
  * Returns true if the content contains suspicious patterns that warrant
  * manual review (excessive links, encoded strings, foreign spam patterns).
  */
-export function hasSuspiciousContent(html: string): boolean
+export function hasSuspiciousContent(html: string): boolean;
 ```
 
 ### SEO Metadata Interface
@@ -129,12 +130,12 @@ For dynamic pages (products, blog posts), `generateMetadata` is an async functio
 
 All components must use the CSS custom properties defined in `src/app/globals.css` via Tailwind utility classes:
 
-| Token | CSS Variable | Tailwind Class | Value |
-|---|---|---|---|
-| Primary Lime | `--primary` | `bg-primary`, `text-primary`, `border-primary` | `#D1FF00` |
-| Deep Secondary | `--secondary` | `bg-secondary`, `text-secondary` | `#0F172A` |
-| Primary Dark | `--primary-dark` | `bg-primary-dark` | `#b8d600` |
-| Accent | `--accent` | `bg-accent`, `text-accent` | `#dfb178` |
+| Token          | CSS Variable     | Tailwind Class                                 | Value     |
+| -------------- | ---------------- | ---------------------------------------------- | --------- |
+| Primary Lime   | `--primary`      | `bg-primary`, `text-primary`, `border-primary` | `#D1FF00` |
+| Deep Secondary | `--secondary`    | `bg-secondary`, `text-secondary`               | `#0F172A` |
+| Primary Dark   | `--primary-dark` | `bg-primary-dark`                              | `#b8d600` |
+| Accent         | `--accent`       | `bg-accent`, `text-accent`                     | `#dfb178` |
 
 ---
 
@@ -156,9 +157,9 @@ graph TD
 ```typescript
 interface ContentRow {
   id: number;
-  title: string;        // Blog post / page title — sanitize with sanitizeText()
-  slug: string;         // URL slug
-  body: string;         // HTML content — sanitize with sanitizeWPContent()
+  title: string; // Blog post / page title — sanitize with sanitizeText()
+  slug: string; // URL slug
+  body: string; // HTML content — sanitize with sanitizeWPContent()
   type: 'post' | 'page';
   status: 'publish' | 'draft';
   created_at: string;
@@ -176,7 +177,7 @@ interface ProductRow {
   regular_price: number | null;
   sale_price: number | null;
   image_url: string | null;
-  description: string;  // HTML — sanitize before rendering
+  description: string; // HTML — sanitize before rendering
   stock_status: 'instock' | 'outofstock';
 }
 ```
@@ -187,17 +188,51 @@ The canonical spam keyword list is maintained in `src/lib/sanitize.ts`:
 
 ```typescript
 export const SPAM_KEYWORDS = [
-  'casino', 'slot', 'betting', 'gambling', 'poker', 'bingo', 'bonus', 'rtp',
-  'vavada', '1xbet', 'mostbet', 'pin-up', 'vulcan', 'mahjong', 'sweet bonanza',
-  'judi', 'genset', 'daftar', 'situs', 'gacor', 'olympus', 'sbobet',
-  'spaceman', 'pragmatic', 'xanax', 'steroid', 'kasyno',
-  'betsala', 'jeetcity', 'wazamba', 'moonwin', 'winspirit', 'loto',
-  'apuesta', 'hellspincassino', 'candyspinz', 'wildsino', 'f12bet',
+  'casino',
+  'slot',
+  'betting',
+  'gambling',
+  'poker',
+  'bingo',
+  'bonus',
+  'rtp',
+  'vavada',
+  '1xbet',
+  'mostbet',
+  'pin-up',
+  'vulcan',
+  'mahjong',
+  'sweet bonanza',
+  'judi',
+  'genset',
+  'daftar',
+  'situs',
+  'gacor',
+  'olympus',
+  'sbobet',
+  'spaceman',
+  'pragmatic',
+  'xanax',
+  'steroid',
+  'kasyno',
+  'betsala',
+  'jeetcity',
+  'wazamba',
+  'moonwin',
+  'winspirit',
+  'loto',
+  'apuesta',
+  'hellspincassino',
+  'candyspinz',
+  'wildsino',
+  'f12bet',
 ] as const;
 
 export const TRUSTED_DOMAINS = [
   'catch-22.co.nz',
-  'i0.wp.com', 'i1.wp.com', 'i2.wp.com',
+  'i0.wp.com',
+  'i1.wp.com',
+  'i2.wp.com',
   'supabase.co',
   'stripe.com',
   'hamandtys.com',
@@ -212,61 +247,61 @@ export const TRUSTED_DOMAINS = [
 
 ## Correctness Properties
 
-*A property is a characteristic or behavior that should hold true across all valid executions of a system — essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
+_A property is a characteristic or behavior that should hold true across all valid executions of a system — essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees._
 
 Property-based testing is applicable here because the sanitization layer is a pure transformation function with a large input space (arbitrary HTML strings), and the design system compliance checks are universal properties that should hold for all rendered components. We use [fast-check](https://github.com/dubzzz/fast-check) as the PBT library (TypeScript-native, well-maintained, works with Vitest).
 
 ### Property 1: Spam keyword removal is total
 
-*For any* HTML string containing one or more words from the spam keyword list, after passing through `sanitizeWPContent`, the output SHALL contain none of those spam keywords.
+_For any_ HTML string containing one or more words from the spam keyword list, after passing through `sanitizeWPContent`, the output SHALL contain none of those spam keywords.
 
 **Validates: Requirements 2.6, 11.1, 11.2, 11.3**
 
 ### Property 2: Spam element removal removes the entire containing element
 
-*For any* HTML `<p>`, `<div>`, or `<a>` element whose text content contains a spam keyword, after sanitization the entire element (including its tags) SHALL be absent from the output — not just the keyword text.
+_For any_ HTML `<p>`, `<div>`, or `<a>` element whose text content contains a spam keyword, after sanitization the entire element (including its tags) SHALL be absent from the output — not just the keyword text.
 
 **Validates: Requirements 2.6, 11.3**
 
 ### Property 3: Trusted links are preserved, untrusted links are stripped
 
-*For any* HTML string containing a mix of internal links (catch-22.co.nz), trusted external links (supabase.co, stripe.com, partner domains), and untrusted external links, after sanitization: all internal and trusted links SHALL be present in the output, and all untrusted external links SHALL be absent.
+_For any_ HTML string containing a mix of internal links (catch-22.co.nz), trusted external links (supabase.co, stripe.com, partner domains), and untrusted external links, after sanitization: all internal and trusted links SHALL be present in the output, and all untrusted external links SHALL be absent.
 
 **Validates: Requirements 11.4**
 
 ### Property 4: JavaScript event handlers are always removed
 
-*For any* HTML string containing one or more JavaScript event handler attributes (onclick, onerror, onload, onmouseover, etc.), after sanitization the output SHALL contain no `on[a-z]+` attributes.
+_For any_ HTML string containing one or more JavaScript event handler attributes (onclick, onerror, onload, onmouseover, etc.), after sanitization the output SHALL contain no `on[a-z]+` attributes.
 
 **Validates: Requirements 11.6**
 
 ### Property 5: WordPress class names are eliminated
 
-*For any* HTML string containing WordPress-specific class names (matching `wp-*`, `elementor-*`, `freshio-*`, `woocommerce`, `yith-*`), after passing through the artifact remover the output SHALL contain no strings matching those patterns.
+_For any_ HTML string containing WordPress-specific class names (matching `wp-*`, `elementor-*`, `freshio-*`, `woocommerce`, `yith-*`), after passing through the artifact remover the output SHALL contain no strings matching those patterns.
 
 **Validates: Requirements 3.1, 3.2, 3.3, 3.5**
 
 ### Property 6: Semantic structure is preserved through sanitization
 
-*For any* HTML string containing semantic elements (`<h1>`–`<h6>`, `<p>`, `<ul>`, `<ol>`, `<li>`, `<a>` with trusted href), after sanitization those elements and their text content SHALL still be present in the output.
+_For any_ HTML string containing semantic elements (`<h1>`–`<h6>`, `<p>`, `<ul>`, `<ol>`, `<li>`, `<a>` with trusted href), after sanitization those elements and their text content SHALL still be present in the output.
 
 **Validates: Requirements 1.5, 2.1, 2.3**
 
 ### Property 7: Metadata title format is always correct
 
-*For any* page title string, the `generateMetadata` function SHALL return a title matching the format `"{title} | Catch-22 New Zealand"` where `{title}` is the input string.
+_For any_ page title string, the `generateMetadata` function SHALL return a title matching the format `"{title} | Catch-22 New Zealand"` where `{title}` is the input string.
 
 **Validates: Requirements 8.1, 8.2**
 
 ### Property 8: Images always have non-empty alt text
 
-*For any* rendered page component that includes `<img>` or Next.js `<Image>` elements, every image SHALL have a non-empty `alt` attribute.
+_For any_ rendered page component that includes `<img>` or Next.js `<Image>` elements, every image SHALL have a non-empty `alt` attribute.
 
 **Validates: Requirements 10.2**
 
 ### Property 9: Sanitization is idempotent
 
-*For any* HTML string, applying `sanitizeWPContent` twice SHALL produce the same result as applying it once — `sanitize(sanitize(x)) === sanitize(x)`.
+_For any_ HTML string, applying `sanitizeWPContent` twice SHALL produce the same result as applying it once — `sanitize(sanitize(x)) === sanitize(x)`.
 
 **Validates: Requirements 4.1, 7.5**
 
@@ -327,9 +362,7 @@ export function sanitizeWPContent(html: string): string {
 The contact form (`src/app/contact/actions.ts`) must return structured error responses:
 
 ```typescript
-type ContactResult = 
-  | { success: true }
-  | { error: string };
+type ContactResult = { success: true } | { error: string };
 ```
 
 The UI already handles `status === 'error'` with a visible error message — this pattern is correct and should be maintained.
@@ -355,15 +388,11 @@ Each property test is tagged with a comment referencing the design property:
 // Feature: assets-migration, Property 1: Spam keyword removal is total
 it('removes all spam keywords from HTML', () => {
   fc.assert(
-    fc.property(
-      fc.constantFrom(...SPAM_KEYWORDS),
-      fc.string(),
-      (keyword, surrounding) => {
-        const html = `<p>${surrounding} ${keyword} ${surrounding}</p>`;
-        const result = sanitizeWPContent(html);
-        expect(result).not.toMatch(new RegExp(keyword, 'i'));
-      }
-    ),
+    fc.property(fc.constantFrom(...SPAM_KEYWORDS), fc.string(), (keyword, surrounding) => {
+      const html = `<p>${surrounding} ${keyword} ${surrounding}</p>`;
+      const result = sanitizeWPContent(html);
+      expect(result).not.toMatch(new RegExp(keyword, 'i'));
+    }),
     { numRuns: 100 }
   );
 });
@@ -388,6 +417,7 @@ Unit tests cover specific examples and integration points:
 ### Accessibility Checks
 
 Manual testing with axe DevTools and keyboard navigation for:
+
 - Focus order through navigation, forms, and interactive cards
 - Screen reader announcements for dynamic content (cart updates, form submission)
 - Color contrast ratios (Primary Lime #D1FF00 on Deep Secondary #0F172A achieves >7:1)
