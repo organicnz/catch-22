@@ -5,7 +5,7 @@
 - `bun run build`: Production bundle generation.
 - `bun run typecheck`: Rust-based TypeScript type checking (`tsrs --noEmit`).
 - `bun run lint:check`: Sub-50ms code quality validation via Biome + Oxlint.
-- `bun test`: Native Bun unit test suite (177 tests in <300ms).
+- `bun test`: Native Bun unit test suite (186 tests in <300ms).
 - `bun run format:check`: High-speed Biome formatting validation.
 
 ### Agent Skills (Vercel)
@@ -17,8 +17,9 @@ Vercel-published skills are installed in `.agents/skills/` (symlinked into `.cla
 All UI development must adhere to the core design tokens.
 
 ### Colors (HSL)
-- **Primary**: `hsl(71 100% 50%)` (Electric Lime)
-- **Secondary**: `hsl(222 47% 11%)` (Deep Sea)
+- **Primary**: `hsl(71 100% 50%)` (Electric Lime `#d1ff00` — dark surfaces & accents only)
+- **Primary Ink**: `#5c7500` (Contrast-remediated readable lime for text & links on white/light surfaces, 5.25:1 WCAG AAA)
+- **Secondary**: `hsl(222 47% 11%)` (Deep Sea `#0f172a`)
 - **Accent**: `hsl(217 91% 60%)` (Coastal Blue)
 - **Surface**: `hsl(210 40% 98%)` (Soft Slate)
 
@@ -26,6 +27,13 @@ All UI development must adhere to the core design tokens.
 - **Headings**: `font-black`, `uppercase`, `tracking-tighter`.
 - **Navigation**: `font-bold`, `uppercase`, `tracking-[0.2em]`.
 - **Body**: `font-medium`, `text-slate-600`, `leading-relaxed`.
+
+---
+
+## 💳 Payment Architecture
+1. **Cards & Stripe Link**: Visa, Mastercard, Amex, Apple Pay, Google Pay via Stripe Hosted Checkout.
+2. **Afterpay (BNPL)**: 4 interest-free fortnightly instalments via Stripe (`afterpay_clearpay`). Dynamic 4-instalment badges rendered on product cards and cart.
+3. **Direct Bank Transfer (NZ Direct Deposit)**: Zero-card checkout into direct deposit account (`06-XXXX-XXXXXXX-XX`, `Account Name`) with automated `on-hold` order reservation, unique `CATCH22-<id>` payment reference, and Resend email alerts to customer and store (`orders@catch-22.co.nz`).
 
 ---
 

@@ -91,4 +91,52 @@ describe('buildOrderItems()', () => {
     expect(items[0].quantity).toBe(1);
     expect(items[0].total).toBe(25);
   });
+
+  it('handles empty line item lists gracefully', () => {
+    const items = buildOrderItems(10, []);
+    expect(items).toEqual([]);
+  });
+
+  it('falls back to "Unknown product" and zero total when details are missing', () => {
+    const items = buildOrderItems(11, [
+      makeLineItem({
+        description: null,
+        price: null,
+        amount_total: 0,
+        quantity: undefined,
+      }),
+    ]);
+
+    expect(items[0]).toEqual({
+      order_id: 11,
+      product_id: null,
+      product_name: 'Unknown product',
+      quantity: 1,
+      total: 0,
+    });
+  });
+
+  it('processes multiple line items in checkout session maintaining correct order', () => {
+    const lineItems = [
+      makeLineItem({
+        description: 'Braid 300m',
+        amount_total: 4500,
+        quantity: 2,
+        price: { product: { name: 'Braid 300m', metadata: { id: '101' } } },
+      }),
+      makeLineItem({
+        description: 'Braid 1000m',
+        amount_total: 7500,
+        quantity: 1,
+        price: { product: { name: 'Braid 1000m', metadata: { id: '102' } } },
+      }),
+    ];
+
+    const items = buildOrderItems(12, lineItems);
+    expect(items).toHaveLength(2);
+    expect(items[0].product_id).toBe(101);
+    expect(items[0].total).toBe(45);
+    expect(items[1].product_id).toBe(102);
+    expect(items[1].total).toBe(75);
+  });
 });
