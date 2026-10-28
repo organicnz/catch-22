@@ -64,28 +64,30 @@ export function ProductCard({ product }: ProductCardProps) {
       </div>
 
       {/* Image */}
-      <Link
-        href={`/products/${product.slug}`}
-        className="relative h-48 xs:h-60 sm:h-64 overflow-hidden bg-slate-50 block"
-        tabIndex={-1}
-        aria-hidden="true"
-      >
-        {product.image_url ? (
-          <Image
-            src={getStorageUrl(product.image_url)}
-            alt={product.name}
-            fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="w-full h-full object-center object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-slate-400 font-black uppercase tracking-widest text-[10px]">
-            No Image
-          </div>
-        )}
+      <div className="relative h-48 xs:h-60 sm:h-64 overflow-hidden bg-slate-50 block">
+        <Link
+          href={`/products/${product.slug}`}
+          className="block w-full h-full"
+          tabIndex={-1}
+          aria-hidden="true"
+        >
+          {product.image_url ? (
+            <Image
+              src={getStorageUrl(product.image_url)}
+              alt={product.name}
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className="w-full h-full object-center object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-slate-400 font-black uppercase tracking-widest text-[10px]">
+              No Image
+            </div>
+          )}
+        </Link>
 
         {/* Quick-add overlay — slides up on hover */}
-        <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out z-10 p-3">
+        <div className="absolute inset-x-0 bottom-0 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out z-10 p-3 pointer-events-none group-hover:pointer-events-auto">
           <button
             type="button"
             onClick={handleQuickAdd}
@@ -100,7 +102,7 @@ export function ProductCard({ product }: ProductCardProps) {
             {added ? 'Added!' : 'Quick Add'}
           </button>
         </div>
-      </Link>
+      </div>
 
       {/* Content */}
       <div className="p-5 sm:p-6 grow flex flex-col justify-between">
