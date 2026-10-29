@@ -474,7 +474,7 @@ export default function CartPage() {
                 className="bg-[#B2FCE4] text-secondary rounded-full py-2.5 px-3 font-black uppercase text-[9px] tracking-wider hover:brightness-95 transition-all shadow-sm flex items-center gap-1 shrink-0 disabled:opacity-50 cursor-pointer"
               >
                 <span className="font-black tracking-tight">
-                  4 × ${(orderTotal / 4).toFixed(0)}
+                  4 × ${(orderTotal / 4).toFixed(2)}
                 </span>
               </button>
               <button

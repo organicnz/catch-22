@@ -394,56 +394,28 @@ function SuccessPanel({
                         <div className="grid grid-cols-4 gap-2">
                           {(() => {
                             const parts = result.bank.accountNumber.split('-');
-                            const bankCode = parts[0] || '06';
-                            const branchCode = parts[1] || '0241';
-                            const accountCode = parts[2] || '0897724';
-                            const suffixCode = parts[3] || '00';
+                            const labels = ['Bank', 'Branch', 'Account', 'Suffix'];
                             return (
                               <>
-                                <div className="bg-black/20 p-2 rounded-xl border border-white/10 text-center">
-                                  <span className="block text-[8px] font-black uppercase tracking-wider text-slate-400">
-                                    Bank
-                                  </span>
-                                  <span className="font-mono font-bold text-xs text-white">
-                                    {bankCode}
-                                  </span>
-                                  <div className="mt-1 flex justify-center">
-                                    <CopyButton value={bankCode} label="bank code" />
+                                {parts.map((part, index) => (
+                                  <div
+                                    key={index}
+                                    className="bg-black/20 p-2 rounded-xl border border-white/10 text-center"
+                                  >
+                                    <span className="block text-[8px] font-black uppercase tracking-wider text-slate-400">
+                                      {labels[index] || `Field ${index + 1}`}
+                                    </span>
+                                    <span className="font-mono font-bold text-xs text-white">
+                                      {part}
+                                    </span>
+                                    <div className="mt-1 flex justify-center">
+                                      <CopyButton
+                                        value={part}
+                                        label={labels[index]?.toLowerCase() || 'part'}
+                                      />
+                                    </div>
                                   </div>
-                                </div>
-                                <div className="bg-black/20 p-2 rounded-xl border border-white/10 text-center">
-                                  <span className="block text-[8px] font-black uppercase tracking-wider text-slate-400">
-                                    Branch
-                                  </span>
-                                  <span className="font-mono font-bold text-xs text-white">
-                                    {branchCode}
-                                  </span>
-                                  <div className="mt-1 flex justify-center">
-                                    <CopyButton value={branchCode} label="branch code" />
-                                  </div>
-                                </div>
-                                <div className="bg-black/20 p-2 rounded-xl border border-white/10 text-center">
-                                  <span className="block text-[8px] font-black uppercase tracking-wider text-slate-400">
-                                    Account
-                                  </span>
-                                  <span className="font-mono font-bold text-xs text-white">
-                                    {accountCode}
-                                  </span>
-                                  <div className="mt-1 flex justify-center">
-                                    <CopyButton value={accountCode} label="account digits" />
-                                  </div>
-                                </div>
-                                <div className="bg-black/20 p-2 rounded-xl border border-white/10 text-center">
-                                  <span className="block text-[8px] font-black uppercase tracking-wider text-slate-400">
-                                    Suffix
-                                  </span>
-                                  <span className="font-mono font-bold text-xs text-white">
-                                    {suffixCode}
-                                  </span>
-                                  <div className="mt-1 flex justify-center">
-                                    <CopyButton value={suffixCode} label="suffix" />
-                                  </div>
-                                </div>
+                                ))}
                               </>
                             );
                           })()}
