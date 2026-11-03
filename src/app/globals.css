@@ -11,14 +11,15 @@
   --secondary: #0f172a;
   --accent: #dfb178;
 
-  /* Fixed-header clearance. Header = logo h-16/h-24 + py-6 (py-4 when scrolled).
-     Pages must pad content by this var instead of hard-coded pt-28/pt-24. */
-  --header-h: 7rem; /* 112px — mobile */
+  /* Fixed-header clearance. Header = logo h-16/h-24 + py-6 (py-4 when scrolled),
+     plus 4px for border/sub-pixel rounding. Pages must pad content by this var
+     instead of hard-coded pt-28/pt-24. */
+  --header-h: 7.25rem; /* 116px — mobile */
 }
 
 @media (min-width: 48rem) {
   :root {
-    --header-h: 9rem; /* 144px — md+ logo h-24 */
+    --header-h: 9.25rem; /* 148px — md+ logo h-24 */
   }
 }
 

@@ -84,7 +84,7 @@ export function HeroSlider() {
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
-      className="relative h-screen min-h-screen h-[100dvh] w-full flex items-center overflow-hidden bg-secondary"
+      className="relative min-h-[100dvh] w-full flex items-center overflow-hidden bg-secondary pt-[calc(var(--header-h)+1rem)] pb-28 md:pb-32"
     >
       {/* Background Images */}
       {slides.map((slide, index) => (
@@ -114,20 +114,20 @@ export function HeroSlider() {
         <div className="max-w-4xl">
           <span
             key={`upper-${currentSlide}`}
-            className="text-primary font-black uppercase tracking-[0.5em] text-[10px] md:text-xs mb-8 block animate-fade-in"
+            className="text-primary font-black uppercase tracking-[0.5em] text-[10px] md:text-xs mb-4 md:mb-6 block animate-fade-in"
           >
             {slides[currentSlide].upperTitle}
           </span>
           <h1
             key={`title-${currentSlide}`}
-            className="text-6xl md:text-8xl lg:text-[10rem] font-black tracking-tight text-white uppercase leading-[0.8] mb-12 animate-fade-in transition-all duration-700"
+            className="text-5xl sm:text-6xl md:text-8xl xl:text-[8rem] font-black tracking-tight text-white uppercase leading-[0.85] mb-6 md:mb-8 animate-fade-in transition-all duration-700"
           >
             {slides[currentSlide].title} <br />
             <span className="text-primary italic">{slides[currentSlide].highlight}</span>
           </h1>
           <p
             key={`desc-${currentSlide}`}
-            className="mt-4 text-xl md:text-2xl text-slate-300 font-medium mb-16 max-w-2xl leading-relaxed animate-fade-in delay-200"
+            className="mt-2 text-lg md:text-xl xl:text-2xl text-slate-300 font-medium mb-8 md:mb-10 max-w-2xl leading-relaxed animate-fade-in delay-200"
           >
             {slides[currentSlide].description}
           </p>

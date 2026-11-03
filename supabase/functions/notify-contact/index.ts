@@ -32,7 +32,10 @@ const SUPABASE_SERVICE_ROLE_KEY = REQUIRED_ENV[1][1]!
 const RESEND_API_KEY = REQUIRED_ENV[2][1]!
 
 const FROM_EMAIL = Deno.env.get('RESEND_FROM_EMAIL') ?? 'orders@catch-22.co.nz'
-const TO_EMAIL = Deno.env.get('ADMIN_ORDER_EMAIL')
+// Contact notifications go to the public contact inbox by default. This is
+// deliberately independent of ADMIN_ORDER_EMAIL, which is for order alerts and
+// may point at a personal address. Override with CONTACT_TO_EMAIL if needed.
+const CONTACT_TO_EMAIL = Deno.env.get('CONTACT_TO_EMAIL')?.trim() || 'Catch-22NZ@hotmail.com'
 
 // Max notifications per rolling 10 minutes, globally.
 const NOTIFY_VOLUME_CAP = 20
@@ -79,7 +82,7 @@ function buildEmail(name: string, email: string, message: string, receivedAt: st
 <tr><td style="padding:32px 40px;color:#E2E8F0;font-size:14px;line-height:1.7;">
 <p style="margin:0 0 18px;"><span style="display:block;color:rgba(255,255,255,0.45);font-size:10px;font-weight:900;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:4px;">From</span><strong style="font-size:16px;">${safeName}</strong></p>
 <p style="margin:0 0 18px;"><span style="display:block;color:rgba(255,255,255,0.45);font-size:10px;font-weight:900;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:4px;">Email</span><a href="mailto:${safeEmail}" style="color:#D1FF00;text-decoration:none;">${safeEmail}</a></p>
-<p style="margin:0;"><span style="display:block;color:rgba(255,255,255,0.45);font-size:10px;font-weight:900;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:4px;">Message</span>${safeMessage}</p>
+<div style="margin:0;"><span style="display:block;color:rgba(255,255,255,0.45);font-size:10px;font-weight:900;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:4px;">Message</span><div style="white-space:pre-wrap;word-break:break-word;">${safeMessage}</div></div>
 </td></tr>
 <tr><td style="padding:20px 40px;border-top:1px solid rgba(209,255,0,0.2);text-align:center;">
 <p style="margin:0;color:rgba(255,255,255,0.4);font-size:11px;text-transform:uppercase;letter-spacing:0.15em;">Received ${receivedAt} NZT &middot; Reply directly to this email</p></td></tr>
@@ -100,12 +103,49 @@ function buildCustomerCopy(name: string, email: string, message: string, receive
 <span style="color:rgba(255,255,255,0.4);font-weight:700;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;margin-left:12px;">Message Received</span></td></tr>
 <tr><td style="padding:32px 40px;color:#E2E8F0;font-size:14px;line-height:1.7;">
 <p style="margin:0 0 18px;">Hi ${safeName}, thanks for getting in touch — this is a copy of the message you sent us via catch-22.co.nz:</p>
-<p style="margin:0 0 18px;padding:16px 20px;background:#0F172A;border-radius:12px;border-left:3px solid #D1FF00;">${safeMessage}</p>
+<p style="margin:0 0 18px;padding:16px 20px;background:#0F172A;border-radius:12px;border-left:3px solid #D1FF00;white-space:pre-wrap;word-break:break-word;line-height:1.6;">${safeMessage}</p>
 <p style="margin:0;">Our team will get back to you at ${safeEmail} as soon as possible. No need to reply to this email.</p>
 </td></tr>
 <tr><td style="padding:20px 40px;border-top:1px solid rgba(209,255,0,0.2);text-align:center;">
 <p style="margin:0;color:rgba(255,255,255,0.4);font-size:11px;text-transform:uppercase;letter-spacing:0.15em;">Sent ${receivedAt} NZT &middot; Catch-22 &middot; Premium Fishing Gear &middot; New Zealand</p></td></tr>
 </table></td></tr></table></body></html>`
+}
+
+function normalizePlainText(value: string): string {
+  return value.replaceAll('\r\n', '\n').replaceAll('\r', '\n')
+}
+
+function buildAdminText(name: string, email: string, message: string, receivedAt: string): string {
+  return [
+    `New message from ${name} — catch-22.co.nz`,
+    '',
+    `From: ${name}`,
+    `Reply-to: ${email}`,
+    '',
+    'Message:',
+    normalizePlainText(message),
+    '',
+    `Received ${receivedAt} NZT`,
+  ].join('\n')
+}
+
+function buildCustomerCopyText(
+  name: string,
+  email: string,
+  message: string,
+  receivedAt: string
+): string {
+  return [
+    `Hi ${name},`,
+    '',
+    'This is a copy of the message you sent us via catch-22.co.nz:',
+    '',
+    normalizePlainText(message),
+    '',
+    `Our team will get back to you at ${email} as soon as possible.`,
+    '',
+    `Sent ${receivedAt} NZT`,
+  ].join('\n')
 }
 
 const app = new Hono()
@@ -138,12 +178,6 @@ app.post('*', async (c) => {
   if (claimError || !claimed) {
     console.log(`[contact:${id}] no unclaimed submission — nothing to do`)
     return c.json({ ok: true, skipped: 'unclaimed-or-unknown' })
-  }
-
-  if (!TO_EMAIL) {
-    console.warn(`[contact:${id}] ADMIN_ORDER_EMAIL not set — releasing claim, skipping send`)
-    await releaseClaim(id)
-    return c.json({ ok: true, skipped: 'no-recipient' })
   }
 
   // Volume guard (moved here from the retired SQL trigger): RLS permits
@@ -183,9 +217,10 @@ app.post('*', async (c) => {
     },
     body: JSON.stringify({
       from: FROM_EMAIL,
-      to: [TO_EMAIL],
+      to: [CONTACT_TO_EMAIL],
       reply_to: contactEmail,
       subject: `New message from ${contactName} — catch-22.co.nz`,
+      text: buildAdminText(contactName, contactEmail, claimed.message, receivedNzt),
       html: buildEmail(contactName, contactEmail, claimed.message, receivedNzt),
     }),
   })
@@ -197,7 +232,7 @@ app.post('*', async (c) => {
     return c.json({ ok: false, error: 'send-failed' }, 502)
   }
 
-  console.log(`[contact:${id}] notification sent to ${TO_EMAIL}`)
+  console.log(`[contact:${id}] notification sent to ${CONTACT_TO_EMAIL}`)
 
   // Sender's copy: opt-in only, recipient locked to the row's own address so
   // the feature can never relay spam to arbitrary third parties. Best-effort
@@ -213,8 +248,9 @@ app.post('*', async (c) => {
       body: JSON.stringify({
         from: FROM_EMAIL,
         to: [contactEmail],
-        reply_to: TO_EMAIL,
+        reply_to: CONTACT_TO_EMAIL,
         subject: 'Copy of your message to Catch-22',
+        text: buildCustomerCopyText(contactName, contactEmail, claimed.message, receivedNzt),
         html: buildCustomerCopy(
           contactName,
           contactEmail,
