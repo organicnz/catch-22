@@ -11,7 +11,7 @@ const testimonials = [
     content:
       'There you go mate! 40.1kg Kingfish, we got 4 yesterday. Your braid doing the business!',
     stars: 5,
-    image: 'site/charles-kingfish.png',
+    image: '/charles-kingfish.webp',
   },
   {
     name: 'Ham & Cheese',
@@ -19,7 +19,7 @@ const testimonials = [
     content:
       "She's like rope, it's bloody good stuff. Bay of Plenty Boat Hire use this stuff on their rods when they're catching the big stuff – This is the braid we use on all our gear.",
     stars: 5,
-    image: 'site/ham-cheese-kingfish.png',
+    image: '/ham-cheese-kingfish.webp',
   },
   {
     name: 'Mike Thompson',
@@ -27,7 +27,7 @@ const testimonials = [
     content:
       "What impressed me most is how well it holds up over time. No fraying, no colour bleed like I've had with other brands, it's super sensitive, you can feel every little nibble.",
     stars: 5,
-    image: 'site/mike-fish.png',
+    image: '/mike-fish.webp',
   },
 ];
 
@@ -62,7 +62,7 @@ export function TestimonialSection() {
               {t.image && (
                 <div className="relative w-full aspect-4/3 rounded-2xl overflow-hidden mb-10 border border-slate-100 shadow-inner">
                   <Image
-                    src={getStorageUrl(t.image)}
+                    src={t.image.startsWith('/') ? t.image : getStorageUrl(t.image)}
                     alt={t.name}
                     fill
                     sizes="(max-width: 768px) 100vw, 33vw"

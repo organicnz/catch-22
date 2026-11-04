@@ -50,7 +50,7 @@ const slides = [
     link: '/products',
   },
   {
-    image: '/stock-marlin-vector.png',
+    image: '/stock-marlin-vector.webp',
     upperTitle: 'Community First',
     title: 'Never Out of',
     highlight: 'a Catch.',
