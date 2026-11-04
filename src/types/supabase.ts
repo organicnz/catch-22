@@ -246,6 +246,8 @@ export type Database = {
           currency: string | null
           customer_id: number | null
           id: number
+          paypal_capture_id: string | null
+          paypal_order_id: string | null
           payment_method: string | null
           shipping_address: Json | null
           status: string | null
@@ -263,6 +265,8 @@ export type Database = {
           currency?: string | null
           customer_id?: number | null
           id?: number
+          paypal_capture_id?: string | null
+          paypal_order_id?: string | null
           payment_method?: string | null
           shipping_address?: Json | null
           status?: string | null
@@ -280,6 +284,8 @@ export type Database = {
           currency?: string | null
           customer_id?: number | null
           id?: number
+          paypal_capture_id?: string | null
+          paypal_order_id?: string | null
           payment_method?: string | null
           shipping_address?: Json | null
           status?: string | null

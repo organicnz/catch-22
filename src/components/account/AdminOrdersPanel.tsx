@@ -119,6 +119,14 @@ function OrderCard({ order }: { order: AdminOrder }) {
               Stripe
             </a>
           )}
+          {order.payment_method === 'paypal' && order.paypal_order_id && (
+            <span
+              className="text-[10px] font-black text-slate-400 uppercase tracking-widest"
+              title={`PayPal ${order.paypal_capture_id ? `capture: ${order.paypal_capture_id}` : 'order'}`}
+            >
+              PayPal
+            </span>
+          )}
         </div>
       </div>
 

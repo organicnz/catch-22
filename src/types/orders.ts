@@ -21,6 +21,8 @@ export type AdminOrder = {
   total_amount: number | null;
   currency: string | null;
   payment_method: string | null;
+  paypal_capture_id: string | null;
+  paypal_order_id: string | null;
   stripe_session_id: string | null;
   shipping_address: ShippingAddress | null;
   billing_address: ShippingAddress | null;

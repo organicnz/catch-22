@@ -52,6 +52,8 @@ type Order = {
   total_amount: number | null;
   currency: string | null;
   payment_method: string | null;
+  paypal_capture_id: string | null;
+  paypal_order_id: string | null;
   stripe_session_id: string | null;
   coupon_code: string | null;
   shipping_address: ShippingAddress | null;
@@ -75,7 +77,7 @@ const PAGE_SIZE = 50;
 const EXPORT_LIMIT = 2000;
 
 const ORDER_SELECT = `id, created_at, status, total_amount, currency,
-  payment_method, stripe_session_id, coupon_code,
+  payment_method, paypal_order_id, paypal_capture_id, stripe_session_id, coupon_code,
   shipping_address,
   order_items ( id, product_name, quantity, total ),
   profiles ( first_name, last_name, email )`;

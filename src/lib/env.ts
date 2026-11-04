@@ -11,6 +11,7 @@ const publicSchema = z.object({
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().min(1).optional(),
   NEXT_PUBLIC_SITE_URL: z.string().url().default('https://catch-22.co.nz'),
+  NEXT_PUBLIC_PAYPAL_ENABLED: z.string().optional().catch(undefined),
 });
 
 const serverSchema = publicSchema.extend({
@@ -22,6 +23,12 @@ const serverSchema = publicSchema.extend({
   STRIPE_WEBHOOK_SECRET: z.string().min(1).optional().catch(undefined),
   STRIPE_ENABLE_PAYPAL: z.string().optional().catch(undefined),
   STRIPE_ENABLE_ZIP: z.string().optional().catch(undefined),
+  // Direct PayPal integration (server-side REST v2). Sandbox/live is selected
+  // with PAYPAL_ENV; sandbox is the default when unset.
+  PAYPAL_CLIENT_ID: z.string().min(1).optional().catch(undefined),
+  PAYPAL_CLIENT_SECRET: z.string().min(1).optional().catch(undefined),
+  PAYPAL_ENV: z.enum(['sandbox', 'live']).optional().catch(undefined),
+  PAYPAL_WEBHOOK_ID: z.string().min(1).optional().catch(undefined),
   // Email / Order notifications (Resend)
   RESEND_API_KEY: z.string().min(1).optional().catch(undefined),
   RESEND_FROM_EMAIL: z.string().min(1).optional().default('orders@catch-22.co.nz'),
@@ -51,6 +58,7 @@ const rawEnv: Record<string, string | undefined> = isClient
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
       NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
       NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+      NEXT_PUBLIC_PAYPAL_ENABLED: process.env.NEXT_PUBLIC_PAYPAL_ENABLED,
     }
   : { ...process.env };
 

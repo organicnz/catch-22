@@ -23,13 +23,14 @@ import {
   GooglePayIcon,
   KlarnaIcon,
   MastercardIcon,
+  PayPalIcon,
   VisaIcon,
   ZipIcon,
 } from '@/components/checkout/PaymentIcons';
 import { NZPaymentOptionsGuide } from '@/components/checkout/NZPaymentOptionsGuide';
 import { AfterpayInfoModal } from '@/components/checkout/AfterpayInfoModal';
 
-export type NZPaymentCategory = 'card' | 'bnpl' | 'bank_transfer' | 'pickup';
+export type NZPaymentCategory = 'card' | 'bnpl' | 'bank_transfer' | 'paypal' | 'pickup';
 
 interface NZPaymentMethodSelectorProps {
   total: number;
@@ -37,6 +38,8 @@ interface NZPaymentMethodSelectorProps {
   shippingMethodId?: string;
   postcode?: string;
   onCheckoutStripe: (preferredMethod: 'card' | 'afterpay' | 'zip' | 'klarna') => Promise<void>;
+  onCheckoutPayPal?: () => Promise<void>;
+  isPayPalAvailable?: boolean;
   isLoading: boolean;
   className?: string;
 }
@@ -47,6 +50,8 @@ export function NZPaymentMethodSelector({
   shippingMethodId,
   postcode,
   onCheckoutStripe,
+  onCheckoutPayPal,
+  isPayPalAvailable = false,
   isLoading,
   className = '',
 }: NZPaymentMethodSelectorProps) {
@@ -177,7 +182,43 @@ export function NZPaymentMethodSelector({
           </span>
         </button>
 
-        {/* 4. Auckland Local Pick-up */}
+        {/* 4. PayPal (conditional) */}
+        {isPayPalAvailable && (
+          <button
+            type="button"
+            role="radio"
+            aria-checked={selectedCategory === 'paypal'}
+            onClick={() => setSelectedCategory('paypal')}
+            className={`p-3.5 sm:p-4 rounded-2xl border text-left transition-all duration-300 relative cursor-pointer ${
+              selectedCategory === 'paypal'
+                ? 'border-[#003087] bg-white ring-2 ring-[#003087]/20 shadow-md'
+                : 'border-slate-200 bg-white/60 hover:bg-white hover:border-slate-300'
+            }`}
+          >
+            <div className="flex items-center justify-between gap-1 mb-2">
+              <div
+                className={`w-8 h-8 rounded-xl flex items-center justify-center transition-colors ${
+                  selectedCategory === 'paypal'
+                    ? 'bg-[#003087] text-white'
+                    : 'bg-[#003087]/10 text-[#003087]'
+                }`}
+              >
+                <span className="font-black text-[10px]">PP</span>
+              </div>
+              <span className="text-[8px] font-black uppercase tracking-wider bg-[#FFC43A] text-[#003087] px-1.5 py-0.5 rounded-full">
+                Buyer Protection
+              </span>
+            </div>
+            <span className="block text-xs font-black uppercase tracking-wide text-secondary truncate">
+              PayPal
+            </span>
+            <span className="block text-[10px] font-medium text-slate-500 mt-0.5 truncate">
+              Pay with your PayPal balance
+            </span>
+          </button>
+        )}
+
+        {/* 5. Auckland Local Pick-up */}
         <button
           type="button"
           role="radio"
@@ -406,7 +447,64 @@ export function NZPaymentMethodSelector({
           </div>
         )}
 
-        {/* Category 3: Direct Bank Deposit */}
+        {/* Category 3b: PayPal */}
+        {selectedCategory === 'paypal' && isPayPalAvailable && (
+          <div className="space-y-4 animate-in fade-in duration-300">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <h3 className="text-sm font-black uppercase tracking-wider text-secondary">
+                  Pay with PayPal
+                </h3>
+                <p className="text-[11px] font-medium text-slate-500 mt-0.5">
+                  Use your PayPal balance or linked card. PayPal Buyer Protection included.
+                </p>
+              </div>
+              <span className="text-[9px] font-black uppercase tracking-wider bg-[#FFC43A] text-[#003087] px-2 py-0.5 rounded-full">
+                Protected
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2 pt-1">
+              <PayPalIcon className="w-16 h-6 rounded" />
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-600 font-medium pt-1">
+              <div className="flex items-center gap-1.5">
+                <ShieldCheck size={12} className="text-[#003087] shrink-0" />
+                <span>PayPal Buyer Protection</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Zap size={12} className="text-[#003087] shrink-0" />
+                <span>One-click if logged in</span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => onCheckoutPayPal?.()}
+              disabled={isLoading}
+              className="w-full bg-[#003087] text-white rounded-2xl py-4 px-6 font-black uppercase tracking-[0.15em] text-sm hover:bg-[#001F5C] transition-all duration-300 shadow-xl shadow-[#003087]/10 flex items-center justify-center gap-3 disabled:opacity-50 group cursor-pointer"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  <span>Connecting to PayPal…</span>
+                </>
+              ) : (
+                <>
+                  <span>Pay ${total.toFixed(2)} with PayPal</span>
+                  <ArrowRight
+                    size={16}
+                    strokeWidth={3}
+                    className="opacity-70 group-hover:translate-x-1 transition-transform"
+                  />
+                </>
+              )}
+            </button>
+          </div>
+        )}
+
+        {/* Category 4: Direct Bank Deposit */}
         {selectedCategory === 'bank_transfer' && (
           <div className="space-y-4 animate-in fade-in duration-300">
             <div className="flex items-center justify-between flex-wrap gap-2">

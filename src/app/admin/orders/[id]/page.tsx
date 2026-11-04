@@ -50,6 +50,8 @@ type Order = {
   total_amount: number | null;
   currency: string | null;
   payment_method: string | null;
+  paypal_capture_id: string | null;
+  paypal_order_id: string | null;
   stripe_session_id: string | null;
   coupon_code: string | null;
   shipping_address: {
@@ -90,7 +92,7 @@ export default async function AdminOrderDetailPage({
     .from('orders')
     .select(
       `id, created_at, status, total_amount, currency, tracking_number, admin_notes,
-       payment_method, stripe_session_id, coupon_code,
+       payment_method, paypal_order_id, paypal_capture_id, stripe_session_id, coupon_code,
        shipping_address,
        order_items ( id, product_name, quantity, total ),
        profiles ( first_name, last_name, email )`
@@ -275,6 +277,30 @@ export default async function AdminOrderDetailPage({
                 {order.stripe_session_id ?? '—'}
               </dd>
             </div>
+            {(order.paypal_order_id || order.paypal_capture_id) && (
+              <>
+                {order.paypal_order_id && (
+                  <div className="flex justify-between gap-4">
+                    <dt className="text-slate-400 font-bold uppercase tracking-wider text-[10px] pt-0.5">
+                      PayPal Order
+                    </dt>
+                    <dd className="text-secondary font-black text-[11px] truncate max-w-[180px]">
+                      {order.paypal_order_id}
+                    </dd>
+                  </div>
+                )}
+                {order.paypal_capture_id && (
+                  <div className="flex justify-between gap-4">
+                    <dt className="text-slate-400 font-bold uppercase tracking-wider text-[10px] pt-0.5">
+                      Capture
+                    </dt>
+                    <dd className="text-secondary font-black text-[11px] truncate max-w-[180px]">
+                      {order.paypal_capture_id}
+                    </dd>
+                  </div>
+                )}
+              </>
+            )}
             {order.coupon_code && (
               <div className="flex justify-between gap-4">
                 <dt className="text-slate-400 font-bold uppercase tracking-wider text-[10px] pt-0.5">

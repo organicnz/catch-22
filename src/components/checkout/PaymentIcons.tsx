@@ -204,6 +204,27 @@ export function BankTransferIcon({ className = 'w-10 h-6' }: { className?: strin
   );
 }
 
+/** PayPal — recognisable blue wordmark. */
+export function PayPalIcon({ className = 'w-14 h-6' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 200 60" className={className} aria-label="PayPal" role="img">
+      <rect width="200" height="60" rx="12" fill="#003087" />
+      <text
+        x="100"
+        y="40"
+        textAnchor="middle"
+        fontFamily="-apple-system,BlinkMacSystemFont,sans-serif"
+        fontSize="22"
+        fontWeight="900"
+        fill="#ffffff"
+        letterSpacing="-0.5"
+      >
+        PayPal
+      </text>
+    </svg>
+  );
+}
+
 /** EFTPOS — New Zealand debit / payment terminal badge. */
 export function EftposIcon({ className = 'w-10 h-6' }: { className?: string }) {
   return (
