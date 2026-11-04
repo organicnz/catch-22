@@ -1,9 +1,8 @@
-import Image from 'next/image';
 import Link from 'next/link';
+import Image from 'next/image';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
 import { PaymentMethodStrip } from '@/components/checkout/PaymentIcons';
-import { getStorageUrl } from '@/lib/supabase';
 
 async function CopyrightYear() {
   await connection();
@@ -18,12 +17,11 @@ export function Footer() {
           <div className="col-span-1 md:col-span-1">
             <Link href="/" className="inline-block">
               <Image
-                src={getStorageUrl('site/logo.png')}
+                src="/logo.webp"
                 alt="Catch-22"
-                width={212}
-                height={150}
+                width={512}
+                height={362}
                 className="h-20 w-auto"
-                unoptimized
               />
             </Link>
             <p className="mt-6 text-sm text-slate-300 leading-relaxed">

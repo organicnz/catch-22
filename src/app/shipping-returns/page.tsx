@@ -1,5 +1,3 @@
-'use client';
-
 import { Clock, RotateCcw, ShieldCheck, Truck } from 'lucide-react';
 import { PaymentMethodStrip } from '@/components/checkout/PaymentIcons';
 import { SHIPPING_RATES } from '@/config/shipping';
