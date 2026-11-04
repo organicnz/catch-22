@@ -9,7 +9,7 @@ export function SustainableSection() {
           <div className="lg:w-1/2 order-1 lg:order-1">
             <div className="relative aspect-square w-full max-w-[500px] mx-auto rounded-[3rem] overflow-hidden shadow-2xl border border-slate-200 group mb-8 lg:mb-0">
               <Image
-                src="/sustainable-bumper.png"
+                src="/sustainable-bumper.webp"
                 alt="Catch-22 Sustainable Fishing Bumper Sticker"
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
