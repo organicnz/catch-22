@@ -1,18 +1,53 @@
 'use client';
 
-import { Elements, ExpressCheckoutElement } from '@stripe/react-stripe-js';
 import type {
+  Stripe,
   StripeExpressCheckoutElementConfirmEvent,
   StripeExpressCheckoutElementReadyEvent,
 } from '@stripe/stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
 import { AlertTriangle, Loader2 } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { env } from '@/lib/env';
 import { useCartStore } from '@/lib/store/cart';
 
-const stripePromise = loadStripe(env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
+// Type-only alias: erased at compile time, so this creates no runtime
+// import and no chunk dependency.
+type ReactStripeModule = typeof import('@stripe/react-stripe-js');
+
+interface LoadedCheckout {
+  Elements: ReactStripeModule['Elements'];
+  ExpressCheckoutElement: ReactStripeModule['ExpressCheckoutElement'];
+  stripe: Stripe | null;
+}
+
+let cachedCheckout: LoadedCheckout | null = null;
+
+/**
+ * Dynamic import on purpose: the main entry of @stripe/stripe-js preloads
+ * stripe.js the moment the module is EVALUATED (version negotiation), and
+ * @stripe/react-stripe-js imports it statically. With partial prefetching,
+ * the cart route's modules are evaluated on every page that links to /cart,
+ * so a static import would inject ~280KB of Stripe JS plus the Radar
+ * controller iframe site-wide. Loading both packages here keeps them out of
+ * the module graph of non-checkout pages; they are fetched (and stripe.js
+ * bootstrapped) only when a cart with items actually renders this component.
+ */
+async function loadCheckout(): Promise<LoadedCheckout> {
+  if (!cachedCheckout) {
+    const [stripeJs, reactStripe] = await Promise.all([
+      import('@stripe/stripe-js'),
+      import('@stripe/react-stripe-js'),
+    ]);
+    const stripe = await stripeJs.loadStripe(env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '');
+    cachedCheckout = {
+      Elements: reactStripe.Elements,
+      ExpressCheckoutElement: reactStripe.ExpressCheckoutElement,
+      stripe,
+    };
+  }
+  return cachedCheckout;
+}
 
 interface StripeExpressCheckoutProps {
   promoCode?: string;
@@ -27,7 +62,21 @@ export function StripeExpressCheckout({
   const [errorMessage, setErrorMessage] = useState('');
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const [checkout, setCheckout] = useState<LoadedCheckout | null>(null);
   const amount = totalPrice();
+
+  const shouldRender = Boolean(env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) && amount > 0;
+
+  useEffect(() => {
+    if (!shouldRender) return;
+    let cancelled = false;
+    loadCheckout().then((loaded) => {
+      if (!cancelled) setCheckout(loaded);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [shouldRender]);
 
   const onReady = useCallback((event: StripeExpressCheckoutElementReadyEvent) => {
     // The element is ready — only show if wallets are available.
@@ -37,11 +86,11 @@ export function StripeExpressCheckout({
     }
   }, []);
 
-  if (!env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
-    return null; // Do not render if publishable key is missing
+  if (!shouldRender || !checkout || !checkout.stripe) {
+    return null; // No key, empty cart, or Stripe still loading
   }
 
-  if (amount === 0) return null;
+  const { Elements, ExpressCheckoutElement, stripe } = checkout;
 
   const onConfirm = async (event: StripeExpressCheckoutElementConfirmEvent) => {
     if (!event) return;
@@ -119,7 +168,7 @@ export function StripeExpressCheckout({
       )}
 
       <Elements
-        stripe={stripePromise}
+        stripe={stripe}
         options={{
           mode: 'payment',
           amount: Math.round(amount * 100) > 0 ? Math.round(amount * 100) : 100,
@@ -150,7 +199,7 @@ export function StripeExpressCheckout({
             layout: {
               maxColumns: 2,
               maxRows: 1,
-              overflow: 'never',
+              overflow: 'auto',
             },
           }}
         />

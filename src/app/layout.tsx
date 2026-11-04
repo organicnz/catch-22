@@ -24,6 +24,13 @@ const outfit = Outfit({
   display: 'swap',
 });
 
+// Preconnect to the two third-party origins the storefront actually talks to
+// (product/media images + API from Supabase, Stripe on the purchase path) so
+// their TLS handshakes don't serialize behind first paint / first interaction.
+const supabaseOrigin = process.env.NEXT_PUBLIC_SUPABASE_URL
+  ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin
+  : 'https://wcoaqlglwxwceqktpckt.supabase.co';
+
 export const metadata: Metadata = {
   // Resolves every relative OG/canonical URL to the canonical host, killing
   // www/apex duplicate-content ambiguity for all child routes.
@@ -70,6 +77,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${outfit.variable} h-full antialiased`}>
+      <head>
+        <link rel="preconnect" href={supabaseOrigin} crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://js.stripe.com" />
+      </head>
       <body className="min-h-full flex flex-col bg-white text-secondary font-sans selection:bg-primary selection:text-secondary">
         <Providers>
           <a

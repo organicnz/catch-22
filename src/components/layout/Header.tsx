@@ -1,15 +1,15 @@
 'use client';
 
 import type { User as SupabaseUser } from '@supabase/supabase-js';
-import { Heart, LogOut, Menu, Search, ShoppingBag, User, X } from 'lucide-react';
 import Image from 'next/image';
+import { Heart, LogOut, Menu, Search, ShoppingBag, User, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
 import { useCartStore } from '@/lib/store/cart';
 import { useSettingsStore } from '@/lib/store/settings';
 import { useWishlistStore } from '@/lib/store/wishlist';
-import { createClient, getStorageUrl } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase';
 
 const NAV_LINKS = [
   { name: 'Home', href: '/' },
@@ -36,11 +36,10 @@ function HeaderFallback() {
     <header className="bg-secondary py-6 border-b border-white/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
         <Image
-          src={getStorageUrl('site/logo.png')}
-          unoptimized
+          src="/logo.webp"
           alt="CATCH-22"
-          width={319}
-          height={225}
+          width={512}
+          height={362}
           className="h-16 md:h-24 w-auto"
           sizes="(max-width: 768px) 120px, 240px"
           priority
@@ -146,11 +145,10 @@ function HeaderInner() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-4 group">
             <Image
-              src={getStorageUrl('site/logo.png')}
-              unoptimized
+              src="/logo.webp"
               alt="CATCH-22"
-              width={319}
-              height={225}
+              width={512}
+              height={362}
               className={`h-16 md:h-24 w-auto transition-all duration-500 ${logoInvert}`}
               sizes="(max-width: 768px) 120px, 240px"
               priority
