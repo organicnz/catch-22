@@ -26,6 +26,7 @@ import { SHIPPING_RATES } from '@/config/shipping';
 import { previewPromoCodeAction } from '@/lib/actions/promo';
 import { MAX_ITEM_QUANTITY, useCartStore } from '@/lib/store/cart';
 import { getStorageUrl } from '@/lib/supabase';
+import { env } from '@/lib/env';
 
 /** No-op store subscription: hydration state never changes after mount. */
 const emptySubscribe = () => () => {};
@@ -119,6 +120,42 @@ export default function CartPage() {
         return;
       }
       toast.error(data.error || 'Something went wrong starting checkout.');
+    } catch {
+      toast.error('Checkout failed — check your connection and try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCheckoutPayPal = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/checkout/paypal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: items.map((item) => ({ id: item.id, quantity: item.quantity })),
+          promoCode: promoApplied?.code ?? promoCode.trim(),
+          shippingMethodId: selectedShippingId,
+        }),
+      });
+      const data = await response.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+        return;
+      }
+      if (response.status === 409 && data.productId) {
+        removeItem(data.productId);
+        toast.error(data.error || 'An item sold out and was removed from your cart.');
+        return;
+      }
+      if (response.status === 429) {
+        const retry = Number(response.headers.get('Retry-After')) || 30;
+        toast.error(`Too many attempts — try again in ${retry}s.`);
+        return;
+      }
+      toast.error(data.error || 'Something went wrong starting PayPal checkout.');
     } catch {
       toast.error('Checkout failed — check your connection and try again.');
     } finally {
@@ -418,6 +455,8 @@ export default function CartPage() {
                 shippingMethodId={selectedShippingId}
                 postcode={postcode}
                 onCheckoutStripe={handleCheckout}
+                onCheckoutPayPal={handleCheckoutPayPal}
+                isPayPalAvailable={env.NEXT_PUBLIC_PAYPAL_ENABLED === 'true'}
                 isLoading={isLoading}
               />
 
