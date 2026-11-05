@@ -17,7 +17,7 @@ import {
   getRelatedProducts,
 } from '@/lib/queries/products';
 import { sanitizeWPContent } from '@/lib/sanitize';
-import { getStorageUrl } from '@/lib/supabase';
+import { getStorageUrl } from '@/lib/storage-url';
 import type { Json } from '@/types/supabase';
 
 export async function generateStaticParams() {

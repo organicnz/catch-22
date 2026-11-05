@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { useCartStore } from '@/lib/store/cart';
 import { useWishlistStore } from '@/lib/store/wishlist';
-import { getStorageUrl } from '@/lib/supabase';
+import { getStorageUrl } from '@/lib/storage-url';
 
 export default function WishlistPage() {
   const { items, removeItem, clearWishlist } = useWishlistStore();

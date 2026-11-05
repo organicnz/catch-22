@@ -2,7 +2,7 @@
  * Shared sanitization utilities for WordPress-migrated and user-generated content.
  * All functions are fail-safe: they never throw and return '' on error.
  */
-import { getStorageUrl } from './supabase';
+import { getStorageUrl } from './storage-url';
 
 export const SPAM_KEYWORDS = [
   'casino',

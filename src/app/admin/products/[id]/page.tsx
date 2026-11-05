@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation';
 import { ProductDetailForm } from '@/components/admin/ProductDetailForm';
 import { ProductImageUpload } from '@/components/admin/ProductImageUpload';
 import { requireAdmin } from '@/lib/admin-auth';
-import { getStorageUrl } from '@/lib/supabase';
+import { getStorageUrl } from '@/lib/storage-url';
 
 // Deliberate Cache Components opt-out (Block): admin surface behind requireAdmin() session gate.
 export const instant = false;

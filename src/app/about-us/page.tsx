@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
-import { getStorageUrl } from '@/lib/supabase';
+import { getStorageUrl } from '@/lib/storage-url';
 
 export const metadata: Metadata = {
   alternates: { canonical: '/about-us' },

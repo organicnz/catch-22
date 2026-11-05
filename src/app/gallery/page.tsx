@@ -4,7 +4,7 @@ import { Camera, ChevronLeft, ChevronRight, MapPin, Maximize2, Share2, X } from 
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
-import { getStorageUrl } from '@/lib/supabase';
+import { getStorageUrl } from '@/lib/storage-url';
 
 // Temporary static data - will eventually come from Supabase DB
 const snaps = [
