@@ -1,6 +1,6 @@
 import { Quote, Star } from 'lucide-react';
 import Image from 'next/image';
-import { getStorageUrl } from '@/lib/supabase';
+import { getStorageUrl } from '@/lib/storage-url';
 
 const STAR_POSITIONS = ['first', 'second', 'third', 'fourth', 'fifth'] as const;
 

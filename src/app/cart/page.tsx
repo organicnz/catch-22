@@ -25,7 +25,7 @@ import { StripeExpressCheckout } from '@/components/checkout/StripeExpressChecko
 import { SHIPPING_RATES } from '@/config/shipping';
 import { previewPromoCodeAction } from '@/lib/actions/promo';
 import { MAX_ITEM_QUANTITY, useCartStore } from '@/lib/store/cart';
-import { getStorageUrl } from '@/lib/supabase';
+import { getStorageUrl } from '@/lib/storage-url';
 import { env } from '@/lib/env';
 
 /** No-op store subscription: hydration state never changes after mount. */

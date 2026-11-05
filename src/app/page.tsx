@@ -8,7 +8,7 @@ import { HeroSlider } from '@/components/home/HeroSlider';
 import { SustainableSection } from '@/components/home/SustainableSection';
 import { TestimonialSection } from '@/components/home/TestimonialSection';
 import { ProductSlider } from '@/components/products/ProductSlider';
-import { getStorageUrl } from '@/lib/supabase';
+import { getStorageUrl } from '@/lib/storage-url';
 import { createPublicClient } from '@/lib/supabase-server';
 
 export const metadata: Metadata = {

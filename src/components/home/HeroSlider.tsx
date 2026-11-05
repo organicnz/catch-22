@@ -4,7 +4,7 @@ import { useReducedMotion } from 'motion/react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { getStorageUrl } from '@/lib/supabase';
+import { getStorageUrl } from '@/lib/storage-url';
 
 const SLIDE_DURATION = 8000; // 8 seconds per slide
 

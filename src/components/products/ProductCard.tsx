@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useCartStore } from '@/lib/store/cart';
-import { getStorageUrl } from '@/lib/supabase';
+import { getStorageUrl } from '@/lib/storage-url';
 import { WishlistButton } from './WishlistButton';
 
 interface ProductCardProps {

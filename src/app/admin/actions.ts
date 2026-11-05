@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { getStorageUrl } from '@/lib/supabase';
+import { getStorageUrl } from '@/lib/storage-url';
 import { createAdminClient, createServerClient } from '@/lib/supabase-server';
 
 const VALID_STATUSES = ['processing', 'completed', 'cancelled', 'refunded', 'on-hold'];
