@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
-import { getStorageUrl } from '@/lib/supabase';
 
 export const metadata: Metadata = {
   alternates: { canonical: '/partners' },
@@ -68,7 +67,7 @@ export default function PartnersPage() {
       description:
         'Our mates down at NZ ANGLER provide solid acidwrap rods and pro-series reels for the serious fisho.',
       links: [{ label: 'Visit Website', url: 'https://nzangler.co.nz/' }],
-      image: getStorageUrl('site/snap2.jpg'),
+      image: '/nz-angler.webp',
       imageAlt: 'NZ Angler fishing rods and reels',
     },
     {

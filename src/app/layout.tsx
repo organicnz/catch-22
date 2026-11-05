@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     locale: 'en_NZ',
     images: [
       {
-        url: 'https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/media/site/thunder-charter.jpg',
+        url: 'https://catch-22.co.nz/thunder-charter.webp',
         width: 1200,
         height: 630,
         alt: 'Catch-22 | Built for the Elements',
@@ -55,9 +55,7 @@ export const metadata: Metadata = {
     ],
   },
   twitter: {
-    images: [
-      'https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/media/site/thunder-charter.jpg',
-    ],
+    images: ['https://catch-22.co.nz/thunder-charter.webp'],
   },
   icons: {
     icon: '/favicon.ico',

@@ -16,7 +16,7 @@ export default function AboutPage() {
       {/* Hero Section — full bleed, overlaps navbar intentionally */}
       <div className="relative h-[400px] pt-(--header-h) flex items-end pb-16 overflow-hidden">
         <Image
-          src={getStorageUrl('site/about-hero.jpg')}
+          src="/about-hero.webp"
           alt="Fishing in New Zealand"
           fill
           className="object-cover"
@@ -46,12 +46,7 @@ export default function AboutPage() {
               </p>
             </div>
             <div className="flex-1 w-full h-80 relative rounded-3xl overflow-hidden shadow-2xl border border-slate-100">
-              <Image
-                src={getStorageUrl('site/team.jpg')}
-                alt="Catch-22 Team"
-                fill
-                className="object-cover"
-              />
+              <Image src="/team.webp" alt="Catch-22 Team" fill className="object-cover" />
             </div>
           </section>
 
