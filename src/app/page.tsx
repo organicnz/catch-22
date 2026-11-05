@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: 'https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/media/site/thunder-charter.jpg',
+        url: 'https://catch-22.co.nz/thunder-charter.webp',
         width: 1200,
         height: 630,
         alt: 'Catch-22 Premium Fishing Gear New Zealand',
@@ -38,9 +38,7 @@ export const metadata: Metadata = {
     title: 'Catch-22 | Premium Fishing Gear New Zealand',
     description:
       'Premium fishing braid, lures, and apparel tested in the harshest New Zealand environments. Built to endure. Free NZ shipping available.',
-    images: [
-      'https://wcoaqlglwxwceqktpckt.supabase.co/storage/v1/object/public/media/site/thunder-charter.jpg',
-    ],
+    images: ['https://catch-22.co.nz/thunder-charter.webp'],
   },
 };
 

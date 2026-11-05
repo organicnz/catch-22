@@ -1,13 +1,12 @@
 import Image from 'next/image';
-import { getStorageUrl } from '@/lib/supabase';
 
 const partners = [
-  { name: 'Sea Cleaners', logo: getStorageUrl('site/partner-seacleaners.jpg') },
-  { name: 'Bay of Plenty Boat Hire', logo: getStorageUrl('site/partner-bop.jpg') },
-  { name: 'Thunder Charter', logo: getStorageUrl('site/partner-thunder.jpg') },
-  { name: 'Shimano', logo: getStorageUrl('site/partner-shimano.png') },
-  { name: 'Yamaha', logo: getStorageUrl('site/partner-yamaha.png') },
-  { name: 'Garmin', logo: getStorageUrl('site/partner-garmin.png') },
+  { name: 'Sea Cleaners', logo: '/seacleaners-logos.png' },
+  { name: 'Bay of Plenty Boat Hire', logo: '/partners/bop.svg' },
+  { name: 'Thunder Charter', logo: '/partners/thunder-logo.jpg' },
+  { name: 'Shimano', logo: '/partners/shimano.svg' },
+  { name: 'Yamaha', logo: '/partners/yamaha.svg' },
+  { name: 'Garmin', logo: '/partners/garmin.svg' },
 ];
 
 export function PartnerSection() {
