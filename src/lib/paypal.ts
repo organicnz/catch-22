@@ -96,8 +96,23 @@ function paypalBaseUrl(): string {
   return BASE_URLS[env.PAYPAL_ENV ?? 'sandbox'];
 }
 
+/**
+ * Pure credential check: values must be present and must not be the
+ * scaffold placeholders ("your...") that ship in example configs. Extracted
+ * so it can be unit-tested without touching the env snapshot.
+ */
+export function hasUsablePayPalCredentials(clientId?: string, clientSecret?: string): boolean {
+  const id = (clientId ?? '').trim();
+  const secret = (clientSecret ?? '').trim();
+  if (!id || !secret) return false;
+  if (id.toLowerCase().startsWith('your') || secret.toLowerCase().startsWith('your')) {
+    return false;
+  }
+  return true;
+}
+
 export function isPayPalConfigured(): boolean {
-  return Boolean(env.PAYPAL_CLIENT_ID && env.PAYPAL_CLIENT_SECRET);
+  return hasUsablePayPalCredentials(env.PAYPAL_CLIENT_ID, env.PAYPAL_CLIENT_SECRET);
 }
 
 async function parseError(res: Response): Promise<never> {
