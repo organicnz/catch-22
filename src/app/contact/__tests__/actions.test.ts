@@ -1,27 +1,15 @@
-import { beforeEach, describe, expect, it, vi } from 'bun:test';
+import { beforeEach, describe, expect, it, mock, vi } from 'bun:test';
 import type { ContactResult } from '../actions';
 
-// Seed env BEFORE any module import chain reaches src/lib/env.ts: bun test
-// does not always honour vi.mock hoisting, and the real Zod validation would
-// throw at module scope without these.
+// Seed env BEFORE any module import chain reaches src/lib/env.ts as a safety
+// net: if a mock below were ever bypassed, the real Zod validation would throw
+// at module scope without these.
 process.env.NEXT_PUBLIC_SUPABASE_URL ||= 'https://stub.supabase.co';
 process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||= 'stub-publishable-key';
 
-/**
- * `bun test` lacks reliable vi.mock hoisting: the real action chain (and its
- * env/Supabase imports) would evaluate despite the mocks above. The suite is
- * fully covered under vitest and again end-to-end by Playwright, so under
- * bun we skip rather than run against unmocked infrastructure.
- */
-const isBun = typeof (globalThis as { Bun?: unknown }).Bun !== 'undefined';
-const describeSuite = isBun ? describe.skip : describe;
-
-let submitContact!: (formData: FormData) => Promise<ContactResult>;
-const loadAction = async () => {
-  ({ submitContact } = await import('../actions'));
-};
-
-// ─── Mocks ────────────────────────────────────────────────────────────────────
+// `bun test` lacks reliable vi.mock hoisting: register module mocks with
+// mock.module() before the action is dynamically imported in beforeEach
+// (same sanctioned seam as lib/__tests__/paypal-configured.test.ts).
 
 let capturedRpcArgs: Record<string, unknown> | null = null;
 let rpcResult: { data: number | null; error: { message: string } | null } = {
@@ -36,15 +24,15 @@ let fetchResponse: { ok: boolean; status?: number; json: () => Promise<unknown> 
 let fetchShouldReject = false;
 const fetchCalls: { url: string; init: RequestInit | undefined }[] = [];
 
-vi.mock('next/headers', () => ({
+mock.module('next/headers', () => ({
   headers: async () => new Headers({ 'x-forwarded-for': '203.0.113.9' }),
 }));
 
-vi.mock('next/cache', () => ({
+mock.module('next/cache', () => ({
   revalidatePath: vi.fn(),
 }));
 
-vi.mock('@/lib/env', () => ({
+mock.module('@/lib/env', () => ({
   env: {
     NEXT_PUBLIC_SUPABASE_URL: 'https://stub.supabase.co',
     CONTACT_FUNCTION_URL: undefined,
@@ -52,15 +40,20 @@ vi.mock('@/lib/env', () => ({
   },
 }));
 
-vi.mock('@/lib/rate-limit', () => ({
+mock.module('@/lib/rate-limit', () => ({
   clientKey: (h: Headers, scope: string) => `${scope}:${h.get('x-forwarded-for')}`,
   rateLimit: vi.fn(() => rateLimitResult),
 }));
 
 const rpcMock = vi.fn();
-vi.mock('@/lib/supabase-server', () => ({
+mock.module('@/lib/supabase-server', () => ({
   createServerClient: vi.fn(async () => ({ rpc: rpcMock })),
 }));
+
+let submitContact!: (formData: FormData) => Promise<ContactResult>;
+const loadAction = async () => {
+  ({ submitContact } = await import('../actions'));
+};
 /** Narrows an action result to its error message, failing loudly otherwise. */
 function errOf(r: ContactResult): string {
   if (!('error' in r)) throw new Error(`Expected an error result, got: ${JSON.stringify(r)}`);
@@ -113,7 +106,7 @@ beforeEach(async () => {
   }) as unknown as typeof fetch;
 });
 
-describeSuite('submitContact() validation', () => {
+describe('submitContact() validation', () => {
   it('rejects missing fields', async () => {
     const r = await submitContact(makeForm({ message: null }));
     expect(r).toEqual({ error: 'All fields are required.' });
@@ -176,7 +169,7 @@ describeSuite('submitContact() validation', () => {
   });
 });
 
-describeSuite('submitContact() delivery status propagation', () => {
+describe('submitContact() delivery status propagation', () => {
   it('stores wants_copy=false by default and skips the copy branch', async () => {
     const r = await submitContact(makeForm());
     expect(capturedRpcArgs?.p_wants_copy).toBe(false);
