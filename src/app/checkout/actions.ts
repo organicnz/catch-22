@@ -207,7 +207,7 @@ export async function createBankTransferOrder(
   const isPayOnPickup = paymentOption === 'pay_on_pickup';
   const paymentMethod = isPayOnPickup ? 'pay_on_pickup' : 'bank_transfer';
   let adminNotes = isPayOnPickup
-    ? 'Pick-up order (Pay on collection: Cash / EFTPOS) — Chatswood, North Shore Auckland.'
+    ? 'Pick-up order (Pay on collection: Cash) — Chatswood, North Shore Auckland.'
     : `Bank transfer order. Shipping: ${shippingRate.name} ($${totals.shipping.toFixed(2)}).`;
 
   if (selectedBank) {
@@ -370,7 +370,7 @@ async function postResend(payload: {
 
 async function sendBankTransferEmails(args: EmailArgs): Promise<void> {
   const from = env.RESEND_FROM_EMAIL || 'orders@catch-22.co.nz';
-  const adminEmail = env.ADMIN_ORDER_EMAIL || 'orders@catch-22.co.nz';
+  const adminEmail = env.ADMIN_ORDER_EMAIL || 'Catch-22NZ@hotmail.com';
 
   const name = escapeHtml(`${args.customer.firstName} ${args.customer.lastName}`.trim());
   const email = escapeHtml(args.customer.email);
@@ -507,7 +507,7 @@ async function sendBankTransferEmails(args: EmailArgs): Promise<void> {
         <p style="margin:0 0 2px;color:rgba(255,255,255,0.6);font-size:11px;text-transform:uppercase;letter-spacing:0.1em;">Pick-up Location</p>
         <p style="margin:0 0 10px;color:#fff;font-size:14px;font-weight:bold;">Chatswood, North Shore, Auckland (By appointment)</p>
         <p style="margin:0 0 2px;color:rgba(255,255,255,0.6);font-size:11px;text-transform:uppercase;letter-spacing:0.1em;">Payment Method</p>
-        <p style="margin:0 0 10px;color:#D1FF00;font-size:15px;font-weight:900;">Pay on Pick-up (Cash or EFTPOS on collection)</p>
+        <p style="margin:0 0 10px;color:#D1FF00;font-size:15px;font-weight:900;">Pay on Pick-up (Cash on collection)</p>
         <p style="margin:0 0 2px;color:rgba(255,255,255,0.6);font-size:11px;text-transform:uppercase;letter-spacing:0.1em;">Order Reference</p>
         <p style="margin:0;color:#fff;font-size:16px;font-weight:900;">${escapeHtml(args.reference)}</p>
       </td></tr>
@@ -519,14 +519,14 @@ async function sendBankTransferEmails(args: EmailArgs): Promise<void> {
         <p style="margin:0 0 8px;color:#D1FF00;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:0.15em;">What happens next</p>
         <p style="margin:0 0 6px;color:rgba(255,255,255,0.75);font-size:13px;line-height:1.5;">&bull; Your items are set aside immediately.</p>
         <p style="margin:0 0 6px;color:rgba(255,255,255,0.75);font-size:13px;line-height:1.5;">&bull; We will contact you by email or phone to confirm a convenient pick-up time in Chatswood.</p>
-        <p style="margin:0 0 6px;color:rgba(255,255,255,0.75);font-size:13px;line-height:1.5;">&bull; Pay by Cash or EFTPOS upon collecting your gear.</p>
+        <p style="margin:0 0 6px;color:rgba(255,255,255,0.75);font-size:13px;line-height:1.5;">&bull; Pay by Cash upon collecting your gear.</p>
       </td></tr>
     </table>`;
 
   // Customer confirmation
   const customerHeading = isPickup ? 'Your pick-up order is reserved' : 'Your order is reserved';
   const customerIntro = isPickup
-    ? `Thanks ${name}! We have set aside your gear. You selected Pay on Pick-up (Cash or EFTPOS in Chatswood, North Shore Auckland). We will email you shortly to confirm your collection time.`
+    ? `Thanks ${name}! We have set aside your gear. You selected Pay on Pick-up (Cash in Chatswood, North Shore Auckland). We will email you shortly to confirm your collection time.`
     : `Thanks ${name}! We have set aside your gear. Complete the bank transfer below and we will get it packed.`;
   const customerBody = isPickup
     ? pickupBlock + gstBlock + itemsBlock + pickupInstructions
@@ -538,7 +538,7 @@ async function sendBankTransferEmails(args: EmailArgs): Promise<void> {
     ? `Pick-up order ${escapeHtml(args.reference)} (Pay on collection)`
     : `Bank transfer order ${escapeHtml(args.reference)}`;
   const adminIntro = isPickup
-    ? `A new pick-up order has been placed with payment on collection (Cash / EFTPOS) of ${money(args.totals.total)} NZD. The order is <strong>on-hold</strong> until the customer collects and pays.`
+    ? `A new pick-up order has been placed with payment on collection (Cash) of ${money(args.totals.total)} NZD. The order is <strong>on-hold</strong> until the customer collects and pays.`
     : `A new bank transfer order is waiting for payment of ${money(args.totals.total)} NZD. The order is <strong>on-hold</strong> until the funds land.`;
   const adminBody = isPickup
     ? orderBlock + gstBlock + itemsBlock + pickupBlock

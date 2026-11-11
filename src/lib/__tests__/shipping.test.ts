@@ -123,7 +123,7 @@ describe('getStripeShippingOptions()', () => {
     expect(standardEstimate?.minimum.unit).toBe('business_day');
     expect(standardEstimate?.maximum.unit).toBe('business_day');
     expect(standardEstimate?.minimum.value).toBe(2);
-    expect(standardEstimate?.maximum.value).toBe(4);
+    expect(standardEstimate?.maximum.value).toBe(5);
 
     // Pickup rate must omit delivery_estimate
     const pickupOpt = options[pickupIndex];

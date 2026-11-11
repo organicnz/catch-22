@@ -74,7 +74,12 @@ export default function PartnersPage() {
       name: 'THUNDER Charter',
       description:
         'Run by Charles at Bay of Plenty Boat Hire. A premier charter experience testing Catch-22 gear in the toughest conditions.',
-      links: [{ label: 'Visit Website', url: 'https://www.bayofplentyboathire.co.nz' }],
+      links: [
+        {
+          label: 'Visit Website',
+          url: 'https://www.tauranganz.info/business/bay-plenty-boat-hire',
+        },
+      ],
       image: '/partners/thunder-logo.jpg',
       imageAlt: 'THUNDER Charter boat on Bay of Plenty waters',
     },
@@ -82,7 +87,7 @@ export default function PartnersPage() {
       name: 'Sea Cleaners',
       description:
         'Dedicated to preserving our New Zealand coastlines. We are proud to support their mission by donating 2.5% of all profits.',
-      links: [{ label: 'Visit Website', url: 'https://seacleaners.org.nz/' }],
+      links: [{ label: 'Visit Website', url: 'https://www.seacleaners.com/' }],
       image: '/seacleaners-logos.png',
       imageAlt: 'Sea Cleaners volunteers cleaning New Zealand coastline',
     },

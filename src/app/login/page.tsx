@@ -21,7 +21,7 @@ export default function LoginPage() {
   const [authMethod, setAuthMethod] = useState<'otp' | 'password'>('otp');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
 
   const supabase = createClient();
@@ -31,6 +31,17 @@ export default function LoginPage() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) router.push('/account');
     });
+
+    if (typeof window !== 'undefined') {
+      const err = new URLSearchParams(window.location.search).get('error');
+      if (err) {
+        const friendlyMessage =
+          err === 'Invalid_Token'
+            ? 'That sign-in or verification link has expired or has already been used. Please request a new one below.'
+            : err.replace(/_/g, ' ');
+        setMessage({ type: 'error', text: `❌ ${friendlyMessage}` });
+      }
+    }
   }, [supabase, router]);
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -123,18 +134,18 @@ export default function LoginPage() {
         <div className="text-center mb-12 animate-in fade-in slide-in-from-top-8 duration-700">
           <div className="inline-flex items-center gap-3 px-6 py-2.5 bg-secondary/5 rounded-full mb-8 border border-secondary/5">
             <Shield className="w-3.5 h-3.5 text-secondary" />
-            <span className="text-secondary font-black uppercase tracking-[0.4em] text-[10px]">
-              Secure Gateway
+            <span className="text-secondary font-black uppercase tracking-[0.3em] text-[10px]">
+              Customer Account
             </span>
           </div>
-          <h1 className="text-6xl md:text-8xl font-black text-secondary uppercase tracking-tighter leading-none mb-6">
-            {isSignUp ? 'Join' : 'Welcome'} <br />
-            <span className="text-primary italic">{isSignUp ? 'The Crew' : 'Back'}</span>
+          <h1 className="text-5xl md:text-7xl font-black text-secondary uppercase tracking-tight leading-none mb-4">
+            {isSignUp ? 'Create' : 'Welcome'} <br />
+            <span className="text-primary italic">{isSignUp ? 'Account' : 'Back'}</span>
           </h1>
-          <p className="text-slate-400 font-bold uppercase tracking-[0.15em] text-[10px] max-w-sm mx-auto">
+          <p className="text-slate-600 font-bold text-sm max-w-md mx-auto">
             {isSignUp
-              ? 'Join the elite community of explorers'
-              : 'Authorized access for returning personnel only'}
+              ? 'Create a free Catch-22 account to track orders & save gear'
+              : 'Sign in to access your order history & account details'}
           </p>
         </div>
 
@@ -143,22 +154,19 @@ export default function LoginPage() {
           <div className="flex p-3 bg-slate-50/50">
             <button
               type="button"
-              onClick={() => {
-                setAuthMethod('otp');
-                setIsSignUp(false);
-              }}
-              className={`flex-1 py-5 text-[10px] font-black uppercase tracking-[0.3em] transition-all rounded-[2rem] flex items-center justify-center gap-3 ${
+              onClick={() => setAuthMethod('otp')}
+              className={`flex-1 py-4 text-xs font-black uppercase tracking-wider transition-all rounded-[2rem] flex items-center justify-center gap-2.5 ${
                 authMethod === 'otp'
                   ? 'bg-secondary text-white shadow-xl shadow-secondary/20'
                   : 'text-slate-400 hover:text-secondary'
               }`}
             >
-              <Fingerprint size={16} /> Magic Link
+              <Fingerprint size={16} /> Magic Link (Email)
             </button>
             <button
               type="button"
               onClick={() => setAuthMethod('password')}
-              className={`flex-1 py-5 text-[10px] font-black uppercase tracking-[0.3em] transition-all rounded-[2rem] flex items-center justify-center gap-3 ${
+              className={`flex-1 py-4 text-xs font-black uppercase tracking-wider transition-all rounded-[2rem] flex items-center justify-center gap-2.5 ${
                 authMethod === 'password'
                   ? 'bg-secondary text-white shadow-xl shadow-secondary/20'
                   : 'text-slate-400 hover:text-secondary'
@@ -174,37 +182,37 @@ export default function LoginPage() {
                 <div className="group">
                   <label
                     htmlFor="login-email"
-                    className="block text-[10px] font-black text-secondary/40 uppercase tracking-[0.3em] ml-1 mb-3 group-focus-within:text-primary transition-colors"
+                    className="block text-xs font-black text-secondary uppercase tracking-wider ml-1 mb-2 group-focus-within:text-primary transition-colors"
                   >
-                    Credential Email
+                    Email Address
                   </label>
                   <input
                     id="login-email"
                     type="email"
-                    placeholder="OPERATOR@CATCH22.CO"
+                    placeholder="you@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="w-full px-8 py-5 bg-slate-50 border border-slate-100 rounded-3xl focus:ring-4 focus:ring-primary/20 focus:bg-white focus:border-primary outline-none transition-all font-black text-secondary uppercase tracking-[0.2em] text-xs placeholder:text-slate-300"
+                    className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-primary/20 focus:bg-white focus:border-primary outline-none transition-all font-bold text-secondary text-sm placeholder:text-slate-400"
                   />
                 </div>
 
                 {authMethod === 'password' && (
                   <div className="group animate-in slide-in-from-top-4 duration-500">
-                    <div className="flex justify-between items-center ml-1 mb-3">
+                    <div className="flex justify-between items-center ml-1 mb-2">
                       <label
                         htmlFor="login-password"
-                        className="block text-[10px] font-black text-secondary/40 uppercase tracking-[0.3em] group-focus-within:text-primary transition-colors"
+                        className="block text-xs font-black text-secondary uppercase tracking-wider group-focus-within:text-primary transition-colors"
                       >
-                        Access Key
+                        Password
                       </label>
                       {!isSignUp && (
                         <button
                           type="button"
                           onClick={handleResetPassword}
-                          className="text-[9px] font-black text-primary uppercase tracking-widest hover:text-secondary transition-colors"
+                          className="text-[10px] font-black text-primary-ink uppercase tracking-wider hover:text-secondary transition-colors"
                         >
-                          Forgot?
+                          Forgot Password?
                         </button>
                       )}
                     </div>
@@ -216,12 +224,12 @@ export default function LoginPage() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
-                        className="w-full px-8 py-5 bg-slate-50 border border-slate-100 rounded-3xl focus:ring-4 focus:ring-primary/20 focus:bg-white focus:border-primary outline-none transition-all font-black text-secondary tracking-[0.3em] text-xs placeholder:text-slate-300 pr-16"
+                        className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-primary/20 focus:bg-white focus:border-primary outline-none transition-all font-bold text-secondary text-sm placeholder:text-slate-400 pr-14"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-300 hover:text-secondary transition-colors"
+                        className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-secondary transition-colors"
                       >
                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>
@@ -233,7 +241,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-secondary text-white font-black rounded-full py-6 hover:bg-primary hover:text-secondary transition-all uppercase tracking-[0.4em] text-xs shadow-2xl shadow-secondary/20 flex items-center justify-center gap-4 group disabled:opacity-50 active:scale-[0.98]"
+                className="w-full bg-secondary text-white font-black rounded-full py-5 hover:bg-primary hover:text-secondary transition-all uppercase tracking-widest text-xs shadow-xl shadow-secondary/15 flex items-center justify-center gap-3 group disabled:opacity-50 active:scale-[0.98] cursor-pointer"
               >
                 {loading ? (
                   <Loader2 className="animate-spin" size={20} />
@@ -241,14 +249,14 @@ export default function LoginPage() {
                   <>
                     <span>
                       {authMethod === 'otp'
-                        ? 'Initialize Link'
+                        ? 'Send Magic Link'
                         : isSignUp
-                          ? 'Generate Account'
-                          : 'Authenticate'}
+                          ? 'Create Free Account'
+                          : 'Sign In'}
                     </span>
                     <ArrowRight
-                      size={20}
-                      className="group-hover:translate-x-2 transition-transform duration-500"
+                      size={18}
+                      className="group-hover:translate-x-1.5 transition-transform duration-300"
                     />
                   </>
                 )}
@@ -257,10 +265,10 @@ export default function LoginPage() {
 
             {message && (
               <div
-                className={`mt-10 p-6 rounded-[2rem] border text-[10px] font-black uppercase tracking-[0.2em] text-center animate-in zoom-in-95 duration-500 ${
+                className={`mt-8 p-5 rounded-2xl border text-xs font-bold text-center animate-in zoom-in-95 duration-300 ${
                   message.type === 'success'
-                    ? 'bg-emerald-50 border-emerald-100 text-emerald-600'
-                    : 'bg-rose-50 border-rose-100 text-rose-600'
+                    ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                    : 'bg-rose-50 border-rose-200 text-rose-700'
                 }`}
               >
                 {message.text}
@@ -268,42 +276,51 @@ export default function LoginPage() {
             )}
 
             {/* OAuth Section */}
-            <div className="mt-16">
-              <div className="flex items-center gap-6 mb-10">
-                <div className="h-px bg-slate-100 flex-1" />
-                <span className="text-[10px] font-black text-slate-300 uppercase tracking-[0.4em]">
-                  Satellite Access
+            <div className="mt-12">
+              <div className="flex items-center gap-4 mb-8">
+                <div className="h-px bg-slate-200 flex-1" />
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  Or Continue With
                 </span>
-                <div className="h-px bg-slate-100 flex-1" />
+                <div className="h-px bg-slate-200 flex-1" />
               </div>
 
-              <div className="grid grid-cols-2 gap-5">
+              <div className="grid grid-cols-2 gap-4">
                 <button
                   type="button"
                   onClick={() => handleOAuth('google')}
-                  className="flex items-center justify-center gap-4 py-5 bg-white border border-slate-100 rounded-3xl hover:border-primary hover:bg-slate-50 transition-all text-[10px] font-black text-secondary uppercase tracking-[0.2em] group shadow-sm active:scale-[0.98]"
+                  className="flex items-center justify-center gap-3 py-4 bg-white border border-slate-200 rounded-2xl hover:border-secondary hover:bg-slate-50 transition-all text-xs font-black text-secondary uppercase tracking-wider group shadow-xs active:scale-[0.98] cursor-pointer"
                 >
-                  <Globe size={18} className="group-hover:text-primary transition-colors" /> Google
+                  <Globe size={16} className="group-hover:text-primary-ink transition-colors" />{' '}
+                  Google
                 </button>
                 <button
                   type="button"
                   onClick={() => handleOAuth('github')}
-                  className="flex items-center justify-center gap-4 py-5 bg-white border border-slate-100 rounded-3xl hover:border-primary hover:bg-slate-50 transition-all text-[10px] font-black text-secondary uppercase tracking-[0.2em] group shadow-sm active:scale-[0.98]"
+                  className="flex items-center justify-center gap-3 py-4 bg-white border border-slate-200 rounded-2xl hover:border-secondary hover:bg-slate-50 transition-all text-xs font-black text-secondary uppercase tracking-wider group shadow-xs active:scale-[0.98] cursor-pointer"
                 >
-                  <Code size={18} className="group-hover:text-primary transition-colors" /> Github
+                  <Code size={16} className="group-hover:text-primary-ink transition-colors" />{' '}
+                  GitHub
                 </button>
               </div>
             </div>
           </div>
 
           {/* Footer Action */}
-          <div className="bg-slate-50/80 p-10 text-center border-t border-slate-100/50">
+          <div className="bg-slate-50 p-8 text-center border-t border-slate-100">
             <button
               type="button"
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="group text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] hover:text-secondary transition-all flex items-center justify-center gap-3 mx-auto"
+              onClick={() => {
+                setIsSignUp(!isSignUp);
+                setMessage(null);
+              }}
+              className="group text-xs font-black text-secondary hover:text-primary-ink transition-all inline-flex items-center justify-center gap-2 cursor-pointer"
             >
-              {isSignUp ? 'Existing Personnel? Sign In' : 'New Recruit? Join The Crew'}
+              <span>
+                {isSignUp
+                  ? 'Already have an account? Sign In'
+                  : 'New customer? Create a free account'}
+              </span>
               <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
             </button>
           </div>

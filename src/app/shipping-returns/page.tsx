@@ -132,7 +132,7 @@ export default function ShippingReturnsPage() {
               </h3>
               <p className="text-xs text-slate-300 font-medium leading-relaxed">
                 Pay via internet banking (0% fee) or choose Auckland North Shore collection with
-                Cash or EFTPOS.
+                Cash on collection.
               </p>
             </div>
           </div>

@@ -1,7 +1,6 @@
 'use client';
 
-import { Check, Copy, QrCode, Smartphone } from 'lucide-react';
-import { QRCodeSVG } from 'qrcode.react';
+import { Check, Copy, Smartphone } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -22,13 +21,10 @@ export function NZMobileBankingHandoff({
   bankName,
   className = '',
 }: NZMobileBankingHandoffProps) {
-  const [showQr, setShowQr] = useState(false);
   const [copied, setCopied] = useState(false);
 
   // Formatted string designed for quick paste into NZ banking apps
   const bankingString = `${accountNumber} | ${accountName} (${bankName}) | $${total.toFixed(2)} | Ref: ${reference}`;
-
-  const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
 
   const copyPayString = async () => {
     try {
@@ -59,47 +55,7 @@ export function NZMobileBankingHandoff({
             </p>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={() => setShowQr(!showQr)}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-[10px] font-black uppercase tracking-wider transition-colors border border-white/10 cursor-pointer"
-        >
-          <QrCode size={13} className="text-primary" />
-          <span>{showQr ? 'Hide QR Code' : 'Scan with Phone Camera'}</span>
-        </button>
       </div>
-
-      {showQr && (
-        <div className="my-5 p-5 bg-white text-secondary rounded-2xl flex flex-col sm:flex-row items-center gap-5 border border-slate-200 animate-in fade-in zoom-in-95 duration-200">
-          <div className="p-2 bg-white rounded-xl shadow-inner border border-slate-100 shrink-0">
-            {currentUrl ? (
-              <QRCodeSVG
-                value={currentUrl}
-                size={140}
-                level="M"
-                includeMargin={false}
-                aria-label={`QR Code to open order ${reference} on mobile`}
-              />
-            ) : (
-              <div className="w-[140px] h-[140px] bg-slate-100 flex items-center justify-center text-xs text-slate-400">
-                Loading QR…
-              </div>
-            )}
-          </div>
-          <div className="text-left space-y-2">
-            <span className="text-[10px] font-black uppercase tracking-widest text-primary-ink bg-primary/20 px-2 py-0.5 rounded-full">
-              Mobile Phone Camera
-            </span>
-            <p className="text-xs font-black text-secondary leading-snug">
-              Scan with your phone to open this order on mobile
-            </p>
-            <p className="text-[11px] font-medium text-slate-600 leading-relaxed">
-              Open Catch-22 order {reference} directly on your phone so you can easily copy and
-              paste bank details straight into your ANZ or mobile banking app.
-            </p>
-          </div>
-        </div>
-      )}
 
       {/* Quick copy one-liner */}
       <div className="bg-black/30 p-3 rounded-xl border border-white/10 flex items-center justify-between gap-3">

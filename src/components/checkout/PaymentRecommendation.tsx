@@ -84,7 +84,7 @@ function getRecommendations(total: number): Recommendation[] {
   recs.push({
     type: 'savings',
     method: 'pickup',
-    reason: 'Free Auckland collection · Cash or EFTPOS',
+    reason: 'Free Auckland collection · Cash on collection',
     icon: Sparkles,
     accentColor: 'text-secondary bg-primary/20 border-primary/40',
     badgeText: 'Free Pick-up',

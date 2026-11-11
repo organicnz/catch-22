@@ -231,19 +231,6 @@ export default function ContactPage() {
               </p>
             </div>
           </div>
-          <div>
-            <h3 className="text-sm font-black text-secondary uppercase tracking-widest mb-4">
-              Business Hours
-            </h3>
-            <div className="space-y-1 text-slate-600 font-medium text-sm uppercase tracking-wider">
-              <p>
-                <span className="font-black text-secondary">Mon – Fri:</span> 9am – 4pm
-              </p>
-              <p>
-                <span className="font-black text-secondary">Sat – Sun:</span> 11am – 3pm
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     </div>

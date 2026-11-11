@@ -18,7 +18,6 @@ import {
   AmexIcon,
   ApplePayIcon,
   BankTransferIcon,
-  EftposIcon,
   GooglePayIcon,
   KlarnaIcon,
   MastercardIcon,
@@ -343,7 +342,7 @@ export function NZPaymentOptionsGuide({
                     Auckland Pick-up (Pay on Collection)
                   </h4>
                   <p className="text-[10px] font-bold text-slate-400">
-                    Chatswood, North Shore Auckland · Cash or EFTPOS terminal
+                    Chatswood, North Shore Auckland · Cash on collection
                   </p>
                 </div>
               </div>
@@ -352,15 +351,14 @@ export function NZPaymentOptionsGuide({
                   $0 Shipping
                 </span>
                 <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-primary/30 text-secondary">
-                  Cash or EFTPOS
+                  Cash on Collection
                 </span>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              <EftposIcon className="w-9 h-5 rounded" />
               <span className="text-[10px] font-bold text-slate-500">
-                Inspect gear before payment &middot; Contactless EFTPOS accepted on collection
+                Inspect gear before payment &middot; Cash accepted on collection
               </span>
             </div>
 
