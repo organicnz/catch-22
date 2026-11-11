@@ -32,7 +32,7 @@ const serverSchema = publicSchema.extend({
   // Email / Order notifications (Resend)
   RESEND_API_KEY: z.string().min(1).optional().catch(undefined),
   RESEND_FROM_EMAIL: z.string().min(1).optional().default('orders@catch-22.co.nz'),
-  ADMIN_ORDER_EMAIL: z.string().min(1).optional().default('orders@catch-22.co.nz'),
+  ADMIN_ORDER_EMAIL: z.string().min(1).optional().default('Catch-22NZ@hotmail.com'),
   // Bank transfer checkout
   BANK_TRANSFER_BANK_NAME: z.string().min(1).optional().catch(undefined),
   BANK_TRANSFER_ACCOUNT_NAME: z.string().min(1).optional().catch(undefined),

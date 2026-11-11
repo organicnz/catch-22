@@ -67,7 +67,7 @@ export default function FAQPage() {
       questions: [
         {
           q: 'What payment methods do you accept?',
-          a: 'We accept all major credit and debit cards (Visa, Mastercard, American Express), Apple Pay, Google Pay, Stripe Link, Afterpay (4 fortnightly instalments), Klarna, direct New Zealand bank transfer (ANZ direct deposit with 0% surcharge), and Pay on Pick-up (Cash or EFTPOS upon collection from Chatswood, North Shore, Auckland).',
+          a: 'We accept all major credit and debit cards (Visa, Mastercard, American Express), Apple Pay, Google Pay, Stripe Link, Afterpay (4 fortnightly instalments), Klarna, direct New Zealand bank transfer (ANZ direct deposit with 0% surcharge), and Pay on Pick-up (Cash upon collection from Chatswood, North Shore, Auckland).',
         },
         {
           q: 'How does New Zealand Direct Bank Transfer work?',
@@ -79,7 +79,7 @@ export default function FAQPage() {
         },
         {
           q: 'Can I pick up my gear in Auckland and pay on collection?',
-          a: 'Yes! Choose "Local Pick-up (Chatswood, Auckland)" at checkout ($0 shipping). You can pre-pay via bank deposit or select "Pay on Pick-up" to pay in person via Cash or EFTPOS when you collect your gear by appointment.',
+          a: 'Yes! Choose "Local Pick-up (Chatswood, Auckland)" at checkout ($0 shipping). You can pre-pay via bank deposit or select "Pay on Pick-up" to pay in person via Cash when you collect your gear by appointment.',
         },
         {
           q: 'Are all prices in New Zealand Dollars (NZD)?',

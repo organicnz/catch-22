@@ -18,7 +18,7 @@ import { useSearchParams } from 'next/navigation';
 import { Suspense, useState, useSyncExternalStore } from 'react';
 import { toast } from 'sonner';
 import { type BankTransferSuccess, createBankTransferOrder } from '@/app/checkout/actions';
-import { NZBankQuickLauncher, NZBankSelector } from '@/components/checkout/NZBankSelector';
+import { NZBankQuickLauncher } from '@/components/checkout/NZBankSelector';
 import { NZCheckoutConfidence } from '@/components/checkout/NZCheckoutConfidence';
 import { NZMobileBankingHandoff } from '@/components/checkout/NZMobileBankingHandoff';
 import { NZPaymentOptionsGuide } from '@/components/checkout/NZPaymentOptionsGuide';
@@ -161,7 +161,7 @@ function SuccessPanel({
             </h1>
             <p className="text-slate-600 font-medium max-w-md leading-relaxed">
               {isPickup
-                ? 'Thanks! Your gear is set aside in Chatswood, North Shore. Pay via Cash or EFTPOS when you collect.'
+                ? 'Thanks! Your gear is set aside in Chatswood, North Shore. Pay via Cash when you collect.'
                 : "Thanks! Your gear is set aside. Complete the bank transfer below and we'll get it packed as soon as the payment clears."}
             </p>
             <div className="inline-flex items-center gap-2 mt-5 px-4 py-2 bg-emerald-50 border border-emerald-200 rounded-full">
@@ -283,7 +283,7 @@ function SuccessPanel({
                     </span>
                   </div>
                   <span className="text-[10px] font-bold text-slate-400 bg-white/5 px-2.5 py-1 rounded-full border border-white/10">
-                    Zero Surcharge · Cash or EFTPOS
+                    Zero Surcharge · Cash on collection
                   </span>
                 </div>
 
@@ -319,7 +319,7 @@ function SuccessPanel({
                     </dt>
                     <dd className="flex items-center justify-between gap-2">
                       <span className="text-base sm:text-lg font-black text-white">
-                        Cash or EFTPOS on collection
+                        Cash on collection
                       </span>
                       <span className="text-sm font-bold text-primary font-mono">
                         {money(result.totals.total)} NZD
@@ -526,8 +526,7 @@ function SuccessPanel({
                       3
                     </span>
                     <span>
-                      Inspect your braid and gear in person, and pay via Cash or EFTPOS on
-                      collection.
+                      Inspect your braid and gear in person, and pay via Cash on collection.
                     </span>
                   </li>
                 </>
@@ -573,7 +572,7 @@ function SuccessPanel({
                     const dtStart = tomorrow.toISOString().replace(/[-:]/g, '').split('.')[0];
                     tomorrow.setHours(tomorrow.getHours() + 1);
                     const dtEnd = tomorrow.toISOString().replace(/[-:]/g, '').split('.')[0];
-                    const calUrl = `https://calendar.google.com/calendar/event?action=TEMPLATE&text=Catch-22+Pick-up+${encodeURIComponent(result.reference)}&dates=${dtStart}/${dtEnd}&details=${encodeURIComponent(`Pick up order ${result.reference} ($${result.totals.total.toFixed(2)} NZD) from Chatswood, North Shore Auckland. Pay by Cash or EFTPOS on collection.`)}&location=${encodeURIComponent('Chatswood, North Shore, Auckland, New Zealand')}`;
+                    const calUrl = `https://calendar.google.com/calendar/event?action=TEMPLATE&text=Catch-22+Pick-up+${encodeURIComponent(result.reference)}&dates=${dtStart}/${dtEnd}&details=${encodeURIComponent(`Pick up order ${result.reference} ($${result.totals.total.toFixed(2)} NZD) from Chatswood, North Shore Auckland. Pay by Cash on collection.`)}&location=${encodeURIComponent('Chatswood, North Shore, Auckland, New Zealand')}`;
                     window.open(calUrl, '_blank', 'noopener,noreferrer');
                   }}
                   className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-black text-secondary uppercase tracking-wider hover:border-secondary transition-all shadow-sm"
@@ -698,7 +697,7 @@ function BankTransferCheckout() {
   const [paymentOption, setPaymentOption] = useState<'bank_transfer' | 'pay_on_pickup'>(
     initialShipping === 'pickup' ? 'pay_on_pickup' : 'bank_transfer'
   );
-  const [selectedBankId, setSelectedBankId] = useState('anz');
+  const selectedBankId = 'anz';
   const [wantGstInvoice, setWantGstInvoice] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [phoneVal, setPhoneVal] = useState('');
@@ -1214,33 +1213,18 @@ function BankTransferCheckout() {
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-black text-secondary">
-                          Pay on Pick-up (Cash or EFTPOS)
+                          Pay on Pick-up (Cash)
                         </span>
                         <span className="text-[9px] font-black uppercase tracking-wider bg-primary/30 text-secondary px-2 py-0.5 rounded-full">
                           Auckland Local
                         </span>
                       </div>
                       <p className="text-xs text-slate-500 font-medium mt-1">
-                        Reserve your gear online now and pay in person (Cash or EFTPOS) when you
-                        collect from Chatswood.
+                        Reserve your gear online now and pay in person (Cash) when you collect from
+                        Chatswood.
                       </p>
                     </div>
                   </label>
-                </div>
-              </fieldset>
-            )}
-
-            {/* Bank Selector for Direct Bank Deposit */}
-            {(shippingMethodId !== 'pickup' || paymentOption === 'bank_transfer') && (
-              <fieldset className="bg-slate-50 border border-slate-100 rounded-3xl p-6 sm:p-8">
-                <legend className="px-2 text-sm font-black text-secondary uppercase tracking-[0.2em]">
-                  Your NZ Bank
-                </legend>
-                <div className="mt-4">
-                  <NZBankSelector
-                    selectedBankId={selectedBankId}
-                    onSelectBank={setSelectedBankId}
-                  />
                 </div>
               </fieldset>
             )}
@@ -1390,7 +1374,7 @@ function BankTransferCheckout() {
             </button>
             <p className="text-center text-[10px] text-slate-400 font-bold uppercase tracking-widest">
               {paymentOption === 'pay_on_pickup' && shippingMethodId === 'pickup'
-                ? 'No payment is taken now — pay cash or EFTPOS upon collection in Chatswood.'
+                ? 'No payment is taken now — pay cash upon collection in Chatswood.'
                 : "No payment is taken now — you'll receive bank details next."}
             </p>
           </form>

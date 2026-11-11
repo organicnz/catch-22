@@ -18,8 +18,6 @@ import {
   AfterpayIcon,
   AmexIcon,
   ApplePayIcon,
-  BankTransferIcon,
-  EftposIcon,
   GooglePayIcon,
   KlarnaIcon,
   MastercardIcon,
@@ -248,7 +246,7 @@ export function NZPaymentMethodSelector({
             Auckland Pick-up
           </span>
           <span className="block text-[10px] font-medium text-slate-500 mt-0.5 truncate">
-            Cash or EFTPOS in-store
+            Cash on collection
           </span>
         </button>
       </div>
@@ -521,20 +519,9 @@ export function NZPaymentMethodSelector({
               </span>
             </div>
 
-            <div className="p-3.5 bg-emerald-50/60 border border-emerald-100 rounded-2xl space-y-2 text-xs">
-              <div className="flex items-center gap-2 text-emerald-900 font-black uppercase tracking-wider text-[11px]">
-                <BankTransferIcon className="w-7 h-4 rounded" />
-                <span>Supported Banks &amp; Clearance Times</span>
-              </div>
-              <p className="text-emerald-800 font-medium text-[11px] leading-relaxed">
-                • <strong>ANZ to ANZ:</strong> Clears instantly 24/7.
-                <br />• <strong>ASB, BNZ, Westpac, Kiwibank, TSB:</strong> Clears in 1–2 hours under
-                Payments NZ 365-day hourly settlement (7 days a week, including weekends).
-              </p>
-              <div className="pt-1 flex items-center gap-2 text-[10px] font-bold text-emerald-700">
-                <CheckCircle2 size={12} strokeWidth={2.5} />
-                <span>Your items are reserved immediately upon placing the order</span>
-              </div>
+            <div className="p-3.5 bg-emerald-50/60 border border-emerald-100 rounded-2xl flex items-center gap-2 text-[11px] font-bold text-emerald-800">
+              <CheckCircle2 size={14} className="text-emerald-700 shrink-0" strokeWidth={2.5} />
+              <span>Your items are reserved immediately upon placing your order</span>
             </div>
 
             <Link
@@ -570,12 +557,11 @@ export function NZPaymentMethodSelector({
 
             <div className="p-3.5 bg-slate-50 border border-slate-100 rounded-2xl space-y-2 text-xs">
               <div className="flex items-center gap-2 text-secondary font-black uppercase tracking-wider text-[11px]">
-                <EftposIcon className="w-7 h-4 rounded" />
-                <span>Payment Options on Collection</span>
+                <span>Payment on Collection</span>
               </div>
               <p className="text-slate-600 font-medium text-[11px] leading-relaxed">
-                Pay when you collect via <strong>EFTPOS terminal</strong> or <strong>Cash</strong>,
-                or pay beforehand via direct bank transfer.
+                Pay when you collect via <strong>Cash</strong>, or pay beforehand via direct bank
+                transfer.
               </p>
               <div className="pt-1 flex items-center gap-2 text-[10px] font-bold text-slate-500">
                 <Clock size={12} strokeWidth={2.5} />

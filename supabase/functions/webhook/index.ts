@@ -487,7 +487,7 @@ async function sendAdminNotification(
     return
   }
 
-  const adminEmail = Deno.env.get('ADMIN_ORDER_EMAIL') ?? 'orders@catch-22.co.nz'
+  const adminEmail = Deno.env.get('ADMIN_ORDER_EMAIL') ?? 'Catch-22NZ@hotmail.com'
   const fromEmail = Deno.env.get('RESEND_FROM_EMAIL') ?? 'orders@catch-22.co.nz'
   const customer = session.customer_details
   const totalNZD = ((session.amount_total ?? 0) / 100).toFixed(2)

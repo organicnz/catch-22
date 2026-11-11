@@ -86,6 +86,7 @@ export async function generateMetadata({
 }
 
 import { ProductCard } from '@/components/products/ProductCard';
+import { sortCatalogProducts } from '@/lib/products';
 
 // Deliberate Cache Components opt-out (Block): per-category SEO titles require
 // awaiting searchParams in generateMetadata, which forces full dynamic rendering.
@@ -140,12 +141,14 @@ export default async function ProductsPage({
     return <div className="p-8 text-center text-red-500">Failed to load products.</div>;
   }
 
-  // Map nulls to undefined for ProductCard compatibility
-  const formattedProducts = products?.map((p) => ({
-    ...p,
-    regular_price: p.regular_price ?? undefined,
-    sale_price: p.sale_price ?? undefined,
-  }));
+  // Map nulls to undefined for ProductCard compatibility and sort catalog
+  const formattedProducts = sortCatalogProducts(
+    (products ?? []).map((p) => ({
+      ...p,
+      regular_price: p.regular_price ?? undefined,
+      sale_price: p.sale_price ?? undefined,
+    }))
+  );
 
   return (
     <div className="bg-white min-h-screen">

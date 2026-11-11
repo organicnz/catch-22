@@ -16,7 +16,6 @@ import Link from 'next/link';
 import { useState, useSyncExternalStore } from 'react';
 import { toast } from 'sonner';
 import { NZCheckoutConfidence } from '@/components/checkout/NZCheckoutConfidence';
-import { NZDispatchTimer } from '@/components/checkout/NZDispatchTimer';
 import { NZPaymentMethodSelector } from '@/components/checkout/NZPaymentMethodSelector';
 import { NZShippingEstimator } from '@/components/checkout/NZShippingEstimator';
 import { PaymentMethodStrip } from '@/components/checkout/PaymentIcons';
@@ -206,7 +205,6 @@ export default function CartPage() {
         <div className="flex flex-col mb-8">
           <h1 className="text-4xl font-black tracking-tight text-secondary uppercase">Your Cart</h1>
           <div className="h-1.5 w-24 bg-primary mt-3" />
-          <NZDispatchTimer className="mt-6" />
         </div>
 
         <div className="lg:grid lg:grid-cols-12 lg:gap-x-12 lg:items-start">

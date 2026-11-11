@@ -25,8 +25,8 @@ export const SHIPPING_RATES: ShippingRate[] = [
     amount: 800, // in cents
     currency: 'nzd',
     displayPrice: '$8.00',
-    deliveryEstimate: { min: 2, max: 4 },
-    displayEstimate: '2–4 business days',
+    deliveryEstimate: { min: 2, max: 5 },
+    displayEstimate: '2–5 business days',
   },
   {
     id: 'rural',
@@ -34,8 +34,8 @@ export const SHIPPING_RATES: ShippingRate[] = [
     amount: 1400,
     currency: 'nzd',
     displayPrice: '$14.00',
-    deliveryEstimate: { min: 3, max: 5 },
-    displayEstimate: '3–5 business days',
+    deliveryEstimate: { min: 3, max: 8 },
+    displayEstimate: '3–8 business days',
   },
   {
     id: 'standard-courier',
@@ -43,8 +43,8 @@ export const SHIPPING_RATES: ShippingRate[] = [
     amount: 1000,
     currency: 'nzd',
     displayPrice: '$10.00',
-    deliveryEstimate: { min: 1, max: 2 },
-    displayEstimate: '1–2 business days',
+    deliveryEstimate: { min: 2, max: 5 },
+    displayEstimate: '2–5 business days',
   },
   {
     id: 'rural-courier',
@@ -52,8 +52,8 @@ export const SHIPPING_RATES: ShippingRate[] = [
     amount: 1500,
     currency: 'nzd',
     displayPrice: '$15.00',
-    deliveryEstimate: { min: 2, max: 4 },
-    displayEstimate: '2–4 business days',
+    deliveryEstimate: { min: 2, max: 6 },
+    displayEstimate: '2–6 business days',
   },
   {
     id: 'pickup',
@@ -62,7 +62,7 @@ export const SHIPPING_RATES: ShippingRate[] = [
     currency: 'nzd',
     displayPrice: 'No cost',
     stripeDisplayName: 'Pick-up by appointment from Chatswood (North Shore Auckland)',
-    displayEstimate: 'Ready for collection — we email you a time',
+    displayEstimate: 'Ready for collection — we email you to organise a time',
   },
 ];
 

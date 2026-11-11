@@ -63,7 +63,9 @@ export const TRUSTED_DOMAINS = [
   'stripe.com',
   'hamandtys.com',
   'bayofplentyboathire.co.nz',
+  'tauranganz.info',
   'nzangler.co.nz',
+  'seacleaners.com',
   'seacleaners.org.nz',
   'givealittle.co.nz',
 ] as const;

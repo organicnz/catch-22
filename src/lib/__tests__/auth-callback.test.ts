@@ -11,12 +11,14 @@ import { afterEach, describe, expect, it, vi } from 'bun:test';
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
 const mockExchangeCodeForSession = vi.fn();
+const mockVerifyOtp = vi.fn();
 
 vi.mock('@/lib/supabase-server', () => ({
   createServerClient: vi.fn(() =>
     Promise.resolve({
       auth: {
         exchangeCodeForSession: mockExchangeCodeForSession,
+        verifyOtp: mockVerifyOtp,
       },
     })
   ),
@@ -89,5 +91,31 @@ describe('GET /auth/callback', () => {
     // No code → skip exchange entirely → error redirect
     expect(mockExchangeCodeForSession).not.toHaveBeenCalled();
     expect(res.headers.get('location')).toBe('https://catch-22.co.nz/login?error=Invalid_Token');
+  });
+
+  it('verifies token_hash and redirects to /account on success', async () => {
+    mockVerifyOtp.mockResolvedValue({ error: null });
+
+    const req = makeRequest({ token_hash: 'pkce-token-hash-123', type: 'signup' });
+    const res = await GET(req);
+
+    expect(mockVerifyOtp).toHaveBeenCalledWith({
+      token_hash: 'pkce-token-hash-123',
+      type: 'signup',
+    });
+    expect(res.status).toBe(307);
+    expect(res.headers.get('location')).toBe('https://catch-22.co.nz/account');
+  });
+
+  it('redirects with error parameter when Supabase returns an auth error description', async () => {
+    const req = makeRequest({
+      error: 'access_denied',
+      error_description: 'Email link is invalid or has expired',
+    });
+    const res = await GET(req);
+
+    expect(res.headers.get('location')).toBe(
+      'https://catch-22.co.nz/login?error=Email+link+is+invalid+or+has+expired'
+    );
   });
 });
